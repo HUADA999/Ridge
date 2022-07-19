@@ -1,4 +1,4 @@
-name: semantic-search
+name: ridge
 channels:
   - conda-forge
 dependencies:
