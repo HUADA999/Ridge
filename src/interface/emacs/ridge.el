@@ -3,8 +3,8 @@
 ;; Copyright (C) 2021-2022 Debanjum Singh Solanky
 
 ;; Author: Debanjum Singh Solanky <debanjum@gmail.com>
-;; Version: 0.1
-;; Keywords: search, org-mode, outlines
+;; Version: 1.0
+;; Keywords: search, org-mode, outlines, markdown, image
 ;; URL: http://github.com/debanjum/ridge/interface/emacs
 
 ;; This file is NOT part of GNU Emacs.
@@ -27,7 +27,7 @@
 ;;; Commentary:
 
 ;; This package provides natural language search on org-mode notes,
-;; beancount transactions and images.
+;; markdown files, beancount transactions and images.
 ;; It is a wrapper that interfaces with transformer based ML models.
 ;; The models search capabilities are exposed via the Ridge HTTP API
 
@@ -46,6 +46,18 @@
   :group 'ridge
   :type 'integer)
 
+(defun ridge--extract-entries-as-markdown (json-response query)
+  "Convert json response from API to markdown entries"
+  ;; remove leading (, ) or SPC from extracted entries string
+  (replace-regexp-in-string
+   "^[\(\) ]" ""
+   ;; extract entries from response as single string and convert to entries
+   (format "# %s\n%s"
+           query
+           (mapcar
+            (lambda (args) (format "%s" (cdr (assoc 'entry args))))
+            json-response))))
+
 (defun ridge--extract-entries-as-org (json-response query)
   "Convert json response from API to org-mode entries"
   ;; remove leading (, ) or SPC from extracted entries string
@@ -59,7 +71,7 @@
             json-response))))
 
 (defun ridge--extract-entries-as-images (json-response query)
-  "Convert json response from API to org-mode entries with images"
+  "Convert json response from API to html with images"
   ;; remove leading (, ) or SPC from extracted entries string
   (replace-regexp-in-string
    "[\(\) ]$" ""
@@ -103,6 +115,7 @@
      ((equal buffer-name "Music.org") "music")
      ((equal file-extension "bean") "ledger")
      ((equal file-extension "org") "notes")
+     ((or (equal file-extension "markdown") (equal file-extension "md")) "markdown")
      (t "notes"))))
 
 (defun ridge--construct-api-query (query search-type)
@@ -111,10 +124,10 @@
 
 ;;;###autoload
 (defun ridge (query)
-  "Ridge on org-mode content via ridge API"
+  "Search your content naturally using the Ridge API"
   (interactive "sQuery: ")
   (let* ((default-type (ridge--buffer-name-to-search-type (buffer-name)))
-         (search-type (completing-read "Type: " '("notes" "ledger" "music" "image") nil t default-type))
+         (search-type (completing-read "Type: " '("notes" "markdown" "ledger" "music" "image") nil t default-type))
          (url (ridge--construct-api-query query search-type))
          (buff (get-buffer-create (format "*Ridge (q:%s t:%s)*" query search-type))))
     ;; get json response from api
@@ -122,17 +135,19 @@
       (let ((inhibit-read-only t))
         (erase-buffer)
         (url-insert-file-contents url)))
-    ;; convert json response to org-mode entries
+    ;; render json response into formatted entries
     (with-current-buffer buff
       (let ((inhibit-read-only t)
             (json-response (json-parse-buffer :object-type 'alist)))
         (erase-buffer)
         (insert
          (cond ((or (equal search-type "notes") (equal search-type "music")) (ridge--extract-entries-as-org json-response query))
+               ((equal search-type "markdown") (ridge--extract-entries-as-markdown json-response query))
                ((equal search-type "ledger") (ridge--extract-entries-as-ledger json-response query))
                ((equal search-type "image") (ridge--extract-entries-as-images json-response query))
                (t (format "%s" json-response))))
       (cond ((equal search-type "notes") (org-mode))
+            ((equal search-type "markdown") (markdown-mode))
             ((equal search-type "ledger") (beancount-mode))
             ((equal search-type "music") (progn (org-mode)
                                                 (org-music-mode)))
