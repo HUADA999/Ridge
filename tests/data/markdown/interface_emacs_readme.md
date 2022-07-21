@@ -1,0 +1,69 @@
+# Emacs Ridge
+
+*An Emacs interface for [Ridge](https://github.com/debanjum/ridge)*
+
+## Requirements
+
+-   Install and Run [Ridge](https://github.com/debanjum/ridge)
+
+## Installation
+
+-   Direct Install
+    -   Put `ridge.el` in your Emacs load path. For e.g \~/.emacs.d/lisp
+
+    -   Load via `use-package` in your \~/.emacs.d/init.el or .emacs
+        file by adding below snippet
+
+        ``` elisp
+        ;; Ridge Package
+        (use-package ridge
+          :load-path "~/.emacs.d/lisp/ridge.el"
+          :bind ("C-c s" . 'ridge))
+        ```
+-   With [straight.el](https://github.com/raxod502/straight.el)
+    -   Add below snippet to your \~/.emacs.d/init.el or .emacs config
+        file and execute it.
+
+        ``` elisp
+        ;; Ridge Package for Semantic Search
+        (use-package ridge
+          :after org
+          :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
+          :bind ("C-c s" . 'ridge))
+        ```
+-   With [Quelpa](https://github.com/quelpa/quelpa#installation)
+    -   Ensure [Quelpa](https://github.com/quelpa/quelpa#installation),
+        [quelpa-use-package](https://github.com/quelpa/quelpa-use-package#installation)
+        are installed
+
+    -   Add below snippet to your \~/.emacs.d/init.el or .emacs config
+        file and execute it.
+
+        ``` elisp
+        ;; Ridge Package
+        (use-package ridge
+          :after org
+          :quelpa (ridge :fetcher url :url "https://raw.githubusercontent.com/debanjum/ridge/master/interface/emacs/ridge.el")
+          :bind ("C-c s" . 'ridge))
+        ```
+
+## Usage
+
+1.  Open Query Interface on Client
+
+    -   In Emacs: Call `ridge` using keybinding `C-c s` or `M-x ridge`
+    -   On Web: Open <http://localhost:8000/>
+
+2.  Query in Natural Language
+
+    e.g \"What is the meaning of life?\" \"What are my life goals?\"
+
+    **Note: It takes about 4s on a Mac M1 and a \>100K line corpus of
+    notes**
+
+3.  (Optional) Narrow down results further
+
+    Include/Exclude specific words or date range from results by
+    updating query with below query format
+
+    e.g \`What is the meaning of life? -god +none dt:\"last week\"\`
