@@ -122,6 +122,19 @@
   (let ((encoded-query (url-hexify-string query)))
     (format "%s/search?q=%s&t=%s" ridge--server-url encoded-query search-type)))
 
+(defun query-ridge (beg end len)
+  (let ((query (minibuffer-contents)))
+    (message "t")))
+
+(defun remove-ridge ()
+  (remove-hook 'after-change-functions #'query-ridge))
+
+(minibuffer-with-setup-hook
+    (lambda ()
+      (add-hook 'after-change-functions #'query-ridge)
+      (add-hook 'minibuffer-exit-hook #'remove-ridge))
+  (read-string "Query: "))
+
 ;;;###autoload
 (defun ridge (query)
   "Search your content naturally using the Ridge API"
