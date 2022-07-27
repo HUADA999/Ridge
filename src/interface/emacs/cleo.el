@@ -1,9 +1,9 @@
-;;; ridge.el --- Natural Search via Emacs
+;;; ridge.el --- Natural, Incremental Search via Emacs
 
 ;; Copyright (C) 2021-2022 Debanjum Singh Solanky
 
 ;; Author: Debanjum Singh Solanky <debanjum@gmail.com>
-;; Version: 1.0
+;; Version: 2.0
 ;; Keywords: search, org-mode, outlines, markdown, image
 ;; URL: http://github.com/debanjum/ridge/interface/emacs
 
@@ -26,10 +26,10 @@
 
 ;;; Commentary:
 
-;; This package provides natural language search on org-mode notes,
-;; markdown files, beancount transactions and images.
+;; This package provides a natural, incremental search interface to your
+;; org-mode notes, markdown files, beancount transactions and images.
 ;; It is a wrapper that interfaces with transformer based ML models.
-;; The models search capabilities are exposed via the Ridge HTTP API
+;; The models search capabilities are exposed via the Ridge HTTP API.
 
 ;;; Code:
 
@@ -184,7 +184,7 @@
   (remove-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query))
 
 ;;;###autoload
-(defun ridge-incremental ()
+(defun ridge ()
   "Natural, Incremental Search for your personal notes, transactions and music using Ridge"
   (interactive)
   (let* ((default-type (ridge--buffer-name-to-search-type (buffer-name)))
@@ -200,12 +200,13 @@
       (read-string ridge--query-prompt))))
 
 ;;;###autoload
-(defun ridge (query)
-  "Search your content naturally using the Ridge API"
+(defun ridge-simple (query)
+  "Natural Search for your personal notes, transactions, music and images using Ridge"
   (interactive "sQuery: ")
-  (let* ((default-type (ridge--buffer-name-to-search-type (buffer-name)))
+  (let* ((rerank "true")
+         (default-type (ridge--buffer-name-to-search-type (buffer-name)))
          (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music" "image") nil t default-type))
-         (query-url (ridge--construct-api-query query search-type))
+         (query-url (ridge--construct-api-query query search-type rerank))
          (buffer-name (get-buffer-create (format "*Ridge (q:%s t:%s)*" query search-type))))
     (ridge--query-api-and-render-results
         query
