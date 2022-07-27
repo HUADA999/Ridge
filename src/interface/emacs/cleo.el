@@ -186,13 +186,18 @@
     ;; Query ridge API only when user in ridge minibuffer.
     ;; Prevents querying during recursive edits or with contents of other buffers user may jump to
     (when (and (active-minibuffer-window) (equal (current-buffer) ridge--minibuffer-window))
-      (ridge--query-api-and-render-results
-       query
-       search-type
-       query-url
-       buffer-name))))
+      (progn
+        (when rerank
+          (message "[Ridge]: Rerank Results"))
+        (ridge--query-api-and-render-results
+         query
+         search-type
+         query-url
+         buffer-name)))))
 
 (defun ridge--teardown-incremental-search ()
+  ;; remove advice to rerank results on normal exit from minibuffer
+  (advice-remove 'exit-minibuffer #'ridge--minibuffer-exit-advice)
   ;; unset ridge minibuffer window
   (setq ridge--minibuffer-window nil)
   ;; cancel rerank timer
@@ -202,6 +207,8 @@
   (remove-hook 'post-command-hook #'ridge--incremental-search)
   (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
 
+(defun ridge--minibuffer-exit-advice (&rest _args)
+  (ridge--incremental-search t))
 
 ;;;###autoload
 (defun ridge ()
@@ -221,6 +228,8 @@
           ;; set current (mini-)buffer entered as ridge minibuffer
           ;; used to query ridge API only when user in ridge minibuffer
           (setq ridge--minibuffer-window (current-buffer))
+          ;; rerank results on normal exit from minibuffer
+          (advice-add 'exit-minibuffer :before #'ridge--minibuffer-exit-advice)
           (add-hook 'post-command-hook #'ridge--incremental-search) ; do ridge incremental search after every user action
           (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
       (read-string ridge--query-prompt))))
