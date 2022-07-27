@@ -42,14 +42,19 @@
   :type 'string)
 
 (defcustom ridge--image-width 156
-  "Width of rendered images returned by Ridge"
+  "Width of rendered images returned by Ridge."
   :group 'ridge
   :type 'integer)
 
 (defcustom ridge--rerank-after-idle-time 1.0
-  "Idle time (in seconds) to trigger cross-encoder to rerank incremental search results"
+  "Idle time (in seconds) to trigger cross-encoder to rerank incremental search results."
   :group 'ridge
   :type 'float)
+
+(defcustom ridge--results-count 5
+  "Number of results to get from Ridge API for each query."
+  :group 'ridge
+  :type 'integer)
 
 (defvar ridge--rerank-timer nil
   "Idle timer to make cross-encoder re-rank incremental search results if user idle.")
@@ -134,8 +139,9 @@
 
 (defun ridge--construct-api-query (query search-type &optional rerank)
   (let ((rerank (or rerank "false"))
+        (results-count (or ridge--results-count 5))
         (encoded-query (url-hexify-string query)))
-    (format "%s/search?q=%s&t=%s&r=%s" ridge--server-url encoded-query search-type rerank)))
+    (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge--server-url encoded-query search-type rerank results-count)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
   ;; get json response from api
