@@ -46,6 +46,14 @@
   :group 'ridge
   :type 'integer)
 
+(defcustom ridge--rerank-after-idle-time 1.0
+  "Idle time (in seconds) to trigger cross-encoder to rerank incremental search results"
+  :group 'ridge
+  :type 'float)
+
+(defvar ridge--rerank-timer nil
+  "Idle timer to make cross-encoder re-rank incremental search results if user idle.")
+
 (defconst ridge--query-prompt "Ridge: "
   "Query prompt shown to user in the minibuffer.")
 
@@ -124,9 +132,10 @@
      ((or (equal file-extension "markdown") (equal file-extension "md")) "markdown")
      (t "org"))))
 
-(defun ridge--construct-api-query (query search-type)
-  (let ((encoded-query (url-hexify-string query)))
-    (format "%s/search?q=%s&t=%s" ridge--server-url encoded-query search-type)))
+(defun ridge--construct-api-query (query search-type &optional rerank)
+  (let ((rerank (or rerank "false"))
+        (encoded-query (url-hexify-string query)))
+    (format "%s/search?q=%s&t=%s&r=%s" ridge--server-url encoded-query search-type rerank)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
   ;; get json response from api
@@ -156,11 +165,12 @@
     (read-only-mode t)))
 
 ;; Incremental Search on Ridge
-(defun ridge--incremental-query ()
-  (let* ((search-type ridge--search-type)
+(defun ridge--incremental-query (&optional rerank)
+  (let* ((rerank (cond (rerank "true") (t "false")))
+         (search-type ridge--search-type)
          (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type)))
          (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-api-query query search-type)))
+         (query-url (ridge--construct-api-query query search-type rerank)))
     (ridge--query-api-and-render-results
      query
      search-type
@@ -168,6 +178,8 @@
      buffer-name)))
 
 (defun ridge--remove-incremental-query ()
+  (ridge--incremental-query t)
+  (cancel-timer ridge--rerank-timer)
   (remove-hook 'post-command-hook #'ridge--incremental-query)
   (remove-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query))
 
@@ -179,6 +191,7 @@
          (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music") nil t default-type))
          (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type))))
     (setq ridge--search-type search-type)
+    (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-query t))
     (switch-to-buffer buffer-name)
     (minibuffer-with-setup-hook
         (lambda ()
