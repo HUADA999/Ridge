@@ -36,6 +36,7 @@
 (require 'url)
 (require 'json)
 
+
 (defcustom ridge--server-url "http://localhost:8000"
   "Location of Ridge API server."
   :group 'ridge
@@ -59,11 +60,15 @@
 (defvar ridge--rerank-timer nil
   "Idle timer to make cross-encoder re-rank incremental search results if user idle.")
 
+(defvar ridge--minibuffer-window nil
+  "Minibuffer window being used by user to enter query.")
+
 (defconst ridge--query-prompt "Ridge: "
   "Query prompt shown to user in the minibuffer.")
 
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
+
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
@@ -170,24 +175,33 @@
             (t (fundamental-mode))))
     (read-only-mode t)))
 
+
 ;; Incremental Search on Ridge
-(defun ridge--incremental-query (&optional rerank)
-  (let* ((rerank (cond (rerank "true") (t "false")))
+(defun ridge--incremental-search (&optional rerank)
+  (let* ((rerank-str (cond (rerank "true") (t "false")))
          (search-type ridge--search-type)
          (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type)))
          (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-api-query query search-type rerank)))
-    (ridge--query-api-and-render-results
-     query
-     search-type
-     query-url
-     buffer-name)))
+         (query-url (ridge--construct-api-query query search-type rerank-str)))
+    ;; Query ridge API only when user in ridge minibuffer.
+    ;; Prevents querying during recursive edits or with contents of other buffers user may jump to
+    (when (and (active-minibuffer-window) (equal (current-buffer) ridge--minibuffer-window))
+      (ridge--query-api-and-render-results
+       query
+       search-type
+       query-url
+       buffer-name))))
 
-(defun ridge--remove-incremental-query ()
-  (ridge--incremental-query t)
-  (cancel-timer ridge--rerank-timer)
-  (remove-hook 'post-command-hook #'ridge--incremental-query)
-  (remove-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query))
+(defun ridge--teardown-incremental-search ()
+  ;; unset ridge minibuffer window
+  (setq ridge--minibuffer-window nil)
+  ;; cancel rerank timer
+  (when (timerp ridge--rerank-timer)
+    (cancel-timer ridge--rerank-timer))
+  ;; remove hooks for ridge incremental query and self
+  (remove-hook 'post-command-hook #'ridge--incremental-search)
+  (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
+
 
 ;;;###autoload
 (defun ridge ()
@@ -197,17 +211,23 @@
          (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music") nil t default-type))
          (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type))))
     (setq ridge--search-type search-type)
-    (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-query t))
+    ;; setup rerank to improve results once user idle for RIDGE--RERANK-AFTER-IDLE-TIME seconds
+    (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-search t))
+    ;; switch to ridge results buffer
     (switch-to-buffer buffer-name)
+    ;; open and setup minibuffer for incremental search
     (minibuffer-with-setup-hook
         (lambda ()
-          (add-hook 'post-command-hook #'ridge--incremental-query nil 'local)
-          (add-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query nil 'local))
+          ;; set current (mini-)buffer entered as ridge minibuffer
+          ;; used to query ridge API only when user in ridge minibuffer
+          (setq ridge--minibuffer-window (current-buffer))
+          (add-hook 'post-command-hook #'ridge--incremental-search) ; do ridge incremental search after every user action
+          (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
       (read-string ridge--query-prompt))))
 
 ;;;###autoload
 (defun ridge-simple (query)
-  "Natural Search for your personal notes, transactions, music and images using Ridge"
+  "Natural Search for QUERY in your personal notes, transactions, music and images using Ridge"
   (interactive "sQuery: ")
   (let* ((rerank "true")
          (default-type (ridge--buffer-name-to-search-type (buffer-name)))
