@@ -153,20 +153,19 @@
     (read-only-mode t)))
 
 ;; Incremental Search on Ridge
-(defun ridge--incremental-query (beg end len)
-  (let* ((in-ridge-prompt (equal (minibuffer-prompt) ridge--query-prompt))
-         (search-type "org")
+(defun ridge--incremental-query ()
+  (let* ((search-type "org")
          (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type)))
          (query (minibuffer-contents-no-properties))
          (query-url (ridge--construct-api-query query search-type)))
     (ridge--query-api-and-render-results
-        query
-        search-type
-        query-url
-        buffer-name)))
+     query
+     search-type
+     query-url
+     buffer-name)))
 
 (defun ridge--remove-incremental-query ()
-  (remove-hook 'after-change-functions #'ridge--incremental-query)
+  (remove-hook 'post-command-hook #'ridge--incremental-query)
   (remove-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query))
 
 ;;;###autoload
@@ -179,8 +178,8 @@
     (switch-to-buffer buffer-name)
     (minibuffer-with-setup-hook
         (lambda ()
-          (add-hook 'after-change-functions #'ridge--incremental-query)
-          (add-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query))
+          (add-hook 'post-command-hook #'ridge--incremental-query nil 'local)
+          (add-hook 'minibuffer-exit-hook #'ridge--remove-incremental-query nil 'local))
       (read-string ridge--query-prompt))))
 
 ;;;###autoload
