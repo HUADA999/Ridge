@@ -1,7 +1,6 @@
+# Ridge 🦅
 ![](https://github.com/debanjum/ridge/actions/workflows/test.yml/badge.svg)
 ![](https://github.com/debanjum/ridge/actions/workflows/build.yml/badge.svg)
-
-# Ridge
 
 *A natural language search engine for your personal notes, transactions and images*
 
