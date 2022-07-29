@@ -63,12 +63,11 @@
 (defvar ridge--minibuffer-window nil
   "Minibuffer window being used by user to enter query.")
 
-(defconst ridge--query-prompt "Ridge: "
+(defconst ridge--query-prompt "🦅Ridge: "
   "Query prompt shown to user in the minibuffer.")
 
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
-
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
@@ -237,7 +236,7 @@
 ;;;###autoload
 (defun ridge-simple (query)
   "Natural Search for QUERY in your personal notes, transactions, music and images using Ridge"
-  (interactive "sQuery: ")
+  (interactive "s🦅Ridge: ")
   (let* ((rerank "true")
          (default-type (ridge--buffer-name-to-search-type (buffer-name)))
          (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music" "image") nil t default-type))
