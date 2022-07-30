@@ -33,7 +33,7 @@
          ;; Ridge Package
          (use-package ridge
            :after org
-           :quelpa (ridge :fetcher url :url "https://raw.githubusercontent.com/debanjum/ridge/master/interface/emacs/ridge.el")
+           :quelpa (ridge :fetcher url :url "https://raw.githubusercontent.com/debanjum/ridge/master/src/interface/emacs/ridge.el")
            :bind ("C-c s" . 'ridge))
        #+end_src
 
