@@ -128,9 +128,8 @@ docker-compose build --pull
 
 2. Install Ridge
    ``` shell
-   git clone https://github.com/debanjum/ridge && cd ridge
-   virtualenv -m python3 .venv && source .venv/bin/activate
-   pip install .
+   virtualenv -m python3 .venv && source .venv/bin/activate # Optional
+   pip install ridge-assistant
    ```
 
 3. Configure
@@ -176,9 +175,7 @@ docker-compose build --pull
 ### Upgrade On Local Machine
 #### Using Pip
 ``` shell
-cd ridge
-git pull origin master
-pip install --upgrade .
+pip install --upgrade ridge-assistant
 ```
 
 #### Using Conda
