@@ -11,3 +11,4 @@ src/.data
 /build/
 /dist/
 /ridge_assistant.egg-info/
+/config/*.yml
