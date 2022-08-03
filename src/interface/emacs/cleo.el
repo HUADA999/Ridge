@@ -36,7 +36,6 @@
 (require 'url)
 (require 'json)
 
-
 (defcustom ridge--server-url "http://localhost:8000"
   "Location of Ridge API server."
   :group 'ridge
@@ -200,7 +199,16 @@
          query-url
          buffer-name)))))
 
+(defun delete-open-network-connections-to-ridge ()
+  "Delete all network connections to ridge server"
+  (dolist (proc (process-list))
+    (let ((proc-buf (buffer-name (process-buffer proc)))
+          (ridge-network-proc-buf (string-join (split-string ridge--server-url "://") " ")))
+      (when (string-match (format "%s" ridge-network-proc-buf) proc-buf)
+        (delete-process proc)))))
+
 (defun ridge--teardown-incremental-search ()
+  (message "[Ridge]: Teardown Incremental Search")
   ;; remove advice to rerank results on normal exit from minibuffer
   (advice-remove 'exit-minibuffer #'ridge--minibuffer-exit-advice)
   ;; unset ridge minibuffer window
@@ -208,6 +216,8 @@
   ;; cancel rerank timer
   (when (timerp ridge--rerank-timer)
     (cancel-timer ridge--rerank-timer))
+  ;; delete open connections to ridge
+  (delete-open-network-connections-to-ridge)
   ;; remove hooks for ridge incremental query and self
   (remove-hook 'post-command-hook #'ridge--incremental-search)
   (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
