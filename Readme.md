@@ -70,7 +70,7 @@ git clone https://github.com/debanjum/ridge && cd ridge
 ### 2. Configure
 
 - **Required**: Update [docker-compose.yml](./docker-compose.yml) to mount your images, (org-mode or markdown) notes and beancount directories
-- **Optional**: Edit application configuration in [sample_config.yml](./config/sample_config.yml)
+- **Optional**: Edit application configuration in [ridge_sample.yml](./config/ridge_sample.yml)
 
 ### 3. Run
 
@@ -105,7 +105,7 @@ docker-compose build --pull
   - Fix: Increase RAM available to Docker Containers in Docker Settings
   - Refer: [StackOverflow Solution](https://stackoverflow.com/a/50770267), [Configure Resources on Docker for Mac](https://docs.docker.com/desktop/mac/#resources)
 - Symptom: Errors out complaining about Tensors mismatch, null etc
-  - Mitigation: Delete content-type > image section from `docker_sample_config.yml`
+  - Mitigation: Delete content-type > image section from `ridge_sample.yml`
 
 ## Miscellaneous
 
@@ -133,15 +133,15 @@ docker-compose build --pull
    ```
 
 3. Configure
-   - Configure files/directories to search in `content-type` section of `sample_config.yml`
-   - To run application on test data, update file paths containing `/data/` to `tests/data/` in `sample_config.yml`
+   - Configure files/directories to search in `content-type` section of `ridge_sample.yml`
+   - To run application on test data, update file paths containing `/data/` to `tests/data/` in `ridge_sample.yml`
      - Example replace `/data/notes/*.org` with `tests/data/notes/*.org`
 
 4. Run
    Load ML model, generate embeddings and expose API to query notes, images, transactions etc specified in config YAML
 
    ``` shell
-   ridge -c=config/sample_config.yml -vv
+   ridge -c=config/ridge_sample.yml -vv
    ```
 
 #### Using Conda
@@ -161,15 +161,15 @@ docker-compose build --pull
    ```
 
 3. Configure
-   - Configure files/directories to search in `content-type` section of `sample_config.yml`
-   - To run application on test data, update file paths containing `/data/` to `tests/data/` in `sample_config.yml`
+   - Configure files/directories to search in `content-type` section of `ridge_sample.yml`
+   - To run application on test data, update file paths containing `/data/` to `tests/data/` in `ridge_sample.yml`
      - Example replace `/data/notes/*.org` with `tests/data/notes/*.org`
 
 4. Run
    Load ML model, generate embeddings and expose API to query notes, images, transactions etc specified in config YAML
 
    ``` shell
-   python3 -m src.main -c=config/sample_config.yml -vv
+   python3 -m src.main -c=config/ridge_sample.yml -vv
    ```
 
 ### Upgrade On Local Machine
