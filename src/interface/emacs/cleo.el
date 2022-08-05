@@ -243,8 +243,6 @@
   (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
     ;; set ridge search type to last used or based on current buffer
     (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
-    ;; setup temporary keymap for ridge
-    (set-transient-map (ridge--search-keymap) t)
     ;; setup rerank to improve results once user idle for RIDGE--RERANK-AFTER-IDLE-TIME seconds
     (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-search t))
     ;; switch to ridge results buffer
@@ -252,6 +250,8 @@
     ;; open and setup minibuffer for incremental search
     (minibuffer-with-setup-hook
         (lambda ()
+          ;; Add ridge keybindings for configuring search to minibuffer keybindings
+          (ridge--make-search-keymap minibuffer-local-map)
           ;; set current (mini-)buffer entered as ridge minibuffer
           ;; used to query ridge API only when user in ridge minibuffer
           (setq ridge--minibuffer-window (current-buffer))
