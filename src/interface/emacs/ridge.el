@@ -71,14 +71,14 @@
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
 
-(defvar ridge--search-keymap
-  (let ((kmap (make-sparse-keymap)))
+(defun ridge--make-search-keymap (&optional existing-keymap)
+  "Setup keymap to configure Ridge search"
+  (let ((kmap (or existing-keymap (make-sparse-keymap))))
     (define-key kmap (kbd "C-x m") '(lambda () (interactive) (setq ridge--search-type "markdown")))
     (define-key kmap (kbd "C-x o") '(lambda () (interactive) (setq ridge--search-type "org")))
     (define-key kmap (kbd "C-x l") '(lambda () (interactive) (setq ridge--search-type "ledger")))
     (define-key kmap (kbd "C-x i") '(lambda () (interactive) (setq ridge--search-type "image")))
-    kmap)
-  "Keymap to configure Ridge search")
+    kmap))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
@@ -244,7 +244,7 @@
     ;; set ridge search type to last used or based on current buffer
     (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
     ;; setup temporary keymap for ridge
-    (set-transient-map ridge--search-keymap t)
+    (set-transient-map (ridge--search-keymap) t)
     ;; setup rerank to improve results once user idle for RIDGE--RERANK-AFTER-IDLE-TIME seconds
     (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-search t))
     ;; switch to ridge results buffer
