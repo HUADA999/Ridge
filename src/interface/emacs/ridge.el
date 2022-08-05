@@ -80,6 +80,16 @@
     (define-key kmap (kbd "C-x i") '(lambda () (interactive) (setq ridge--search-type "image")))
     kmap))
 
+(defvar ridge--keybindings-help-message
+  "
+     Set Search Type
+-------------------------
+C-x m  | markdown
+C-x o  | org-mode
+C-x l  | ledger/beancount
+C-x i  | images
+")
+
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
   ;; remove leading (, ) or SPC from extracted entries string
@@ -252,6 +262,7 @@
         (lambda ()
           ;; Add ridge keybindings for configuring search to minibuffer keybindings
           (ridge--make-search-keymap minibuffer-local-map)
+          (message "%s" ridge--keybindings-help-message)
           ;; set current (mini-)buffer entered as ridge minibuffer
           ;; used to query ridge API only when user in ridge minibuffer
           (setq ridge--minibuffer-window (current-buffer))
