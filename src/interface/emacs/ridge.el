@@ -71,16 +71,7 @@
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
 
-(defun ridge--make-search-keymap (&optional existing-keymap)
-  "Setup keymap to configure Ridge search"
-  (let ((kmap (or existing-keymap (make-sparse-keymap))))
-    (define-key kmap (kbd "C-x m") '(lambda () (interactive) (setq ridge--search-type "markdown")))
-    (define-key kmap (kbd "C-x o") '(lambda () (interactive) (setq ridge--search-type "org")))
-    (define-key kmap (kbd "C-x l") '(lambda () (interactive) (setq ridge--search-type "ledger")))
-    (define-key kmap (kbd "C-x i") '(lambda () (interactive) (setq ridge--search-type "image")))
-    kmap))
-
-(defvar ridge--keybindings-help-message
+(defvar ridge--keybindings-info-message
   "
      Set Search Type
 -------------------------
@@ -89,6 +80,28 @@ C-x o  | org-mode
 C-x l  | ledger/beancount
 C-x i  | images
 ")
+(defun ridge--search-markdown (interactive) (setq ridge--search-type "markdown"))
+(defun ridge--search-org (interactive) (setq ridge--search-type "org"))
+(defun ridge--search-ledger (interactive) (setq ridge--search-type "ledger"))
+(defun ridge--search-images (interactive) (setq ridge--search-type "image"))
+(defun ridge--make-search-keymap (&optional existing-keymap)
+  "Setup keymap to configure Ridge search"
+  (let ((kmap (or existing-keymap (make-sparse-keymap))))
+    (define-key kmap (kbd "C-x m") #'ridge--search-markdown)
+    (define-key kmap (kbd "C-x o") #'ridge--search-org)
+    (define-key kmap (kbd "C-x l") #'ridge--search-ledger)
+    (define-key kmap (kbd "C-x i") #'ridge--search-images)
+    kmap))
+(defun ridge--display-keybinding-info ()
+  "Display information on keybindings to customize ridge search.
+Use `which-key` if available, else display simple message in echo area"
+  (if (fboundp 'which-key--create-buffer-and-show)
+      (which-key--create-buffer-and-show
+       (kbd "C-x")
+       (symbolp (ridge--make-search-keymap))
+       '(lambda (binding) (string-prefix-p "ridge--" (cdr binding)))
+       "Ridge Bindings")
+    (message "%s" ridge--keybindings-info-message)))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
@@ -265,7 +278,8 @@ C-x i  | images
         (lambda ()
           ;; Add ridge keybindings for configuring search to minibuffer keybindings
           (ridge--make-search-keymap minibuffer-local-map)
-          (message "%s" ridge--keybindings-help-message)
+          ;; Display information on keybindings to customize ridge search
+          (ridge--display-keybinding-info)
           ;; set current (mini-)buffer entered as ridge minibuffer
           ;; used to query ridge API only when user in ridge minibuffer
           (setq ridge--minibuffer-window (current-buffer))
