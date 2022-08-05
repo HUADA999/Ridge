@@ -65,6 +65,9 @@
 (defconst ridge--query-prompt "🦅Ridge: "
   "Query prompt shown to user in the minibuffer.")
 
+(defconst ridge--buffer-name "*🦅Ridge*"
+  "Name of buffer to show results from Ridge.")
+
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
 
@@ -192,7 +195,7 @@
 ;; Incremental Search on Ridge
 (defun ridge--incremental-search (&optional rerank)
   (let* ((rerank-str (cond (rerank "true") (t "false")))
-         (buffer-name (get-buffer-create "*Ridge*"))
+         (ridge-buffer-name (get-buffer-create ridge--buffer-name))
          (query (minibuffer-contents-no-properties))
          (query-url (ridge--construct-api-query query ridge--search-type rerank-str)))
     ;; Query ridge API only when user in ridge minibuffer.
@@ -205,7 +208,7 @@
          query
          ridge--search-type
          query-url
-         buffer-name)))))
+         ridge-buffer-name)))))
 
 (defun delete-open-network-connections-to-ridge ()
   "Delete all network connections to ridge server"
@@ -237,7 +240,7 @@
 (defun ridge ()
   "Natural, Incremental Search for your personal notes, transactions and music using Ridge"
   (interactive)
-  (let* ((ridge-buffer-name (get-buffer-create "*Ridge*")))
+  (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
     ;; set ridge search type to last used or based on current buffer
     (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
     ;; setup temporary keymap for ridge
@@ -266,7 +269,7 @@
          (default-type (ridge--buffer-name-to-search-type (buffer-name)))
          (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music" "image") nil t default-type))
          (query-url (ridge--construct-api-query query search-type rerank))
-         (buffer-name (get-buffer-create (format "*Ridge (q:%s t:%s)*" query search-type))))
+         (buffer-name (get-buffer-create (format "*%s (q:%s t:%s)*" ridge--buffer-name query search-type))))
     (ridge--query-api-and-render-results
         query
         search-type
