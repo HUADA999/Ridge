@@ -208,12 +208,15 @@ C-x i  | images
          (ridge-buffer-name (get-buffer-create ridge--buffer-name))
          (query (minibuffer-contents-no-properties))
          (query-url (ridge--construct-api-query query ridge--search-type rerank-str)))
-    ;; Query ridge API only when user in ridge minibuffer.
-    ;; Prevents querying during recursive edits or with contents of other buffers user may jump to
-    (when (and (active-minibuffer-window) (equal (current-buffer) ridge--minibuffer-window))
+    ;; Query ridge API only when user in ridge minibuffer and non-empty query
+    ;; Prevents querying if
+    ;;   1. user hasn't started typing query
+    ;;   2. during recursive edits
+    ;;   3. with contents of other buffers user may jump to
+    (when (and (not (equal query "")) (active-minibuffer-window) (equal (current-buffer) ridge--minibuffer-window))
       (progn
         (when rerank
-          (message "[Ridge]: Rerank Results"))
+          (message "Ridge: Rerank Results"))
         (ridge--query-api-and-render-results
          query
          ridge--search-type
