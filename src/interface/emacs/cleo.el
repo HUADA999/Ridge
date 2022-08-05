@@ -68,6 +68,15 @@
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
 
+(defvar ridge--search-keymap
+  (let ((kmap (make-sparse-keymap)))
+    (define-key kmap (kbd "C-x m") '(lambda () (interactive) (setq ridge--search-type "markdown")))
+    (define-key kmap (kbd "C-x o") '(lambda () (interactive) (setq ridge--search-type "org")))
+    (define-key kmap (kbd "C-x l") '(lambda () (interactive) (setq ridge--search-type "ledger")))
+    (define-key kmap (kbd "C-x i") '(lambda () (interactive) (setq ridge--search-type "image")))
+    kmap)
+  "Keymap to configure Ridge search")
+
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
   ;; remove leading (, ) or SPC from extracted entries string
@@ -183,10 +192,9 @@
 ;; Incremental Search on Ridge
 (defun ridge--incremental-search (&optional rerank)
   (let* ((rerank-str (cond (rerank "true") (t "false")))
-         (search-type ridge--search-type)
-         (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type)))
+         (buffer-name (get-buffer-create "*Ridge*"))
          (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-api-query query search-type rerank-str)))
+         (query-url (ridge--construct-api-query query ridge--search-type rerank-str)))
     ;; Query ridge API only when user in ridge minibuffer.
     ;; Prevents querying during recursive edits or with contents of other buffers user may jump to
     (when (and (active-minibuffer-window) (equal (current-buffer) ridge--minibuffer-window))
@@ -195,7 +203,7 @@
           (message "[Ridge]: Rerank Results"))
         (ridge--query-api-and-render-results
          query
-         search-type
+         ridge--search-type
          query-url
          buffer-name)))))
 
@@ -229,14 +237,15 @@
 (defun ridge ()
   "Natural, Incremental Search for your personal notes, transactions and music using Ridge"
   (interactive)
-  (let* ((default-type (ridge--buffer-name-to-search-type (buffer-name)))
-         (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music") nil t default-type))
-         (buffer-name (get-buffer-create (format "*Ridge (t:%s)*" search-type))))
-    (setq ridge--search-type search-type)
+  (let* ((ridge-buffer-name (get-buffer-create "*Ridge*")))
+    ;; set ridge search type to last used or based on current buffer
+    (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
+    ;; setup temporary keymap for ridge
+    (set-transient-map ridge--search-keymap t)
     ;; setup rerank to improve results once user idle for RIDGE--RERANK-AFTER-IDLE-TIME seconds
     (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-search t))
     ;; switch to ridge results buffer
-    (switch-to-buffer buffer-name)
+    (switch-to-buffer ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
     (minibuffer-with-setup-hook
         (lambda ()
