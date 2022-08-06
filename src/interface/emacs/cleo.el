@@ -95,12 +95,9 @@ C-x i  | images
 (defun ridge--display-keybinding-info ()
   "Display information on keybindings to customize ridge search.
 Use `which-key` if available, else display simple message in echo area"
-  (if (fboundp 'which-key--create-buffer-and-show)
-      (which-key--create-buffer-and-show
-       (kbd "C-x")
-       (symbolp (ridge--make-search-keymap))
-       '(lambda (binding) (string-prefix-p "ridge--" (cdr binding)))
-       "Ridge Bindings")
+  (if (fboundp 'which-key-show-full-keymap)
+      (let ((ridge--keymap (ridge--make-search-keymap)))
+        (which-key-show-full-keymap 'ridge--keymap))
     (message "%s" ridge--keybindings-info-message)))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
@@ -261,6 +258,7 @@ Use `which-key` if available, else display simple message in echo area"
 
 (defun ridge--minibuffer-exit-advice (&rest _args)
   (ridge--incremental-search t))
+
 
 ;;;###autoload
 (defun ridge ()
