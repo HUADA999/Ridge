@@ -80,10 +80,10 @@ C-x o  | org-mode
 C-x l  | ledger/beancount
 C-x i  | images
 ")
-(defun ridge--search-markdown (interactive) (setq ridge--search-type "markdown"))
-(defun ridge--search-org (interactive) (setq ridge--search-type "org"))
-(defun ridge--search-ledger (interactive) (setq ridge--search-type "ledger"))
-(defun ridge--search-images (interactive) (setq ridge--search-type "image"))
+(defun ridge--search-markdown () (interactive) (setq ridge--search-type "markdown"))
+(defun ridge--search-org () (interactive) (setq ridge--search-type "org"))
+(defun ridge--search-ledger () (interactive) (setq ridge--search-type "ledger"))
+(defun ridge--search-images () (interactive) (setq ridge--search-type "image"))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search"
   (let ((kmap (or existing-keymap (make-sparse-keymap))))
