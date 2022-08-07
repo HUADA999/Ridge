@@ -97,7 +97,9 @@ C-x i  | images
 Use `which-key` if available, else display simple message in echo area"
   (if (fboundp 'which-key-show-full-keymap)
       (let ((ridge--keymap (ridge--make-search-keymap)))
-        (which-key-show-full-keymap 'ridge--keymap))
+        (which-key--show-keymap (symbol-name 'ridge--keymap)
+                                (symbol-value 'ridge--keymap)
+                                nil t t))
     (message "%s" ridge--keybindings-info-message)))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
@@ -242,7 +244,7 @@ Use `which-key` if available, else display simple message in echo area"
         (delete-process proc)))))
 
 (defun ridge--teardown-incremental-search ()
-  (message "[Ridge]: Teardown Incremental Search")
+  (message "Ridge: Teardown Incremental Search")
   ;; remove advice to rerank results on normal exit from minibuffer
   (advice-remove 'exit-minibuffer #'ridge--minibuffer-exit-advice)
   ;; unset ridge minibuffer window
