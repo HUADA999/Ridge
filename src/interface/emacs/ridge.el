@@ -84,6 +84,7 @@ C-x i  | images
 (defun ridge--search-org () (interactive) (setq ridge--search-type "org"))
 (defun ridge--search-ledger () (interactive) (setq ridge--search-type "ledger"))
 (defun ridge--search-images () (interactive) (setq ridge--search-type "image"))
+(defun ridge--search-music () (interactive) (setq ridge--search-type "music"))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search"
   (let ((enabled-search-types (ridge--get-enabled-search-types))
@@ -96,6 +97,8 @@ C-x i  | images
       (define-key kmap (kbd "C-x l") #'ridge--search-ledger))
     (when (member 'image enabled-search-types)
       (define-key kmap (kbd "C-x i") #'ridge--search-images))
+    (when (member 'music enabled-search-types)
+      (define-key kmap (kbd "C-x M") #'ridge--search-music))
     kmap))
 (defun ridge--display-keybinding-info ()
   "Display information on keybindings to customize ridge search.
