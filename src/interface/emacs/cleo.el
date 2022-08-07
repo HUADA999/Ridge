@@ -79,15 +79,23 @@
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
 
-(defvar ridge--keybindings-info-message
-  "
+(defun ridge--keybindings-info-message ()
+  (let ((enabled-search-types (ridge--get-enabled-search-types)))
+    (concat
+     "
      Set Search Type
--------------------------
-C-x m  | markdown
-C-x o  | org-mode
-C-x l  | ledger/beancount
-C-x i  | images
-")
+-------------------------\n"
+     (when (member 'markdown enabled-search-types)
+         "C-x m  | markdown\n")
+     (when (member 'org enabled-search-types)
+       "C-x o  | org-mode\n")
+     (when (member 'ledger enabled-search-types)
+       "C-x l  | ledger\n")
+     (when (member 'image enabled-search-types)
+       "C-x i  | images\n")
+     (when (member 'music enabled-search-types)
+       "C-x M  | music\n"))))
+
 (defun ridge--search-markdown () (interactive) (setq ridge--search-type "markdown"))
 (defun ridge--search-org () (interactive) (setq ridge--search-type "org"))
 (defun ridge--search-ledger () (interactive) (setq ridge--search-type "ledger"))
@@ -116,7 +124,7 @@ Use `which-key` if available, else display simple message in echo area"
         (which-key--show-keymap (symbol-name 'ridge--keymap)
                                 (symbol-value 'ridge--keymap)
                                 nil t t))
-    (message "%s" ridge--keybindings-info-message)))
+    (message "%s" (ridge--keybindings-info-message))))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
