@@ -36,22 +36,22 @@
 (require 'url)
 (require 'json)
 
-(defcustom ridge--server-url "http://localhost:8000"
+(defcustom ridge-server-url "http://localhost:8000"
   "Location of Ridge API server."
   :group 'ridge
   :type 'string)
 
-(defcustom ridge--image-width 156
+(defcustom ridge-image-width 156
   "Width of rendered images returned by Ridge."
   :group 'ridge
   :type 'integer)
 
-(defcustom ridge--rerank-after-idle-time 1.0
+(defcustom ridge-rerank-after-idle-time 1.0
   "Idle time (in seconds) to trigger cross-encoder to rerank incremental search results."
   :group 'ridge
   :type 'float)
 
-(defcustom ridge--results-count 5
+(defcustom ridge-results-count 5
   "Number of results to get from Ridge API for each query."
   :group 'ridge
   :type 'integer)
@@ -173,9 +173,9 @@ Use `which-key` if available, else display simple message in echo area"
                              (cdr (assoc 'score args))
                              (cdr (assoc 'metadata_score args))
                              (cdr (assoc 'image_score args))
-                             ridge--server-url
+                             ridge-server-url
                              (cdr (assoc 'entry args))
-                             ridge--server-url
+                             ridge-server-url
                              (cdr (assoc 'entry args))
                              (random 10000)))
              json-response)))))
@@ -207,7 +207,7 @@ Use `which-key` if available, else display simple message in echo area"
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API"
-  (let ((config-url (format "%s/config/data" ridge--server-url)))
+  (let ((config-url (format "%s/config/data" ridge-server-url)))
     (with-temp-buffer
       (erase-buffer)
       (url-insert-file-contents config-url)
@@ -222,9 +222,8 @@ Use `which-key` if available, else display simple message in echo area"
 
 (defun ridge--construct-api-query (query search-type &optional rerank)
   (let ((rerank (or rerank "false"))
-        (results-count (or ridge--results-count 5))
         (encoded-query (url-hexify-string query)))
-    (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge--server-url encoded-query search-type rerank results-count)))
+    (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
   ;; get json response from api
@@ -279,7 +278,7 @@ Use `which-key` if available, else display simple message in echo area"
   "Delete all network connections to ridge server"
   (dolist (proc (process-list))
     (let ((proc-buf (buffer-name (process-buffer proc)))
-          (ridge-network-proc-buf (string-join (split-string ridge--server-url "://") " ")))
+          (ridge-network-proc-buf (string-join (split-string ridge-server-url "://") " ")))
       (when (string-match (format "%s" ridge-network-proc-buf) proc-buf)
         (delete-process proc)))))
 
@@ -309,8 +308,8 @@ Use `which-key` if available, else display simple message in echo area"
   (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
     ;; set ridge search type to last used or based on current buffer
     (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
-    ;; setup rerank to improve results once user idle for RIDGE--RERANK-AFTER-IDLE-TIME seconds
-    (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-search t))
+    ;; setup rerank to improve results once user idle for RIDGE-RERANK-AFTER-IDLE-TIME seconds
+    (setq ridge--rerank-timer (run-with-idle-timer ridge-rerank-after-idle-time t 'ridge--incremental-search t))
     ;; switch to ridge results buffer
     (switch-to-buffer ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
