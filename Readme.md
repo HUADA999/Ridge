@@ -136,7 +136,7 @@ pip install --upgrade ridge-assistant
    ``` shell
    git clone https://github.com/debanjum/ridge && cd ridge
    python -m venv .venv && source .venv/bin/activate
-   pip install .
+   pip install -e .
    ```
 ##### 2. Configure
    - Set `input-files` or `input-filter` in each relevant `content-type` section of `ridge_sample.yml`
@@ -159,6 +159,8 @@ pip install --upgrade ridge-assistant
 pip install --upgrade --pre ridge-assistant
 
 # To Upgrade To Specific Development Release
+# Useful to test, review a PR.
+# A ridge-assistant package is automatically uploaded to Test PyPi
 pip install -r testpypi ridge-assistant==0.1.5.dev491659577806
 ```
 
