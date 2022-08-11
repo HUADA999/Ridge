@@ -136,7 +136,7 @@ pip install --upgrade ridge-assistant
    ``` shell
    git clone https://github.com/debanjum/ridge && cd ridge
    python -m venv .venv && source .venv/bin/activate
-   pip install
+   pip install .
    ```
 ##### 2. Configure
    - Set `input-files` or `input-filter` in each relevant `content-type` section of `ridge_sample.yml`
