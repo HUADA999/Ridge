@@ -158,10 +158,10 @@ pip install --upgrade ridge-assistant
 # To Upgrade To Latest Pre-Release
 pip install --upgrade --pre ridge-assistant
 
-# To Upgrade To Specific Development Release
+# To Upgrade To Specific Development Release.
 # Useful to test, review a PR.
-# A ridge-assistant package is automatically uploaded to Test PyPi
-pip install -r testpypi ridge-assistant==0.1.5.dev491659577806
+# Note: ridge-assistant is published to test PyPi on creating a PR
+pip install -i https://test.pypi.org/simple/ ridge-assistant==0.1.5.dev57166025766
 ```
 
 #### Using Docker
