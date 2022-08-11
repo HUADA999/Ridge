@@ -136,7 +136,7 @@ pip install --upgrade ridge-assistant
    ``` shell
    git clone https://github.com/debanjum/ridge && cd ridge
    python -m venv .venv && source .venv/bin/activate
-   pip install .
+   pip install -e .
    ```
 ##### 2. Configure
    - Set `input-files` or `input-filter` in each relevant `content-type` section of `ridge_sample.yml`
@@ -158,8 +158,10 @@ pip install --upgrade ridge-assistant
 # To Upgrade To Latest Pre-Release
 pip install --upgrade --pre ridge-assistant
 
-# To Upgrade To Specific Development Release
-pip install -r testpypi ridge-assistant==0.1.5.dev491659577806
+# To Upgrade To Specific Development Release.
+# Useful to test, review a PR.
+# Note: ridge-assistant is published to test PyPi on creating a PR
+pip install -i https://test.pypi.org/simple/ ridge-assistant==0.1.5.dev57166025766
 ```
 
 #### Using Docker
