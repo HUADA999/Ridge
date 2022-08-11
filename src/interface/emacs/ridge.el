@@ -36,25 +36,38 @@
 (require 'url)
 (require 'json)
 
-(defcustom ridge--server-url "http://localhost:8000"
+(defcustom ridge-server-url "http://localhost:8000"
   "Location of Ridge API server."
   :group 'ridge
   :type 'string)
 
-(defcustom ridge--image-width 156
+(defcustom ridge-image-width 156
   "Width of rendered images returned by Ridge."
   :group 'ridge
   :type 'integer)
 
-(defcustom ridge--rerank-after-idle-time 1.0
+(defcustom ridge-image-height 156
+  "Height of rendered images returned by Ridge."
+  :group 'ridge
+  :type 'integer)
+
+(defcustom ridge-rerank-after-idle-time 2.0
   "Idle time (in seconds) to trigger cross-encoder to rerank incremental search results."
   :group 'ridge
   :type 'float)
 
-(defcustom ridge--results-count 5
+(defcustom ridge-results-count 5
   "Number of results to get from Ridge API for each query."
   :group 'ridge
   :type 'integer)
+
+(defcustom ridge-default-search-type "org"
+  "The default content type to perform search on."
+  :group 'ridge
+  :type '(choice (const "org")
+                 (const "markdown")
+                 (const "ledger")
+                 (const "music")))
 
 (defvar ridge--rerank-timer nil
   "Idle timer to make cross-encoder re-rank incremental search results if user idle.")
@@ -71,37 +84,52 @@
 (defvar ridge--search-type "org"
   "The type of content to perform search on.")
 
-(defvar ridge--keybindings-info-message
-  "
+(defun ridge--keybindings-info-message ()
+  (let ((enabled-content-types (ridge--get-enabled-content-types)))
+    (concat
+     "
      Set Search Type
--------------------------
-C-x m  | markdown
-C-x o  | org-mode
-C-x l  | ledger/beancount
-C-x i  | images
-")
-(defun ridge--search-markdown (interactive) (setq ridge--search-type "markdown"))
-(defun ridge--search-org (interactive) (setq ridge--search-type "org"))
-(defun ridge--search-ledger (interactive) (setq ridge--search-type "ledger"))
-(defun ridge--search-images (interactive) (setq ridge--search-type "image"))
+-------------------------\n"
+     (when (member 'markdown enabled-content-types)
+         "C-x m  | markdown\n")
+     (when (member 'org enabled-content-types)
+       "C-x o  | org-mode\n")
+     (when (member 'ledger enabled-content-types)
+       "C-x l  | ledger\n")
+     (when (member 'image enabled-content-types)
+       "C-x i  | images\n")
+     (when (member 'music enabled-content-types)
+       "C-x M  | music\n"))))
+
+(defun ridge--search-markdown () (interactive) (setq ridge--search-type "markdown"))
+(defun ridge--search-org () (interactive) (setq ridge--search-type "org"))
+(defun ridge--search-ledger () (interactive) (setq ridge--search-type "ledger"))
+(defun ridge--search-images () (interactive) (setq ridge--search-type "image"))
+(defun ridge--search-music () (interactive) (setq ridge--search-type "music"))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search"
-  (let ((kmap (or existing-keymap (make-sparse-keymap))))
-    (define-key kmap (kbd "C-x m") #'ridge--search-markdown)
-    (define-key kmap (kbd "C-x o") #'ridge--search-org)
-    (define-key kmap (kbd "C-x l") #'ridge--search-ledger)
-    (define-key kmap (kbd "C-x i") #'ridge--search-images)
+  (let ((enabled-content-types (ridge--get-enabled-content-types))
+        (kmap (or existing-keymap (make-sparse-keymap))))
+    (when (member 'markdown enabled-content-types)
+      (define-key kmap (kbd "C-x m") #'ridge--search-markdown))
+    (when (member 'org enabled-content-types)
+      (define-key kmap (kbd "C-x o") #'ridge--search-org))
+    (when (member 'ledger enabled-content-types)
+      (define-key kmap (kbd "C-x l") #'ridge--search-ledger))
+    (when (member 'image enabled-content-types)
+      (define-key kmap (kbd "C-x i") #'ridge--search-images))
+    (when (member 'music enabled-content-types)
+      (define-key kmap (kbd "C-x M") #'ridge--search-music))
     kmap))
 (defun ridge--display-keybinding-info ()
   "Display information on keybindings to customize ridge search.
 Use `which-key` if available, else display simple message in echo area"
-  (if (fboundp 'which-key--create-buffer-and-show)
-      (which-key--create-buffer-and-show
-       (kbd "C-x")
-       (symbolp (ridge--make-search-keymap))
-       '(lambda (binding) (string-prefix-p "ridge--" (cdr binding)))
-       "Ridge Bindings")
-    (message "%s" ridge--keybindings-info-message)))
+  (if (fboundp 'which-key-show-full-keymap)
+      (let ((ridge--keymap (ridge--make-search-keymap)))
+        (which-key--show-keymap (symbol-name 'ridge--keymap)
+                                (symbol-value 'ridge--keymap)
+                                nil t t))
+    (message "%s" (ridge--keybindings-info-message))))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert json response from API to markdown entries"
@@ -124,7 +152,7 @@ Use `which-key` if available, else display simple message in echo area"
   (replace-regexp-in-string
    "^[\(\) ]" ""
    ;; extract entries from response as single string and convert to entries
-   (format "#+STARTUP: showall hidestars inlineimages\n* %s\n%s"
+   (format "* %s\n%s\n#+STARTUP: showall hidestars inlineimages"
            query
            (mapcar
             (lambda (args)
@@ -146,15 +174,17 @@ Use `which-key` if available, else display simple message in echo area"
             query
             (mapcar
              (lambda (args) (format
-                             "\n\n<h2>Score: %s Meta: %s Image: %s</h2>\n\n<a href=\"%s%s\">\n<img src=\"%s%s?%s\" width=100 height=100>\n</a>"
+                             "\n\n<h2>Score: %s Meta: %s Image: %s</h2>\n\n<a href=\"%s%s\">\n<img src=\"%s%s?%s\" width=%s height=%s>\n</a>"
                              (cdr (assoc 'score args))
                              (cdr (assoc 'metadata_score args))
                              (cdr (assoc 'image_score args))
-                             ridge--server-url
+                             ridge-server-url
                              (cdr (assoc 'entry args))
-                             ridge--server-url
+                             ridge-server-url
                              (cdr (assoc 'entry args))
-                             (random 10000)))
+                             (random 10000)
+                             ridge-image-width
+                             ridge-image-height))
              json-response)))))
 
 (defun ridge--extract-entries-as-ledger (json-response query)
@@ -173,19 +203,34 @@ Use `which-key` if available, else display simple message in echo area"
              json-response)))))
 
 (defun ridge--buffer-name-to-search-type (buffer-name)
-  (let ((file-extension (file-name-extension buffer-name)))
+  (let ((enabled-content-types (ridge--get-enabled-content-types))
+        (file-extension (file-name-extension buffer-name)))
     (cond
-     ((equal buffer-name "Music.org") "music")
-     ((or (equal file-extension "bean") (equal file-extension "beancount")) "ledger")
-     ((equal file-extension "org") "org")
-     ((or (equal file-extension "markdown") (equal file-extension "md")) "markdown")
-     (t "org"))))
+     ((and (member 'music enabled-content-types) (equal buffer-name "Music.org")) "music")
+     ((and (member 'ledger enabled-content-types) (or (equal file-extension "bean") (equal file-extension "beancount"))) "ledger")
+     ((and (member 'org enabled-content-types) (equal file-extension "org")) "org")
+     ((and (member 'markdown enabled-content-types) (or (equal file-extension "markdown") (equal file-extension "md"))) "markdown")
+     (t ridge-default-search-type))))
+
+(defun ridge--get-enabled-content-types ()
+  "Get content types enabled for search from API"
+  (let ((config-url (format "%s/config/data" ridge-server-url)))
+    (with-temp-buffer
+      (erase-buffer)
+      (url-insert-file-contents config-url)
+      (let* ((json-response (json-parse-buffer :object-type 'alist))
+            (content-type (cdr (assoc 'content-type json-response))))
+        ;; return content-type items with configuration
+        (mapcar
+         'car
+         (cl-remove-if-not
+          '(lambda (a) (not (eq (cdr a) :null)))
+          content-type))))))
 
 (defun ridge--construct-api-query (query search-type &optional rerank)
   (let ((rerank (or rerank "false"))
-        (results-count (or ridge--results-count 5))
         (encoded-query (url-hexify-string query)))
-    (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge--server-url encoded-query search-type rerank results-count)))
+    (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
   ;; get json response from api
@@ -240,12 +285,12 @@ Use `which-key` if available, else display simple message in echo area"
   "Delete all network connections to ridge server"
   (dolist (proc (process-list))
     (let ((proc-buf (buffer-name (process-buffer proc)))
-          (ridge-network-proc-buf (string-join (split-string ridge--server-url "://") " ")))
+          (ridge-network-proc-buf (string-join (split-string ridge-server-url "://") " ")))
       (when (string-match (format "%s" ridge-network-proc-buf) proc-buf)
         (delete-process proc)))))
 
 (defun ridge--teardown-incremental-search ()
-  (message "[Ridge]: Teardown Incremental Search")
+  (message "Ridge: Teardown Incremental Search")
   ;; remove advice to rerank results on normal exit from minibuffer
   (advice-remove 'exit-minibuffer #'ridge--minibuffer-exit-advice)
   ;; unset ridge minibuffer window
@@ -262,6 +307,7 @@ Use `which-key` if available, else display simple message in echo area"
 (defun ridge--minibuffer-exit-advice (&rest _args)
   (ridge--incremental-search t))
 
+
 ;;;###autoload
 (defun ridge ()
   "Natural, Incremental Search for your personal notes, transactions and music using Ridge"
@@ -269,8 +315,8 @@ Use `which-key` if available, else display simple message in echo area"
   (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
     ;; set ridge search type to last used or based on current buffer
     (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
-    ;; setup rerank to improve results once user idle for RIDGE--RERANK-AFTER-IDLE-TIME seconds
-    (setq ridge--rerank-timer (run-with-idle-timer ridge--rerank-after-idle-time t 'ridge--incremental-search t))
+    ;; setup rerank to improve results once user idle for RIDGE-RERANK-AFTER-IDLE-TIME seconds
+    (setq ridge--rerank-timer (run-with-idle-timer ridge-rerank-after-idle-time t 'ridge--incremental-search t))
     ;; switch to ridge results buffer
     (switch-to-buffer ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
