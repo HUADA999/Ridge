@@ -36,7 +36,7 @@ class ConfigureScreen(QtWidgets.QDialog):
 
         # Initialize Configure Window
         self.setWindowFlags(Qt.WindowType.WindowStaysOnTopHint)
-        self.setWindowTitle("Ridge - Configure")
+        self.setWindowTitle("Configure - Ridge")
         self.setFixedWidth(600)
 
         # Initialize Configure Window Layout
