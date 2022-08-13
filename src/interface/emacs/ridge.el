@@ -1,10 +1,12 @@
-;;; ridge.el --- Natural, Incremental Search via Emacs
+;;; ridge.el --- Natural, Incremental Search for your Second Brain -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2021-2022 Debanjum Singh Solanky
 
 ;; Author: Debanjum Singh Solanky <debanjum@gmail.com>
-;; Version: 2.0
-;; Keywords: search, org-mode, outlines, markdown, image
+;; Description: Natural, Incremental Search for your Second Brain
+;; Keywords: search, org-mode, outlines, markdown, beancount, ledger, image
+;; Version: 2.1
+;; Package-Requires: ((emacs "27.1"))
 ;; URL: http://github.com/debanjum/ridge/interface/emacs
 
 ;; This file is NOT part of GNU Emacs.
@@ -27,9 +29,20 @@
 ;;; Commentary:
 
 ;; This package provides a natural, incremental search interface to your
-;; org-mode notes, markdown files, beancount transactions and images.
-;; It is a wrapper that interfaces with transformer based ML models.
-;; The models search capabilities are exposed via the Ridge HTTP API.
+;; `org-mode' notes, `markdown' files, `beancount' transactions and images.
+;; It is a wrapper that interfaces with the Ridge server.
+;; The server exposes an API for advanced search using transformer ML models.
+;; The Ridge server needs to be running to use this package.
+;; See the repository docs for detailed setup of the Ridge server.
+;;
+;; Quickstart
+;; -------------
+;; 1. Install Ridge Server
+;;    pip install ridge-assistant
+;; 2. Start, Configure Ridge Server
+;;    ridge
+;; 3. Install ridge.el
+;;    (use-package ridge :bind ("C-c s" . 'ridge))
 
 ;;; Code:
 
@@ -52,7 +65,7 @@
   :type 'integer)
 
 (defcustom ridge-rerank-after-idle-time 2.0
-  "Idle time (in seconds) to trigger cross-encoder to rerank incremental search results."
+  "Idle time (in seconds) to rerank incremental search results."
   :group 'ridge
   :type 'float)
 
@@ -70,7 +83,7 @@
                  (const "music")))
 
 (defvar ridge--rerank-timer nil
-  "Idle timer to make cross-encoder re-rank incremental search results if user idle.")
+  "Idle timer to re-rank incremental search results if user idle.")
 
 (defvar ridge--minibuffer-window nil
   "Minibuffer window being used by user to enter query.")
@@ -85,6 +98,7 @@
   "The type of content to perform search on.")
 
 (defun ridge--keybindings-info-message ()
+  "Show available ridge keybindings in-context, when user invokes Ridge."
   (let ((enabled-content-types (ridge--get-enabled-content-types)))
     (concat
      "
@@ -101,13 +115,13 @@
      (when (member 'music enabled-content-types)
        "C-x M  | music\n"))))
 
-(defun ridge--search-markdown () (interactive) (setq ridge--search-type "markdown"))
-(defun ridge--search-org () (interactive) (setq ridge--search-type "org"))
-(defun ridge--search-ledger () (interactive) (setq ridge--search-type "ledger"))
-(defun ridge--search-images () (interactive) (setq ridge--search-type "image"))
-(defun ridge--search-music () (interactive) (setq ridge--search-type "music"))
+(defun ridge--search-markdown () "Set search-type to 'markdown'." (interactive) (setq ridge--search-type "markdown"))
+(defun ridge--search-org () "Set search-type to 'org-mode'." (interactive) (setq ridge--search-type "org"))
+(defun ridge--search-ledger () "Set search-type to 'ledger'." (interactive) (setq ridge--search-type "ledger"))
+(defun ridge--search-images () "Set search-type to image." (interactive) (setq ridge--search-type "image"))
+(defun ridge--search-music () "Set search-type to music." (interactive) (setq ridge--search-type "music"))
 (defun ridge--make-search-keymap (&optional existing-keymap)
-  "Setup keymap to configure Ridge search"
+  "Setup keymap to configure Ridge search. Build of EXISTING-KEYMAP when passed."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (kmap (or existing-keymap (make-sparse-keymap))))
     (when (member 'markdown enabled-content-types)
@@ -121,6 +135,8 @@
     (when (member 'music enabled-content-types)
       (define-key kmap (kbd "C-x M") #'ridge--search-music))
     kmap))
+
+(defvar ridge--keymap nil "Track Ridge keymap in this variable.")
 (defun ridge--display-keybinding-info ()
   "Display information on keybindings to customize ridge search.
 Use `which-key` if available, else display simple message in echo area"
@@ -132,7 +148,7 @@ Use `which-key` if available, else display simple message in echo area"
     (message "%s" (ridge--keybindings-info-message))))
 
 (defun ridge--extract-entries-as-markdown (json-response query)
-  "Convert json response from API to markdown entries"
+  "Convert JSON-RESPONSE, QUERY from API to markdown entries."
   ;; remove leading (, ) or SPC from extracted entries string
   (replace-regexp-in-string
    "^[\(\) ]" ""
@@ -147,7 +163,7 @@ Use `which-key` if available, else display simple message in echo area"
             json-response))))
 
 (defun ridge--extract-entries-as-org (json-response query)
-  "Convert json response from API to org-mode entries"
+  "Convert JSON-RESPONSE, QUERY from API to 'org-mode' entries."
   ;; remove leading (, ) or SPC from extracted entries string
   (replace-regexp-in-string
    "^[\(\) ]" ""
@@ -162,7 +178,7 @@ Use `which-key` if available, else display simple message in echo area"
               json-response))))
 
 (defun ridge--extract-entries-as-images (json-response query)
-  "Convert json response from API to html with images"
+  "Convert JSON-RESPONSE, QUERY from API to html with images."
   ;; remove leading (, ) or SPC from extracted entries string
   (replace-regexp-in-string
    "[\(\) ]$" ""
@@ -188,7 +204,7 @@ Use `which-key` if available, else display simple message in echo area"
              json-response)))))
 
 (defun ridge--extract-entries-as-ledger (json-response query)
-  "Convert json response from API to ledger entries"
+  "Convert JSON-RESPONSE, QUERY from API to ledger entries."
   ;; remove leading (, ) or SPC from extracted entries string
   (replace-regexp-in-string
    "[\(\) ]$" ""
@@ -203,6 +219,7 @@ Use `which-key` if available, else display simple message in echo area"
              json-response)))))
 
 (defun ridge--buffer-name-to-search-type (buffer-name)
+  "Infer search type based on BUFFER-NAME."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (file-extension (file-name-extension buffer-name)))
     (cond
@@ -213,7 +230,7 @@ Use `which-key` if available, else display simple message in echo area"
      (t ridge-default-search-type))))
 
 (defun ridge--get-enabled-content-types ()
-  "Get content types enabled for search from API"
+  "Get content types enabled for search from API."
   (let ((config-url (format "%s/config/data" ridge-server-url)))
     (with-temp-buffer
       (erase-buffer)
@@ -228,11 +245,14 @@ Use `which-key` if available, else display simple message in echo area"
           content-type))))))
 
 (defun ridge--construct-api-query (query search-type &optional rerank)
+  "Construct API Query from QUERY, SEARCH-TYPE and (optional) RERANK params."
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
     (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
+  "Query Ridge API using QUERY, SEARCH-TYPE, QUERY-URL.
+Render results in BUFFER-NAME."
   ;; get json response from api
   (with-current-buffer buffer-name
     (let ((inhibit-read-only t))
@@ -260,8 +280,8 @@ Use `which-key` if available, else display simple message in echo area"
     (read-only-mode t)))
 
 
-;; Incremental Search on Ridge
 (defun ridge--incremental-search (&optional rerank)
+  "Perform Incremental Search on Ridge. Allow optional RERANK of results."
   (let* ((rerank-str (cond (rerank "true") (t "false")))
          (ridge-buffer-name (get-buffer-create ridge--buffer-name))
          (query (minibuffer-contents-no-properties))
@@ -281,8 +301,8 @@ Use `which-key` if available, else display simple message in echo area"
          query-url
          ridge-buffer-name)))))
 
-(defun delete-open-network-connections-to-ridge ()
-  "Delete all network connections to ridge server"
+(defun ridge--delete-open-network-connections-to-server ()
+  "Delete all network connections to ridge server."
   (dolist (proc (process-list))
     (let ((proc-buf (buffer-name (process-buffer proc)))
           (ridge-network-proc-buf (string-join (split-string ridge-server-url "://") " ")))
@@ -290,6 +310,7 @@ Use `which-key` if available, else display simple message in echo area"
         (delete-process proc)))))
 
 (defun ridge--teardown-incremental-search ()
+  "Teardown timers and hooks used for incremental search."
   (message "Ridge: Teardown Incremental Search")
   ;; remove advice to rerank results on normal exit from minibuffer
   (advice-remove 'exit-minibuffer #'ridge--minibuffer-exit-advice)
@@ -298,19 +319,20 @@ Use `which-key` if available, else display simple message in echo area"
   ;; cancel rerank timer
   (when (timerp ridge--rerank-timer)
     (cancel-timer ridge--rerank-timer))
-  ;; delete open connections to ridge
-  (delete-open-network-connections-to-ridge)
+  ;; delete open connections to ridge server
+  (ridge--delete-open-network-connections-to-server)
   ;; remove hooks for ridge incremental query and self
   (remove-hook 'post-command-hook #'ridge--incremental-search)
   (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
 
 (defun ridge--minibuffer-exit-advice (&rest _args)
+  "Rerank results of incremental search on exiting minibuffer."
   (ridge--incremental-search t))
 
 
 ;;;###autoload
 (defun ridge ()
-  "Natural, Incremental Search for your personal notes, transactions and music using Ridge"
+  "Natural, Incremental Search for your personal notes, transactions and music."
   (interactive)
   (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
     ;; set ridge search type to last used or based on current buffer
@@ -337,7 +359,7 @@ Use `which-key` if available, else display simple message in echo area"
 
 ;;;###autoload
 (defun ridge-simple (query)
-  "Natural Search for QUERY in your personal notes, transactions, music and images using Ridge"
+  "Natural Search for QUERY on your personal notes, transactions, music and images."
   (interactive "s🦅Ridge: ")
   (let* ((rerank "true")
          (default-type (ridge--buffer-name-to-search-type (buffer-name)))
