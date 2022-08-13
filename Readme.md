@@ -34,7 +34,7 @@
 
 ## Features
 
-- **Natural**: Advanced Natural language understanding using Transformer based ML Models
+- **Natural**: Advanced natural language understanding using Transformer based ML Models
 - **Local**: Your personal data stays local. All search, indexing is done on your machine[\*](https://github.com/debanjum/ridge#miscellaneous)
 - **Incremental**: Incremental search for a fast, search-as-you-type experience
 - **Pluggable**: Modular architecture makes it easy to plug in new data sources, frontends and ML models
@@ -75,7 +75,7 @@
 
 ### 3. Run
    ``` shell
-   ridge config/ridge_sample.yml -vv
+   ridge -c=config/ridge_sample.yml -vv
    ```
    Loads ML model, generates embeddings and exposes API to search notes, images, transactions etc specified in config YAML
 
@@ -135,7 +135,7 @@ pip install --upgrade ridge-assistant
 ##### 1. Install
    ``` shell
    git clone https://github.com/debanjum/ridge && cd ridge
-   python -m venv .venv && source .venv/bin/activate
+   python3 -m venv .venv && source .venv/bin/activate
    pip install -e .
    ```
 ##### 2. Configure
@@ -145,7 +145,7 @@ pip install --upgrade ridge-assistant
 
 ##### 3. Run
    ``` shell
-   ridge config/ridge_sample.yml -vv
+   ridge -c=config/ridge_sample.yml -vv
    ```
    Load ML model, generate embeddings and expose API to query notes, images, transactions etc specified in config YAML
 
@@ -153,9 +153,11 @@ pip install --upgrade ridge-assistant
 
 ```shell
 # To Upgrade To Latest Stable Release
+# Maps to the latest tagged version of ridge on master branch
 pip install --upgrade ridge-assistant
 
 # To Upgrade To Latest Pre-Release
+# Maps to the latest commit on the master branch
 pip install --upgrade --pre ridge-assistant
 
 # To Upgrade To Specific Development Release.
