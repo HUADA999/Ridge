@@ -32,18 +32,19 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller
 
-      - name: Install Ridge Application
+      - name: Install Ridge App
         run: |
           pip install --upgrade .
 
-      - name: Create Mac App
+      - name: Package Ridge App
+        shell: bash
+        run: |
+          pyinstaller Ridge.spec
+
+      - name: Create Mac App DMG
         if: matrix.os == 'macos-latest'
         run: |
-          # Set Target Architecture
-          sed -E -i "" "s/target_arch='(.*)'/target_arch='x86_64'/g" Ridge.spec
-          # Create Mac app
-          pyinstaller Ridge.spec
-          # Install Mac DMG Creator
+         # Install Mac DMG Creator
           brew install create-dmg
           # Copy app to separate dmg folder
           mkdir -p dist/dmg && cp -r dist/Ridge.app dist/dmg
@@ -59,35 +60,21 @@ jobs:
             --app-drop-link 425 120 \
             "dist/Ridge.dmg" \
             "dist/dmg/"
+
       - uses: actions/upload-artifact@v3
         if : matrix.os == 'macos-latest'
         with:
           name: ridge.dmg
           path: dist/Ridge.dmg
 
-      - name: Create Windows App
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run: |
-          # Set Target Architecture
-          # sed -E -i "s/target_arch='(.*)'/target_arch='x86_64'/g" Ridge.spec
-          # Create Windows app
-          pyinstaller Ridge.spec
       - uses: actions/upload-artifact@v3
         if : matrix.os == 'windows-latest'
         with:
           name: ridge.exe
           path: dist/Ridge.exe
 
-      - name: Create Debian App
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          # Set Target Architecture
-          sed -E -i "s/target_arch='(.*)'/target_arch='x86_64'/g" Ridge.spec
-          # Create Debian app
-          pyinstaller Ridge.spec
       - uses: actions/upload-artifact@v3
         if : matrix.os == 'ubuntu-latest'
         with:
-          name: ridge.deb
-          path: dist/Ridge.deb
+          name: ridge
+          path: dist/Ridge
