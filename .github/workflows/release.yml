@@ -31,19 +31,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install pyinstaller
-          brew install create-dmg
 
-      - name: Install Application
+      - name: Install Ridge Application
         run: |
           pip install --upgrade .
 
-      - name: Package Mac App
+      - name: Create Mac App
         if: matrix.os == 'macos-latest'
         run: |
           # Set Target Architecture
           sed -E -i "" "s/target_arch='(.*)'/target_arch='x86_64'/g" Ridge.spec
           # Create Mac app
           pyinstaller Ridge.spec
+          # Install Mac DMG Creator
+          brew install create-dmg
           # Copy app to separate dmg folder
           mkdir -p dist/dmg && cp -r dist/Ridge.app dist/dmg
           # Create disk image with the app
@@ -64,7 +65,7 @@ jobs:
           name: ridge.dmg
           path: dist/Ridge.dmg
 
-      - name: Package Windows App
+      - name: Create Windows App
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
@@ -78,7 +79,7 @@ jobs:
           name: ridge.exe
           path: dist/Ridge.exe
 
-      - name: Package Ubuntu App
+      - name: Create Debian App
         if: matrix.os == 'ubuntu-latest'
         run: |
           # Set Target Architecture
