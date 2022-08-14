@@ -76,10 +76,8 @@ jobs:
           cp Ridge.desktop package/usr/share/applications
 
           # Fix permissions to be usable by non-root users
-          find package/opt/Ridge -type f -exec chmod 644 -- {} +
-          find package/opt/Ridge -type d -exec chmod 755 -- {} +
           find package/usr/share -type f -exec chmod 644 -- {} +
-          chmod +x package/opt/Ridge/Ridge
+          chmod 644 package/opt/Ridge
 
           # Package the app
           fpm -s dir -t deb -n Ridge --version "$GITHUB_REF_NAME" -p dist/Ridge.deb
