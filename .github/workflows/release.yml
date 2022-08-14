@@ -53,6 +53,29 @@ jobs:
             "dist/Ridge.dmg" \
             "dist/dmg/"
 
+      - name: Create Debian Package
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          # Install Debian Packager
+          sudo apt install ruby
+          get install fpm --user-install
+
+          # Copy app files into expected output directory structure
+          mkdir -p package/opt package/usr/share/applications package/usr/share/icons/hicolor/128x128/apps
+          cp -r dist/Ridge package/opt/Ridge
+          cp src/interface/web/assets/icons/favicon-128x128.png package/usr/share/icons/hicolor/128x128/apps/Ridge.png
+          cp Ridge.desktop package/usr/share/applications
+
+          # Fix permissions to be usable by non-root users
+          find package/opt/Ridge -type f -exec chmod 644 -- {} +
+          find package/opt/Ridge -type d -exec chmod 755 -- {} +
+          find package/usr/share -type f -exec chmod 644 -- {} +
+          chmod +x package/opt/Ridge/Ridge
+
+          # Package the app
+          fpm -s dir -t deb -n Ridge --version "$GITHUB_REF_NAME" -p dist/Ridge.deb
+
       - uses: actions/upload-artifact@v3
         if : matrix.os == 'macos-latest'
         with:
@@ -68,5 +91,5 @@ jobs:
       - uses: actions/upload-artifact@v3
         if : matrix.os == 'ubuntu-latest'
         with:
-          name: ridge
-          path: dist/Ridge
+          name: ridge.deb
+          path: dist/Ridge.deb
