@@ -1,6 +1,7 @@
 name: release
 
 on:
+  workflow-dispatch:
   push:
     tags:
       - v*
@@ -36,6 +37,9 @@ jobs:
         shell: bash
         run: |
           pyinstaller Ridge.spec
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            mv dist/Ridge.exe dist/ridge_"$GITHUB_REF_NAME"_amd64.exe
+          fi
 
       - name: Create Mac App DMG
         if: matrix.os == 'macos-latest'
@@ -54,7 +58,7 @@ jobs:
             --icon "Ridge.app" 175 120 \
             --hide-extension "Ridge.app" \
             --app-drop-link 425 120 \
-            "dist/Ridge.dmg" \
+            "dist/ridge_"$GITHUB_REF_NAME"_amd64.dmg" \
             "dist/dmg/"
 
       - uses: ruby/setup-ruby@v1
@@ -79,22 +83,14 @@ jobs:
           chmod 644 package/opt/Ridge
 
           # Package the app
-          fpm -C package -s dir -t deb -n "Ridge" --version "$GITHUB_REF_NAME" -p dist/Ridge.deb
+          fpm -C package -s dir -t deb -n "Ridge" --version "$GITHUB_REF_NAME" -p dist/ridge_"$GITHUB_REF_NAME"_amd64.deb
 
       - uses: actions/upload-artifact@v3
-        if : matrix.os == 'macos-latest'
         with:
-          name: ridge.dmg
-          path: dist/Ridge.dmg
+          path: dist/ridge_${{github.ref_name}}_amd64*
 
-      - uses: actions/upload-artifact@v3
-        if : matrix.os == 'windows-latest'
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          name: ridge.exe
-          path: dist/Ridge.exe
-
-      - uses: actions/upload-artifact@v3
-        if : matrix.os == 'ubuntu-latest'
-        with:
-          name: ridge.deb
-          path: dist/Ridge.deb
+          files: ridge_${{github.ref_name}}_amd64*
