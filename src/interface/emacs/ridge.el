@@ -107,6 +107,7 @@
      (when (member 'music enabled-content-types)
        "C-x M  | music\n"))))
 
+(defvar ridge--rerank nil "Track when re-rank of results triggered")
 (defun ridge--search-markdown () "Set search-type to 'markdown'." (interactive) (setq ridge--search-type "markdown"))
 (defun ridge--search-org () "Set search-type to 'org-mode'." (interactive) (setq ridge--search-type "org"))
 (defun ridge--search-ledger () "Set search-type to 'ledger'." (interactive) (setq ridge--search-type "ledger"))
@@ -285,15 +286,24 @@ Render results in BUFFER-NAME."
     ;;   1. user hasn't started typing query
     ;;   2. during recursive edits
     ;;   3. with contents of other buffers user may jump to
-    (when (and (not (equal query "")) (active-minibuffer-window) (equal (current-buffer) ridge--minibuffer-window))
+    ;;   4. search not triggered right after rerank
+    ;;      ignore to not overwrite reranked results before the user even sees them
+    (if ridge--rerank
+        (setq ridge--rerank nil)
+      (when
+          (and
+           (not (equal query ""))
+           (active-minibuffer-window)
+           (equal (current-buffer) ridge--minibuffer-window))
       (progn
         (when rerank
+          (setq ridge--rerank t)
           (message "Ridge: Rerank Results"))
         (ridge--query-api-and-render-results
          query
          ridge--search-type
          query-url
-         ridge-buffer-name)))))
+         ridge-buffer-name))))))
 
 (defun ridge--delete-open-network-connections-to-server ()
   "Delete all network connections to ridge server."
