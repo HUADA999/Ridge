@@ -12,6 +12,7 @@
 - [Demo](#Demo)
   - [Description](#Description)
   - [Analysis](#Analysis)
+  - [Interfaces](#Interfaces)
 - [Architecture](#Architecture)
 - [Setup](#Setup)
   - [Install](#1-Install)
@@ -57,7 +58,11 @@
 - The results do not have any words used in the query
   - *Based on the top result it seems the re-ranking model understands that Emacs is an editor?*
 - The results incrementally update as the query is entered
-- The results are re-ranked, for better accuracy, once user is idle
+- The results are re-ranked, for better accuracy, once user hits enter
+
+### Interfaces
+
+![](https://github.com/debanjum/ridge/blob/master/docs/interfaces.png)
 
 ## Architecture
 
@@ -65,30 +70,31 @@
 
 ## Setup
 ### 1. Install
-   ``` shell
-   pip install ridge-assistant
-   ```
+    ``` shell
+    pip install ridge-assistant
+    ```
 
-### 2. Configure
-   - Set `input-files` or `input-filter` in each relevant `content-type` section of [ridge_sample.yml](./config/ridge_sample.yml)
-     - Set `input-directories` field in `content-type.image` section
-   - Delete `content-type`, `processor` sub-sections irrelevant for your use-case
+### 2. Start App
+    ``` shell
+    ridge
+    ```
 
-### 3. Run
-   ``` shell
-   ridge -c=config/ridge_sample.yml -vv
-   ```
-   Loads ML model, generates embeddings and exposes API to search notes, images, transactions etc specified in config YAML
+### 3. Configure
+
+  1. Enable content types and point to files to search in the First Run Screen that pops up on app start*
+  2. Click configure* and wait. The app will load ML model, generates embeddings and exposes the search API
+
+  ![](https://github.com/debanjum/ridge/blob/master/docs/desktop_interface.png)
 
 ## Use
 
 - **Ridge via Web**
-  - Open <http://localhost:8000/>
+  - Open <http://localhost:8000/> via desktop interface or directly
 - **Ridge via Emacs**
   - [Install](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#installation) [ridge.el](./src/interface/emacs/ridge.el)
   - Run `M-x ridge <user-query>`
 - **Ridge via API**
-  - See [Ridge FastAPI Docs](http://localhost:8000/docs), [Ridge FastAPI ReDocs](http://localhost:8000/redocs)
+  - See the FastAPI [Swagger Docs](http://localhost:8000/docs), [ReDocs](http://localhost:8000/redocs)
 
 ## Upgrade
 ``` shell
@@ -98,7 +104,7 @@ pip install --upgrade ridge-assistant
 ## Troubleshoot
 
 - Symptom: Errors out complaining about Tensors mismatch, null etc
-  - Mitigation: Delete `content-type` > `image` section from `ridge_sample.yml`
+  - Mitigation: Disable `image` section on the desktop GUI
 
 - Symptom: Errors out with \"Killed\" in error message in Docker
   - Fix: Increase RAM available to Docker Containers in Docker Settings
@@ -108,7 +114,7 @@ pip install --upgrade ridge-assistant
 
 - The experimental [chat](localhost:8000/chat) API endpoint uses the [OpenAI API](https://openai.com/api/)
     - It is disabled by default
-    - To use it add your `openai-api-key` to config.yml
+    - To use it add your `openai-api-key` via the app configure screen
 
 ## Performance
 
@@ -140,13 +146,14 @@ pip install --upgrade ridge-assistant
    pip install -e .
    ```
 ##### 2. Configure
-   - Set `input-files` or `input-filter` in each relevant `content-type` section of `ridge_sample.yml`
+   - Copy the `config/ridge_sample.yml` to `~/.ridge/ridge.yml`
+   - Set `input-files` or `input-filter` in each relevant `content-type` section of `~/.ridge/ridge.yml`
      - Set `input-directories` field in `image` `content-type` section
-   - Delete `content-type`, `processor` sub-sections irrelevant for your use-case
+   - Delete `content-type` and `processor` sub-section(s) irrelevant for your use-case
 
 ##### 3. Run
    ``` shell
-   ridge -c=config/ridge_sample.yml -vv
+   ridge -vv
    ```
    Load ML model, generate embeddings and expose API to query notes, images, transactions etc specified in config YAML
 
@@ -209,13 +216,14 @@ docker-compose build --pull
    ```
 
 ##### 3. Configure
-   - Set `input-files` or `input-filter` in each relevant `content-type` section of `ridge_sample.yml`
+   - Copy the `config/ridge_sample.yml` to `~/.ridge/ridge.yml`
+   - Set `input-files` or `input-filter` in each relevant `content-type` section of `~/.ridge/ridge.yml`
      - Set `input-directories` field in `image` `content-type` section
    - Delete `content-type`, `processor` sub-sections irrelevant for your use-case
 
 ##### 4. Run
    ``` shell
-   python3 -m src.main config/ridge_sample.yml -vv
+   python3 -m src.main -vv
    ```
    Load ML model, generate embeddings and expose API to query notes, images, transactions etc specified in config YAML
 
