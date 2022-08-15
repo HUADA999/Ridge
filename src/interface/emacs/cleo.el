@@ -64,11 +64,6 @@
   :group 'ridge
   :type 'integer)
 
-(defcustom ridge-rerank-after-idle-time 2.0
-  "Idle time (in seconds) to rerank incremental search results."
-  :group 'ridge
-  :type 'float)
-
 (defcustom ridge-results-count 5
   "Number of results to get from Ridge API for each query."
   :group 'ridge
@@ -81,9 +76,6 @@
                  (const "markdown")
                  (const "ledger")
                  (const "music")))
-
-(defvar ridge--rerank-timer nil
-  "Idle timer to re-rank incremental search results if user idle.")
 
 (defvar ridge--minibuffer-window nil
   "Minibuffer window being used by user to enter query.")
@@ -120,10 +112,12 @@
 (defun ridge--search-ledger () "Set search-type to 'ledger'." (interactive) (setq ridge--search-type "ledger"))
 (defun ridge--search-images () "Set search-type to image." (interactive) (setq ridge--search-type "image"))
 (defun ridge--search-music () "Set search-type to music." (interactive) (setq ridge--search-type "music"))
+(defun ridge--improve-rank () "Use cross-encoder to rerank search results." (interactive) (ridge--incremental-search t))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search. Build of EXISTING-KEYMAP when passed."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (kmap (or existing-keymap (make-sparse-keymap))))
+    (define-key kmap (kbd "C-c RET") #'ridge--improve-rank)
     (when (member 'markdown enabled-content-types)
       (define-key kmap (kbd "C-x m") #'ridge--search-markdown))
     (when (member 'org enabled-content-types)
@@ -310,24 +304,15 @@ Render results in BUFFER-NAME."
         (delete-process proc)))))
 
 (defun ridge--teardown-incremental-search ()
-  "Teardown timers and hooks used for incremental search."
+  "Teardown hooks used for incremental search."
   (message "Ridge: Teardown Incremental Search")
-  ;; remove advice to rerank results on normal exit from minibuffer
-  (advice-remove 'exit-minibuffer #'ridge--minibuffer-exit-advice)
   ;; unset ridge minibuffer window
   (setq ridge--minibuffer-window nil)
-  ;; cancel rerank timer
-  (when (timerp ridge--rerank-timer)
-    (cancel-timer ridge--rerank-timer))
   ;; delete open connections to ridge server
   (ridge--delete-open-network-connections-to-server)
   ;; remove hooks for ridge incremental query and self
   (remove-hook 'post-command-hook #'ridge--incremental-search)
   (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
-
-(defun ridge--minibuffer-exit-advice (&rest _args)
-  "Rerank results of incremental search on exiting minibuffer."
-  (ridge--incremental-search t))
 
 
 ;;;###autoload
@@ -337,8 +322,6 @@ Render results in BUFFER-NAME."
   (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
     ;; set ridge search type to last used or based on current buffer
     (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
-    ;; setup rerank to improve results once user idle for RIDGE-RERANK-AFTER-IDLE-TIME seconds
-    (setq ridge--rerank-timer (run-with-idle-timer ridge-rerank-after-idle-time t 'ridge--incremental-search t))
     ;; switch to ridge results buffer
     (switch-to-buffer ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
@@ -351,8 +334,6 @@ Render results in BUFFER-NAME."
           ;; set current (mini-)buffer entered as ridge minibuffer
           ;; used to query ridge API only when user in ridge minibuffer
           (setq ridge--minibuffer-window (current-buffer))
-          ;; rerank results on normal exit from minibuffer
-          (advice-add 'exit-minibuffer :before #'ridge--minibuffer-exit-advice)
           (add-hook 'post-command-hook #'ridge--incremental-search) ; do ridge incremental search after every user action
           (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
       (read-string ridge--query-prompt))))
