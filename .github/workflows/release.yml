@@ -47,6 +47,10 @@ jobs:
       - name: Package Ridge App
         shell: bash
         run: |
+          # Setup Environment for Reproducible Builds
+          export PYTHONHASHSEED=42
+          export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct
+
           pyinstaller Ridge.spec
           if [ "$RUNNER_OS" == "Windows" ]; then
             mv dist/Ridge.exe dist/ridge_"$GITHUB_REF_NAME"_amd64.exe
