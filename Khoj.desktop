@@ -2,6 +2,6 @@
 Type=Application
 Name=Ridge
 Comment=A natural language search engine for your personal notes, transactions and images.
-Path=/opt/Ridge
-Exec=/opt/Ridge/Ridge
+Path=/opt
+Exec=/opt/Ridge
 Icon=Ridge
