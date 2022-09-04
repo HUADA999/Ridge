@@ -13,3 +13,4 @@ src/.data
 /dist/
 /ridge_assistant.egg-info/
 /config/ridge*.yml
+.pytest_cache
