@@ -11,7 +11,8 @@ default_config = {
             'input-files': None,
             'input-filter': None,
             'compressed-jsonl': '~/.ridge/content/org/org.jsonl.gz',
-            'embeddings-file': '~/.ridge/content/org/org_embeddings.pt'
+            'embeddings-file': '~/.ridge/content/org/org_embeddings.pt',
+            'index_heading_entries': False
         },
         'markdown': {
             'input-files': None,
