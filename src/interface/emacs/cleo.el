@@ -226,7 +226,7 @@ Use `which-key` if available, else display simple message in echo area"
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (let ((config-url (format "%s/api/v1.0/config/data" ridge-server-url)))
+  (let ((config-url (format "%s/api/config/data" ridge-server-url)))
     (with-temp-buffer
       (erase-buffer)
       (url-insert-file-contents config-url)
@@ -243,7 +243,7 @@ Use `which-key` if available, else display simple message in echo area"
   "Construct API Query from QUERY, SEARCH-TYPE and (optional) RERANK params."
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
-    (format "%s/api/v1.0/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
+    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
   "Query Ridge API using QUERY, SEARCH-TYPE, QUERY-URL.
