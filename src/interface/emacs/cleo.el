@@ -187,8 +187,8 @@ Use `which-key` if available, else display simple message in echo area"
              (lambda (args) (format
                              "\n\n<h2>Score: %s Meta: %s Image: %s</h2>\n\n<a href=\"%s%s\">\n<img src=\"%s%s?%s\" width=%s height=%s>\n</a>"
                              (cdr (assoc 'score args))
-                             (cdr (assoc 'metadata_score args))
-                             (cdr (assoc 'image_score args))
+                             (cdr (assoc 'metadata_score (assoc 'additional args)))
+                             (cdr (assoc 'image_score (assoc 'additional args)))
                              ridge-server-url
                              (cdr (assoc 'entry args))
                              ridge-server-url
@@ -226,7 +226,7 @@ Use `which-key` if available, else display simple message in echo area"
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (let ((config-url (format "%s/config/data" ridge-server-url))
+  (let ((config-url (format "%s/api/config/data" ridge-server-url))
         (url-request-method "GET"))
     (with-temp-buffer
       (erase-buffer)
@@ -244,7 +244,7 @@ Use `which-key` if available, else display simple message in echo area"
   "Construct API Query from QUERY, SEARCH-TYPE and (optional) RERANK params."
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
-    (format "%s/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
+    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
 
 (defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
   "Query Ridge API using QUERY, SEARCH-TYPE, QUERY-URL.
