@@ -215,6 +215,7 @@ docker-compose build --pull
 git clone https://github.com/debanjum/ridge && cd ridge
 conda env create -f config/environment.yml
 conda activate ridge
+python3 -m pip install pyqt6  # As conda does not support pyqt6 yet
 ```
 
 ##### 3. Configure
