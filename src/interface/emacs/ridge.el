@@ -7,7 +7,7 @@
 ;; Keywords: search, org-mode, outlines, markdown, beancount, ledger, image
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "27.1"))
-;; URL: http://github.com/debanjum/ridge/interface/emacs
+;; URL: https://github.com/debanjum/ridge/tree/master/src/interface/emacs
 
 ;; This file is NOT part of GNU Emacs.
 
