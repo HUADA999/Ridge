@@ -1,41 +1,34 @@
 * Emacs Ridge
-  /An Emacs interface for [[https://github.com/debanjum/ridge][Ridge]]/
+  [[https://melpa.org/#/ridge][file:https://melpa.org/packages/ridge-badge.svg]] [[https://stable.melpa.org/#/ridge][file:https://stable.melpa.org/packages/ridge-badge.svg]]
+ 
+  /The Emacs interface for [[https://github.com/debanjum/ridge][Ridge]]/
 
-** Requirements
+** Prerequisites
    - Install and Run [[https://github.com/debanjum/ridge][Ridge]]
 
 ** Installation
-   - Direct Install
-     - Put ~ridge.el~ in your Emacs load path. For e.g ~/.emacs.d/lisp
+**** Using MELPA
+     #+begin_src elisp
+      M-x package-install ridge
+     #+end_src elisp
 
-     - Load via ~use-package~ in your ~/.emacs.d/init.el or .emacs file by adding below snippet
-       #+begin_src elisp
-         ;; Ridge Package
-         (use-package ridge
-           :load-path "~/.emacs.d/lisp/ridge.el"
-           :bind ("C-c s" . 'ridge))
-       #+end_src
+     Add below snippet to your Emacs config file
+     #+begin_src elisp
+     ;; Install Ridge Package using MELPA
+     (use-package ridge
+        :ensure t
+        :bind ("C-c s" . 'ridge))
+     #+end_src
 
-   - With [[https://github.com/raxod502/straight.el][straight.el]]
-     - Add below snippet to your ~/.emacs.d/init.el or .emacs config file and execute it.
-       #+begin_src elisp
-         ;; Ridge Package for Semantic Search
-         (use-package ridge
-           :after org
-           :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
-           :bind ("C-c s" . 'ridge))
-       #+end_src
-
-   - With [[https://github.com/quelpa/quelpa#installation][Quelpa]]
-     - Ensure [[https://github.com/quelpa/quelpa#installation][Quelpa]], [[https://github.com/quelpa/quelpa-use-package#installation][quelpa-use-package]] are installed
-     - Add below snippet to your ~/.emacs.d/init.el or .emacs config file and execute it.
-       #+begin_src elisp
-         ;; Ridge Package
-         (use-package ridge
-           :after org
-           :quelpa (ridge :fetcher url :url "https://raw.githubusercontent.com/debanjum/ridge/master/src/interface/emacs/ridge.el")
-           :bind ("C-c s" . 'ridge))
-       #+end_src
+**** Using [[https://github.com/raxod502/straight.el][Straight.el]]
+     Add below snippet to your Emacs config file
+     #+begin_src elisp
+       ;; Install Ridge Package using Straight.el
+       (use-package ridge
+         :after org
+         :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
+         :bind ("C-c s" . 'ridge))
+     #+end_src
 
 ** Usage
    1. Open Query Interface on Client
