@@ -1,5 +1,5 @@
 * Emacs Ridge
-  [[https://melpa.org/#/ridge][file:https://melpa.org/packages/ridge-badge.svg]] [[https://stable.melpa.org/#/ridge][file:https://stable.melpa.org/packages/ridge-badge.svg]]
+  [[https://stable.melpa.org/#/ridge][file:https://stable.melpa.org/packages/ridge-badge.svg]] [[https://melpa.org/#/ridge][file:https://melpa.org/packages/ridge-badge.svg]]
  
   /The Emacs interface for [[https://github.com/debanjum/ridge][Ridge]]/
 
@@ -14,11 +14,17 @@
 
      Add below snippet to your Emacs config file
      #+begin_src elisp
-     ;; Install Ridge Package using MELPA
+     ;; Install Ridge Package from MELPA Stable
      (use-package ridge
         :ensure t
+        :pin melpa-stable
         :bind ("C-c s" . 'ridge))
      #+end_src
+
+    Note: Install ~ridge.el~ from MELPA (instead of MELPA Stable) if you installed the pre-release version of ridge
+    - That is, use ~:pin melpa~ to install ridge.el in above snippet if ridge was installed with ~pip install --pre ridge-assistant~
+    - Else use ~:pin melpa-stable~ to install ridge.el in above snippet if ridge was installed with ~pip install ridge-assistant~
+    - This ensures both ridge.el and ridge app are from the same version (tagged or latest)
 
 **** Using [[https://github.com/raxod502/straight.el][Straight.el]]
      Add below snippet to your Emacs config file
