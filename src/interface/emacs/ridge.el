@@ -41,8 +41,8 @@
 ;;    pip install ridge-assistant
 ;; 2. Start, Configure Ridge Server
 ;;    ridge
-;; 3. Install ridge.el
-;;    (use-package ridge :bind ("C-c s" . 'ridge))
+;; 3. Install ridge.el from MELPA Stable
+;;    (use-package ridge :pin melpa-stable :bind ("C-c s" . 'ridge))
 
 ;;; Code:
 
