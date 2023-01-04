@@ -21,6 +21,9 @@
   - [Interfaces](#Interfaces-1)
   - [Query Filters](#Query-filters)
 - [Upgrade](#Upgrade)
+  - [Ridge Server](#upgrade-ridge-server)
+  - [Ridge.el](#upgrade-ridge-on-emacs)
+  - [Ridge Obsidian](#upgrade-ridge-on-obsidian)
 - [Troubleshoot](#Troubleshoot)
 - [Advanced Usage](#advanced-usage)
   - [Access Ridge on Mobile](#access-ridge-on-mobile)
@@ -89,7 +92,7 @@ https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9
 ## Setup
 These are the general setup instructions for Ridge.
 
-Check the [Ridge Obsidian Readme]((https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#Setup) to setup Ridge with the Obsidian Plugin. Its simpler as it can skip the configure step below.
+Check the [Ridge Obsidian Readme](https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#Setup) to setup Ridge with the Obsidian Plugin. Its simpler as it can skip the configure step below.
 
 ### 1. Install
 
@@ -142,10 +145,19 @@ Use structured query syntax to filter the natural language search results
     - that best match the natural language query *"what is the meaning of life?"*
 
 ## Upgrade
-
+### Upgrade Ridge Server
 ```shell
 pip install --upgrade ridge-assistant
 ```
+
+### Upgrade Ridge on Emacs
+- Use your Emacs Package Manager to Upgrade
+  - E.g Run `M-x package-refresh-content` followed by `M-x package-reinstall ridge` to upgrade `ridge.el`
+- See [ridge.el readme](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Upgrade) for details
+
+### Upgrade Ridge on Obsidian
+- Upgrade via the Community plugins tab on the settings pane in the Obsidian app
+- See the [ridge plugin readme](https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#2-Setup-Plugin) for details
 
 ## Troubleshoot
 
