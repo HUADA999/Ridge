@@ -26,9 +26,10 @@ logger = logging.getLogger(__name__)
 def configure_server(args, required=False):
     if args.config is None:
         if required:
-            print('Exiting as Ridge is not configured. Configure the application to use it.')
+            logger.error(f'Exiting as Ridge is not configured.\nConfigure it via GUI or by editing {state.config_file}.')
             sys.exit(1)
         else:
+            logger.warn(f'Ridge is not configured.\nConfigure it via ridge GUI, plugins or by editing {state.config_file}.')
             return
     else:
         state.config = args.config
