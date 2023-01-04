@@ -53,7 +53,7 @@
 ### Ridge in Obsidian
 https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8a26-b0bfc0a4344f.mp4
 
-#### Description
+<details><summary>Description</summary>
 
 - Install Ridge via `pip` and start Ridge backend in non-gui mode
 - Install Ridge plugin via Community Plugins settings pane on Obsidian app
@@ -62,24 +62,27 @@ https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8
 - Open Ridge plugin on Obsidian via Search button on Left Pane
 - Search \"*Announce plugin to folks*\" in the [Obsidian Plugin docs](https://marcus.se.net/obsidian-plugin-docs/)
 - Jump to the [search result](https://marcus.se.net/obsidian-plugin-docs/publishing/submit-your-plugin)
+</details>
 
 ### Ridge in Emacs, Browser
 https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9087-a1ea194b8f4b.mp4
 
-#### Description
+<details><summary>Description</summary>
 
 - Install Ridge via pip
 - Start Ridge app
 - Add this readme and [ridge.el readme](https://github.com/debanjum/ridge/tree/master/src/interface/emacs) as org-mode for Ridge to index
 - Search \"*Setup editor*\" on the Web and Emacs. Re-rank the results for better accuracy
 - Top result is what we are looking for, the [section to Install Ridge.el on Emacs](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#installation)
+</details>
 
-#### Analysis
+<details><summary>Analysis</summary>
 
 - The results do not have any words used in the query
   - *Based on the top result it seems the re-ranking model understands that Emacs is an editor?*
 - The results incrementally update as the query is entered
 - The results are re-ranked, for better accuracy, once user hits enter
+</details>
 
 ### Interfaces
 
@@ -116,7 +119,7 @@ ridge
 
 - **Ridge via Obsidian**
   - [Install](https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#2-Setup-Plugin) the Ridge Obsidian plugin
-  - Click the *Ridge search icon* 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or Search for *Ridge: Search* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette) 
+  - Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or Search for *Ridge: Search* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
 - **Ridge via Emacs**
   - [Install](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#installation) [ridge.el](./src/interface/emacs/ridge.el)
   - Run `M-x ridge <user-query>`
@@ -152,7 +155,6 @@ pip install --upgrade ridge-assistant
 
 ### Upgrade Ridge on Emacs
 - Use your Emacs Package Manager to Upgrade
-  - E.g Run `M-x package-refresh-content` followed by `M-x package-reinstall ridge` to upgrade `ridge.el`
 - See [ridge.el readme](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Upgrade) for details
 
 ### Upgrade Ridge on Obsidian
