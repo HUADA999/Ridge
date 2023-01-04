@@ -8,9 +8,9 @@
 ## Table of Contents
 
 - [Features](#Features)
-- [Demo](#Demo)
-  - [Description](#Description)
-  - [Analysis](#Analysis)
+- [Demos](#Demos)
+  - [Ridge in Obsidian](#ridge-in-obsidian)
+  - [Ridge in Emacs, Browser](#ridge-in-emacs-browser)
   - [Interfaces](#Interfaces)
 - [Architecture](#Architecture)
 - [Setup](#Setup)
@@ -46,11 +46,24 @@
 - **Multiple Sources**: Search your Org-mode and Markdown notes, Beancount transactions and Photos
 - **Multiple Interfaces**: Search using a [Web Browser](./src/interface/web/index.html), [Emacs](./src/interface/emacs/ridge.el) or the [API](http://localhost:8000/docs)
 
-## Demo
+## Demos
+### Ridge in Obsidian
+https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8a26-b0bfc0a4344f.mp4
 
+#### Description
+
+- Install Ridge via `pip` and start Ridge backend in non-gui mode
+- Install Ridge plugin via Community Plugins settings pane on Obsidian app
+- Check the new Ridge plugin settings
+- Let Ridge backend index the markdown files in the current Vault
+- Open Ridge plugin on Obsidian via Search button on Left Pane
+- Search \"*Announce plugin to folks*\" in the [Obsidian Plugin docs](https://marcus.se.net/obsidian-plugin-docs/)
+- Jump to the [search result](https://marcus.se.net/obsidian-plugin-docs/publishing/submit-your-plugin)
+
+### Ridge in Emacs, Browser
 https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9087-a1ea194b8f4b.mp4
 
-### Description
+#### Description
 
 - Install Ridge via pip
 - Start Ridge app
@@ -58,7 +71,7 @@ https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9
 - Search \"*Setup editor*\" on the Web and Emacs. Re-rank the results for better accuracy
 - Top result is what we are looking for, the [section to Install Ridge.el on Emacs](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#installation)
 
-### Analysis
+#### Analysis
 
 - The results do not have any words used in the query
   - *Based on the top result it seems the re-ranking model understands that Emacs is an editor?*
@@ -74,6 +87,10 @@ https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9
 ![](https://github.com/debanjum/ridge/blob/master/docs/ridge_architecture.png)
 
 ## Setup
+These are the general setup instructions for Ridge.
+
+Check the [Ridge Obsidian Readme]((https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#Setup) to setup Ridge with the Obsidian Plugin. Its simpler as it can skip the configure step below.
+
 ### 1. Install
 
 ```shell
@@ -94,11 +111,14 @@ ridge
 ## Use
 ### Interfaces
 
-- **Ridge via Web**
-  - Open <http://localhost:8000/> via desktop interface or directly
+- **Ridge via Obsidian**
+  - [Install](https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#2-Setup-Plugin) the Ridge Obsidian plugin
+  - Click the *Ridge search icon* 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or Search for *Ridge: Search* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette) 
 - **Ridge via Emacs**
   - [Install](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#installation) [ridge.el](./src/interface/emacs/ridge.el)
   - Run `M-x ridge <user-query>`
+- **Ridge via Web**
+  - Open <http://localhost:8000/> via desktop interface or directly
 - **Ridge via API**
   - See the Ridge FastAPI [Swagger Docs](http://localhost:8000/docs), [ReDocs](http://localhost:8000/redocs)
 
