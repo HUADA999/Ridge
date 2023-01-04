@@ -1,16 +1,37 @@
+# Ridge artifacts
+*.gz
+*.pt
+src/.data
+tests/data/models
+tests/data/embeddings
+
+# External app artifacts
 __pycache__
 .DS_Store
 .emacs.desktop*
 *.py[cod]
-tests/data/models
-tests/data/embeddings
-src/.data
-/src/interface/web/images
 .vscode
-*.gz
-*.pt
+
+# Build artifacts
+/src/interface/web/images
 /build/
 /dist/
 /ridge_assistant.egg-info/
 /config/ridge*.yml
 .pytest_cache
+ridge.log
+
+# Obsidian plugin artifacts
+# ---
+# npm
+node_modules
+
+# Don't include the compiled obsidian main.js file in the repo.
+# They should be uploaded to GitHub releases instead.
+main.js
+
+# Exclude sourcemaps
+*.map
+
+# obsidian
+data.json
