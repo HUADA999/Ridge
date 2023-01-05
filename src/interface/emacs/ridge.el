@@ -114,9 +114,9 @@ NO-PAGING FILTER))
        "C-x M  | music\n"))))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
-(defun ridge--search-markdown () "Set search-type to 'markdown'." (interactive) (setq ridge--search-type "markdown"))
-(defun ridge--search-org () "Set search-type to 'org-mode'." (interactive) (setq ridge--search-type "org"))
-(defun ridge--search-ledger () "Set search-type to 'ledger'." (interactive) (setq ridge--search-type "ledger"))
+(defun ridge--search-markdown () "Set search-type to `markdown'." (interactive) (setq ridge--search-type "markdown"))
+(defun ridge--search-org () "Set search-type to `org-mode'." (interactive) (setq ridge--search-type "org"))
+(defun ridge--search-ledger () "Set search-type to `ledger'." (interactive) (setq ridge--search-type "ledger"))
 (defun ridge--search-images () "Set search-type to image." (interactive) (setq ridge--search-type "image"))
 (defun ridge--search-music () "Set search-type to music." (interactive) (setq ridge--search-type "music"))
 (defun ridge--improve-rank () "Use cross-encoder to rerank search results." (interactive) (ridge--incremental-search t))
@@ -164,7 +164,7 @@ Use `which-key` if available, else display simple message in echo area"
             json-response))))
 
 (defun ridge--extract-entries-as-org (json-response query)
-  "Convert JSON-RESPONSE, QUERY from API to 'org-mode' entries."
+  "Convert JSON-RESPONSE, QUERY from API to `org-mode' entries."
   ;; remove leading (, ) or SPC from extracted entries string
   (replace-regexp-in-string
    "^[\(\) ]" ""
