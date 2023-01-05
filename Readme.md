@@ -33,6 +33,7 @@
   - [Indexing Performance](#Indexing-performance)
   - [Miscellaneous](#Miscellaneous-1)
 - [Development](#Development)
+  - [Visualize Codebase](#visualize-codebase)
   - [Setup](#Setup)
     - [Using Pip](#Using-Pip)
     - [Using Docker](#Using-Docker)
@@ -215,6 +216,12 @@ pip install --upgrade ridge-assistant
 - Search, indexing on a GPU has not been tested yet
 
 ## Development
+### Visualize Codebase
+
+*[Interactive Visualization](https://mango-dune-07a8b7110.1.azurestaticapps.net/?repo=debanjum%2Fridge)*
+
+![](https://github.com/debanjum/ridge/blob/master/docs/ridge_codebase_visualization_0.2.1.png)
+
 ### Setup
 #### Using Pip
 ##### 1. Install
