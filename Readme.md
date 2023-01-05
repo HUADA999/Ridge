@@ -168,6 +168,14 @@ pip install --upgrade ridge-assistant
 - Symptom: Errors out with \"Killed\" in error message in Docker
   - Fix: Increase RAM available to Docker Containers in Docker Settings
   - Refer: [StackOverflow Solution](https://stackoverflow.com/a/50770267), [Configure Resources on Docker for Mac](https://docs.docker.com/desktop/mac/#resources)
+- Symptom: `pip install ridge-assistant` fails while building the `tokenizers` dependency. Complains about Rust.
+  - Fix: Install Rust to build the tokenizers package. For example on Mac run:
+    ```shell
+    brew install rustup
+    rustup-init
+    source ~/.cargo/env
+    ```
+  - Refer: [Issue with Fix](https://github.com/debanjum/ridge/issues/82#issuecomment-1241890946) for more details
 
 # Advanced Usage
 ## Access Ridge on Mobile
