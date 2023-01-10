@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, PluginSettingTab, request, Setting } from 'obsidian';
 import Ridge from 'src/main';
 import { getVaultAbsolutePath } from 'src/utils';
 
@@ -35,7 +35,7 @@ export class RidgeSettingTab extends PluginSettingTab {
 
         // Add ridge settings configurable from the plugin settings tab
         new Setting(containerEl)
-            .setName('Vault Paths')
+            .setName('Vault Path')
             .setDesc('The Obsidian Vault to search with Ridge')
             .addText(text => text
                 .setValue(`${this.plugin.settings.obsidianVaultPath}`)
@@ -53,7 +53,7 @@ export class RidgeSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
          new Setting(containerEl)
-            .setName('Number of Results')
+            .setName('Results Count')
             .setDesc('The number of search results to show')
             .addText(text => text
                 .setPlaceholder('6')
@@ -62,5 +62,14 @@ export class RidgeSettingTab extends PluginSettingTab {
                     this.plugin.settings.resultsCount = parseInt(value);
                     await this.plugin.saveSettings();
                 }));
+        new Setting(containerEl)
+            .setName('Index Vault')
+            .setDesc('Manually force Ridge to re-index your Obsidian Vault')
+            .addButton(button => button
+                .setButtonText('Update')
+                .onClick(async () => {
+                    await request(`${this.plugin.settings.ridgeUrl}/api/update?t=markdown&force=true`);
+                }
+            ));
     }
 }
