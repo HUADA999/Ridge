@@ -13,16 +13,23 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
     let mdInVault = `${setting.obsidianVaultPath}/**/*.md`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
-    // Load ridge app config from backend API, Update Markdown config and save
-    let ridge_configured = await request(ridgeConfigUrl)
-        .then(response => response !== "null");
+    // Check if ridge backend is configured, show error if backend is not running
+    let ridge_already_configured = await request(ridgeConfigUrl)
+        .then(response => {
+            return response !== "null"
+        })
+        .catch(error => {
+            new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the Ridge plugin settings.\n\n${error}`);
+        })
+    // Short-circuit configuring ridge if unable to connect to ridge backend
+    if (ridge_already_configured === null) return;
 
     // Get current config if ridge backend configured, else get default config from ridge backend
-    await request(ridge_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
+    await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
         .then(response => JSON.parse(response))
         .then(data => {
             // If ridge backend not configured yet
-            if (!ridge_configured) {
+            if (!ridge_already_configured) {
                 // Create ridge content-type config with only markdown configured
                 let ridgeObsidianPluginPath = `${setting.obsidianVaultPath}/${this.app.vault.configDir}/plugins/ridge/`;
                 data["content-type"] = {
@@ -70,9 +77,10 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
                 updateRidgeBackend(setting.ridgeUrl, data);
                 console.log(`Ridge: Updated markdown config in ridge backend config:\n${JSON.stringify(data["content-type"]["markdown"])}`)
             }
+            new Notice(`✅ Successfully Setup Ridge`);
         })
         .catch(error => {
-            new Notice(`Ensure Ridge backend is running and Ridge URL is correct in the Ridge plugin settings.\nError: ${error}`);
+            new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github. \n\nError: ${error}`);
         })
 }
 
