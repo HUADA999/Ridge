@@ -16,13 +16,15 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
     // Check if ridge backend is configured, show error if backend is not running
     let ridge_already_configured = await request(ridgeConfigUrl)
         .then(response => {
+            setting.connectedToBackend = true;
             return response !== "null"
         })
         .catch(error => {
-            new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the Ridge plugin settings.\n\n${error}`);
+            setting.connectedToBackend = false;
+            new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
         })
     // Short-circuit configuring ridge if unable to connect to ridge backend
-    if (ridge_already_configured === null) return;
+    if (!setting.connectedToBackend) return;
 
     // Get current config if ridge backend configured, else get default config from ridge backend
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
