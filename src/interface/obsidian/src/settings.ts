@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, request, Setting } from 'obsidian';
+import { App, Notice, PluginSettingTab, request, Setting } from 'obsidian';
 import Ridge from 'src/main';
 import { getVaultAbsolutePath } from 'src/utils';
 
@@ -28,10 +28,8 @@ export class RidgeSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        // Add notice if unable to connect to ridge backend
-        if (!this.plugin.settings.connectedToBackend) {
-            containerEl.createEl('small', { text: '❗Ensure Ridge backend is running and Ridge URL is correctly set below' });
-        }
+        // Add notice whether able to connect to ridge backend or not
+        containerEl.createEl('small', { text: this.getBackendStatusMessage() });
 
         // Add ridge settings configurable from the plugin settings tab
         new Setting(containerEl)
@@ -49,8 +47,9 @@ export class RidgeSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(`${this.plugin.settings.ridgeUrl}`)
                 .onChange(async (value) => {
-                    this.plugin.settings.ridgeUrl = value;
-                    await this.plugin.saveSettings();
+                    this.plugin.settings.ridgeUrl = value.trim();
+                    await this.plugin.saveSettings()
+                    .finally(() => containerEl.firstElementChild?.setText(this.getBackendStatusMessage()));
                 }));
          new Setting(containerEl)
             .setName('Results Count')
@@ -69,8 +68,15 @@ export class RidgeSettingTab extends PluginSettingTab {
                 .setButtonText('Update')
                 .setCta()
                 .onClick(async () => {
-                    await request(`${this.plugin.settings.ridgeUrl}/api/update?t=markdown&force=true`);
-                }
-            ));
+                    await request(`${this.plugin.settings.ridgeUrl}/api/update?t=markdown&force=true`)
+                    .then(() => new Notice('✅ Updated Ridge index.'))
+                })
+            );
+    }
+
+    getBackendStatusMessage() {
+        return !this.plugin.settings.connectedToBackend
+        ? '❗Disconnected from Ridge backend. Ensure Ridge backend is running and Ridge URL is correctly set below.'
+        : '✅ Connected to Ridge backend.';
     }
 }

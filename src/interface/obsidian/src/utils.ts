@@ -9,7 +9,7 @@ export function getVaultAbsolutePath(): string {
     return '';
 }
 
-export async function configureRidgeBackend(setting: RidgeSetting) {
+export async function configureRidgeBackend(setting: RidgeSetting, notify: boolean = true) {
     let mdInVault = `${setting.obsidianVaultPath}/**/*.md`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
@@ -21,7 +21,8 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
         })
         .catch(error => {
             setting.connectedToBackend = false;
-            new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
+            if (notify)
+                new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
         })
     // Short-circuit configuring ridge if unable to connect to ridge backend
     if (!setting.connectedToBackend) return;
@@ -79,10 +80,10 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
                 updateRidgeBackend(setting.ridgeUrl, data);
                 console.log(`Ridge: Updated markdown config in ridge backend config:\n${JSON.stringify(data["content-type"]["markdown"])}`)
             }
-            new Notice(`✅ Successfully Setup Ridge`);
         })
         .catch(error => {
-            new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github.\n\nError: ${error}`);
+            if (notify)
+                new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github.\n\nError: ${error}`);
         })
 }
 
