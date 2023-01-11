@@ -67,6 +67,7 @@ export class RidgeSettingTab extends PluginSettingTab {
             .setDesc('Manually force Ridge to re-index your Obsidian Vault')
             .addButton(button => button
                 .setButtonText('Update')
+                .setCta()
                 .onClick(async () => {
                     await request(`${this.plugin.settings.ridgeUrl}/api/update?t=markdown&force=true`);
                 }
