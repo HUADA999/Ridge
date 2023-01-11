@@ -45,7 +45,7 @@ export default class Ridge extends Plugin {
     }
 
     async saveSettings() {
-        await configureRidgeBackend(this.settings)
+        await configureRidgeBackend(this.settings, false)
             .then(() => this.saveData(this.settings));
     }
 }
