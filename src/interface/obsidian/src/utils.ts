@@ -9,11 +9,11 @@ export function getVaultAbsolutePath(): string {
     return '';
 }
 
-export async function configureRidgeBackend(setting: RidgeSetting) {
-    let mdInVault = `${setting.obsidianVaultPath}/**/*.md`;
+export async function configureRidgeBackend(setting: RidgeSetting, notify: boolean = true) {
+    let mdInVault = `${getVaultAbsolutePath()}/**/*.md`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
-    // Check if ridge backend is configured, show error if backend is not running
+    // Check if ridge backend is configured, note if cannot connect to backend
     let ridge_already_configured = await request(ridgeConfigUrl)
         .then(response => {
             setting.connectedToBackend = true;
@@ -21,10 +21,18 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
         })
         .catch(error => {
             setting.connectedToBackend = false;
-            new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
+            if (notify)
+                new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
         })
     // Short-circuit configuring ridge if unable to connect to ridge backend
     if (!setting.connectedToBackend) return;
+
+    // Set index name from the path of the current vault
+    let indexName = getVaultAbsolutePath().replace(/\//g, '_').replace(/ /g, '_');
+    // Get default index directory from ridge backend
+    let ridgeDefaultIndexDirectory = await request(`${ridgeConfigUrl}/default`)
+        .then(response => JSON.parse(response))
+        .then(data => { return getIndexDirectoryFromBackendConfig(data); });
 
     // Get current config if ridge backend configured, else get default config from ridge backend
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
@@ -33,13 +41,12 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
             // If ridge backend not configured yet
             if (!ridge_already_configured) {
                 // Create ridge content-type config with only markdown configured
-                let ridgeObsidianPluginPath = `${setting.obsidianVaultPath}/${this.app.vault.configDir}/plugins/ridge/`;
                 data["content-type"] = {
                     "markdown": {
                         "input-filter": [mdInVault],
                         "input-files": null,
-                        "embeddings-file": `${ridgeObsidianPluginPath}/markdown_embeddings.pt`,
-                        "compressed-jsonl": `${ridgeObsidianPluginPath}/markdown.jsonl.gz`,
+                        "embeddings-file": `${ridgeDefaultIndexDirectory}/${indexName}.pt`,
+                        "compressed-jsonl": `${ridgeDefaultIndexDirectory}/${indexName}.jsonl.gz`,
                     }
                 }
                 // Disable ridge processors, as not required
@@ -54,12 +61,11 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
             else if (!data["content-type"]["markdown"]) {
                 // Add markdown config to ridge content-type config
                 // Set markdown config to index markdown files in configured obsidian vault
-                let ridgeObsidianPluginPath = `${setting.obsidianVaultPath}/${this.app.vault.configDir}/plugins/ridge/`;
                 data["content-type"]["markdown"] = {
                     "input-filter": [mdInVault],
                     "input-files": null,
-                    "embeddings-file": `${ridgeObsidianPluginPath}/markdown_embeddings.pt`,
-                    "compressed-jsonl": `${ridgeObsidianPluginPath}/markdown.jsonl.gz`,
+                    "embeddings-file": `${ridgeDefaultIndexDirectory}/${indexName}.pt`,
+                    "compressed-jsonl": `${ridgeDefaultIndexDirectory}/${indexName}.jsonl.gz`,
                 }
 
                 // Save updated config and refresh index on ridge backend
@@ -72,17 +78,21 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
                 data["content-type"]["markdown"]["input-filter"][0] !== mdInVault) {
                 // Update markdown config in ridge content-type config
                 // Set markdown config to only index markdown files in configured obsidian vault
-                data["content-type"]["markdown"]["input-filter"] = [mdInVault]
-                data["content-type"]["markdown"]["input-files"] = null
-
+                let ridgeIndexDirectory = getIndexDirectoryFromBackendConfig(data);
+                data["content-type"]["markdown"] = {
+                    "input-filter": [mdInVault],
+                    "input-files": null,
+                    "embeddings-file": `${ridgeIndexDirectory}/${indexName}.pt`,
+                    "compressed-jsonl": `${ridgeIndexDirectory}/${indexName}.jsonl.gz`,
+                }
                 // Save updated config and refresh index on ridge backend
                 updateRidgeBackend(setting.ridgeUrl, data);
                 console.log(`Ridge: Updated markdown config in ridge backend config:\n${JSON.stringify(data["content-type"]["markdown"])}`)
             }
-            new Notice(`✅ Successfully Setup Ridge`);
         })
         .catch(error => {
-            new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github.\n\nError: ${error}`);
+            if (notify)
+                new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github.\n\nError: ${error}`);
         })
 }
 
@@ -98,5 +108,9 @@ export async function updateRidgeBackend(ridgeUrl: string, ridgeConfig: Object) 
     // Save ridgeConfig on ridge backend at ridgeConfigUrl
     await request(requestContent)
         // Refresh ridge search index after updating config
-        .then(_ => request(`${ridgeUrl}/api/update?t=markdown`));
+        .then(_ => request(`${ridgeUrl}/api/update?t=markdown&force=true`));
+}
+
+function getIndexDirectoryFromBackendConfig(ridgeConfig: any) {
+    return ridgeConfig["content-type"]["markdown"]["embeddings-file"].split("/").slice(0, -1).join("/");
 }
