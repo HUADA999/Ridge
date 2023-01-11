@@ -10,7 +10,7 @@ export function getVaultAbsolutePath(): string {
 }
 
 export async function configureRidgeBackend(setting: RidgeSetting, notify: boolean = true) {
-    let mdInVault = `${setting.obsidianVaultPath}/**/*.md`;
+    let mdInVault = `${getVaultAbsolutePath()}/**/*.md`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
     // Check if ridge backend is configured, show error if backend is not running
@@ -34,7 +34,7 @@ export async function configureRidgeBackend(setting: RidgeSetting, notify: boole
             // If ridge backend not configured yet
             if (!ridge_already_configured) {
                 // Create ridge content-type config with only markdown configured
-                let ridgeObsidianPluginPath = `${setting.obsidianVaultPath}/${this.app.vault.configDir}/plugins/ridge/`;
+                let ridgeObsidianPluginPath = `${getVaultAbsolutePath()}/${this.app.vault.configDir}/plugins/ridge/`;
                 data["content-type"] = {
                     "markdown": {
                         "input-filter": [mdInVault],
@@ -55,7 +55,7 @@ export async function configureRidgeBackend(setting: RidgeSetting, notify: boole
             else if (!data["content-type"]["markdown"]) {
                 // Add markdown config to ridge content-type config
                 // Set markdown config to index markdown files in configured obsidian vault
-                let ridgeObsidianPluginPath = `${setting.obsidianVaultPath}/${this.app.vault.configDir}/plugins/ridge/`;
+                let ridgeObsidianPluginPath = `${getVaultAbsolutePath()}/${this.app.vault.configDir}/plugins/ridge/`;
                 data["content-type"]["markdown"] = {
                     "input-filter": [mdInVault],
                     "input-files": null,
@@ -99,5 +99,5 @@ export async function updateRidgeBackend(ridgeUrl: string, ridgeConfig: Object) 
     // Save ridgeConfig on ridge backend at ridgeConfigUrl
     await request(requestContent)
         // Refresh ridge search index after updating config
-        .then(_ => request(`${ridgeUrl}/api/update?t=markdown`));
+        .then(_ => request(`${ridgeUrl}/api/update?t=markdown&force=true`));
 }

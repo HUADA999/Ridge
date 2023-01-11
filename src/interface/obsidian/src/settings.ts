@@ -1,18 +1,15 @@
 import { App, Notice, PluginSettingTab, request, Setting } from 'obsidian';
 import Ridge from 'src/main';
-import { getVaultAbsolutePath } from 'src/utils';
 
 export interface RidgeSetting {
     resultsCount: number;
     ridgeUrl: string;
-    obsidianVaultPath: string;
     connectedToBackend: boolean;
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
     resultsCount: 6,
     ridgeUrl: 'http://localhost:8000',
-    obsidianVaultPath: getVaultAbsolutePath(),
     connectedToBackend: false,
 }
 
@@ -32,15 +29,6 @@ export class RidgeSettingTab extends PluginSettingTab {
         containerEl.createEl('small', { text: this.getBackendStatusMessage() });
 
         // Add ridge settings configurable from the plugin settings tab
-        new Setting(containerEl)
-            .setName('Vault Path')
-            .setDesc('The Obsidian Vault to search with Ridge')
-            .addText(text => text
-                .setValue(`${this.plugin.settings.obsidianVaultPath}`)
-                .onChange(async (value) => {
-                    this.plugin.settings.obsidianVaultPath = value;
-                    await this.plugin.saveSettings();
-                }));
         new Setting(containerEl)
             .setName('Ridge URL')
             .setDesc('The URL of the Ridge backend')
