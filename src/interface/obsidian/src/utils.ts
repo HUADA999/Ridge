@@ -82,7 +82,7 @@ export async function configureRidgeBackend(setting: RidgeSetting) {
             new Notice(`✅ Successfully Setup Ridge`);
         })
         .catch(error => {
-            new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github. \n\nError: ${error}`);
+            new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github.\n\nError: ${error}`);
         })
 }
 
