@@ -108,7 +108,7 @@ export async function updateRidgeBackend(ridgeUrl: string, ridgeConfig: Object) 
     // Save ridgeConfig on ridge backend at ridgeConfigUrl
     await request(requestContent)
         // Refresh ridge search index after updating config
-        .then(_ => request(`${ridgeUrl}/api/update?t=markdown&force=true`));
+        .then(_ => request(`${ridgeUrl}/api/update?t=markdown`));
 }
 
 function getIndexDirectoryFromBackendConfig(ridgeConfig: any) {
