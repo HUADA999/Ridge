@@ -9,15 +9,29 @@ export interface SearchResult {
 
 export class RidgeModal extends SuggestModal<SearchResult> {
     setting: RidgeSetting;
+    rerank: boolean;
 
     constructor(app: App, setting: RidgeSetting) {
         super(app);
         this.setting = setting;
+        this.rerank = false;
+
+        // Register Modal Keybindings to Rerank Results
+        this.scope.register(['Mod'], 'Enter', async () => {
+            this.rerank = true
+            let results = await this.getSuggestions(this.inputEl.value);
+
+            this.resultContainerEl.empty();
+            results.forEach((result) => {
+                this.renderSuggestion(result, this.resultContainerEl);
+            });
+            this.rerank = false
+        });
     }
 
     async getSuggestions(query: string): Promise<SearchResult[]> {
         // Query Ridge backend for search results
-        var searchUrl = `${this.setting.ridgeUrl}/api/search?q=${query}&n=${this.setting.resultsCount}&t=markdown`
+        var searchUrl = `${this.setting.ridgeUrl}/api/search?q=${query}&n=${this.setting.resultsCount}&r=${this.rerank}&t=markdown`
         var results = await request(searchUrl)
             .then(response => JSON.parse(response))
             .then(data => {
