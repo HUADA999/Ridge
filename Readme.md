@@ -75,7 +75,7 @@ https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9
 - Start Ridge app
 - Add this readme and [ridge.el readme](https://github.com/debanjum/ridge/tree/master/src/interface/emacs) as org-mode for Ridge to index
 - Search \"*Setup editor*\" on the Web and Emacs. Re-rank the results for better accuracy
-- Top result is what we are looking for, the [section to Install Ridge.el on Emacs](https://github.com/debanjum/ridge/master/src/interface/emacs/#2-install-ridgeel)
+- Top result is what we are looking for, the [section to Install Ridge.el on Emacs](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#2-Install-Ridgeel)
 </details>
 
 <details><summary>Analysis</summary>
@@ -97,8 +97,8 @@ https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9
 ## Setup
 These are the general setup instructions for Ridge.
 
-- Check the [Ridge.el Readme](https://github.com/debanjum/ridge/master/src/interface/emacs#Setup) to setup Ridge with Emacs
-- Check the [Ridge Obsidian Readme](https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#Setup) to setup Ridge with the Obsidian Plugin<br />
+- Check the [Ridge.el Readme](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Setup) to setup Ridge with Emacs
+- Check the [Ridge Obsidian Readme](https://github.com/debanjum/ridge/tree/master/src/interface/obsidian#Setup) to setup Ridge with Obsidian<br />
   Its simpler as it can skip the configure step below.
 
 ### 1. Install
