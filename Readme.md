@@ -27,6 +27,7 @@
 - [Troubleshoot](#Troubleshoot)
 - [Advanced Usage](#advanced-usage)
   - [Access Ridge on Mobile](#access-ridge-on-mobile)
+  - [Use OpenAI Models for Search](#use-openai-models-for-search)
 - [Miscellaneous](#Miscellaneous)
 - [Performance](#Performance)
   - [Query Performance](#Query-performance)
@@ -182,11 +183,46 @@ pip install --upgrade ridge-assistant
 ## Access Ridge on Mobile
 1. [Setup Ridge](#Setup) on your personal server. This can be any always-on machine, i.e an old computer, RaspberryPi(?) etc
 2. [Install](https://tailscale.com/kb/installation/) [Tailscale](tailscale.com/) on your personal server and phone
-3. Open the Ridge web interface of the server from your phone browser. It should be `http://tailscale-url-of-server:8000` or `http://name-of-server:8000` if you've setup [MagicDNS](https://tailscale.com/kb/1081/magicdns/)
-4. Click the [Install/Add to Homescreen](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen) button
+3. Open the Ridge web interface of the server from your phone browser.<br /> It should be `http://tailscale-url-of-server:8000` or `http://name-of-server:8000` if you've setup [MagicDNS](https://tailscale.com/kb/1081/magicdns/)
+4. Click the [Add to Homescreen](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen) button
 5. Enjoy exploring your notes, transactions and images from your phone!
 
 ![](https://github.com/debanjum/ridge/blob/master/docs/ridge_pwa_android.png)
+
+## Use OpenAI Models for Search
+**Warnings**
+  - This configuration *uses an online model*
+    - It will **send all notes to OpenAI** to generate embeddings
+    - **All queries will be sent to OpenAI** when you search with Ridge
+    - *Requires an active internet connection* to search and index
+  - You will be **charged by OpenAI** based on the total tokens processed
+
+**Setup**
+1. Set `encoder-type`, `encoder` and `model-directory` under `asymmetric` and/or `symmetric` `search-type` in your `ridge.yml`[^1]:
+   ```diff
+      asymmetric:
+   -    encoder: "sentence-transformers/multi-qa-MiniLM-L6-cos-v1"
+   +    encoder: text-embedding-ada-002
+   +    encoder-type: src.utils.models.OpenAI
+        cross-encoder: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+   -    encoder-type: sentence_transformers.SentenceTransformer
+   -    model_directory: "~/.ridge/search/asymmetric/"
+   +    model-directory: null
+   ```
+
+2. Set `openai-api-key` field under `processor.conversation` section in your `ridge.yml`[^1] is set to your [OpenAI API key](https://beta.openai.com/account/api-keys):
+   ```diff
+    processor:
+      conversation:
+   -    openai-api-key: # "YOUR_OPENAI_API_KEY"
+   +    openai-api-key: sk-aaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhh
+        model: "text-davinci-003"
+        conversation-logfile: "~/.ridge/processor/conversation/conversation_logs.json"
+   ```
+
+3. Restart Ridge server to generate embeddings. It will take longer than with offline models.
+
+[^1]: By default @ `~/.ridge/ridge.yml`
 
 ## Miscellaneous
 
