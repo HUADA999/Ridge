@@ -46,7 +46,7 @@ export class RidgeModal extends SuggestModal<SearchResult> {
         this.setInstructions(modalInstructions);
 
         // Set Placeholder Text for Modal
-        this.setPlaceholder('Search with Ridge...');
+        this.setPlaceholder('Search with Ridge 🦅...');
     }
 
     async getSuggestions(query: string): Promise<SearchResult[]> {
