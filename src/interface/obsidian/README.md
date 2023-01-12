@@ -47,7 +47,7 @@ https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8
 ```shell
 pip install ridge-assistant && ridge --no-gui
 ```
-## 2. Setup Plugin
+### 2. Setup Plugin
   1. Open *Community plugins* tab in Obsidian settings panel
   2. Click Browse and Search for *Ridge*
   3. Click *Install*, after that click *Enable* on the Ridge plugin
