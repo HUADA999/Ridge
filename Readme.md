@@ -27,8 +27,11 @@
 - [Troubleshoot](#Troubleshoot)
 - [Advanced Usage](#advanced-usage)
   - [Access Ridge on Mobile](#access-ridge-on-mobile)
+  - [Chat with Notes](#chat-with-notes)
   - [Use OpenAI Models for Search](#use-openai-models-for-search)
 - [Miscellaneous](#Miscellaneous)
+  - [Setup OpenAI API key in Ridge](#set-your-openai-api-key-in-ridge)
+  - [Beta API](#beta-api)
 - [Performance](#Performance)
   - [Query Performance](#Query-performance)
   - [Indexing Performance](#Indexing-performance)
@@ -45,7 +48,7 @@
 ## Features
 
 - **Natural**: Advanced natural language understanding using Transformer based ML Models
-- **Local**: Your personal data stays local. All search, indexing is done on your machine[\*](https://github.com/debanjum/ridge#miscellaneous)
+- **Local**: Your personal data stays local. All search, indexing is done on your machine[\*](https://github.com/debanjum/ridge#beta-api)
 - **Incremental**: Incremental search for a fast, search-as-you-type experience
 - **Pluggable**: Modular architecture makes it easy to plug in new data sources, frontends and ML models
 - **Multiple Sources**: Search your Org-mode and Markdown notes, Beancount transactions and Photos
@@ -88,11 +91,11 @@ https://user-images.githubusercontent.com/6413477/184735169-92c78bf1-d827-4663-9
 
 ### Interfaces
 
-![](https://github.com/debanjum/ridge/blob/master/docs/interfaces.png)
+![](https://github.com/debanjum/ridge/blob/master/docs/interfaces.png?)
 
 ## Architecture
 
-![](https://github.com/debanjum/ridge/blob/master/docs/ridge_architecture.png)
+![](https://github.com/debanjum/ridge/blob/master/docs/ridge_architecture.png?)
 
 ## Setup
 These are the general setup instructions for Ridge.
@@ -178,7 +181,7 @@ pip install --upgrade ridge-assistant
 - **Refer**: [Issue with Fix](https://github.com/debanjum/ridge/issues/82#issuecomment-1241890946) for more details
 
 #### Search starts giving wonky results
-- **Fix**: Open `<ridge-url>/api/update?force=true` in browser to regenerate index from scratch.  Default: http://localhost:8000/api/update?force=true
+- **Fix**: Open [/api/update?force=true](http://localhost:8000/api/update?force=true)[^2] in browser to regenerate index from scratch
 - **Note**: *This is a fix for when you percieve the search results have degraded. Not if you think they've always given wonky results*
 
 #### Ridge in Docker errors out with \"Killed\" in error message
@@ -189,24 +192,34 @@ pip install --upgrade ridge-assistant
 - **Mitigation**: Disable `image` search using the desktop GUI
 
 ## Advanced Usage
-## Access Ridge on Mobile
+### Access Ridge on Mobile
 1. [Setup Ridge](#Setup) on your personal server. This can be any always-on machine, i.e an old computer, RaspberryPi(?) etc
 2. [Install](https://tailscale.com/kb/installation/) [Tailscale](tailscale.com/) on your personal server and phone
 3. Open the Ridge web interface of the server from your phone browser.<br /> It should be `http://tailscale-ip-of-server:8000` or `http://name-of-server:8000` if you've setup [MagicDNS](https://tailscale.com/kb/1081/magicdns/)
 4. Click the [Add to Homescreen](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps/Add_to_home_screen) button
 5. Enjoy exploring your notes, transactions and images from your phone!
 
-![](https://github.com/debanjum/ridge/blob/master/docs/ridge_pwa_android.png)
+![](https://github.com/debanjum/ridge/blob/master/docs/ridge_pwa_android.png?)
 
-## Use OpenAI Models for Search
-**Warnings**
-  - This configuration *uses an online model*
-    - It will **send all notes to OpenAI** to generate embeddings
-    - **All queries will be sent to OpenAI** when you search with Ridge
-    - *Requires an active internet connection* to search and index
-  - You will be **charged by OpenAI** based on the total tokens processed
+### Chat with Notes
+#### Overview
+- Provides a chat interface to inquire and engage with your notes
+- Chat Types:
+  - **Summarize**: Pulls the most relevant note from your notes and summarizes it
+  - **Chat**: Also does general chat. It guesses whether to give a general response or search, summarizes from your note. <br />
+    E.g *"how was your day?"* will give a general response. But *When did I go surfing?* should give a response from your notes
+- **Note**: *Your query and top note from search result will be sent to OpenAI for processing*
 
-**Setup**
+#### Use
+1. [Setup your OpenAI API key in Ridge](#set-your-openai-api-key-in-ridge)
+2. Open [/chat?type=summarize](http://localhost:8000/chat?type=summarize)[^2]
+3. Type your queries, see summarized response by Ridge from your notes
+
+#### Demo
+![](https://github.com/debanjum/ridge/blob/master/docs/ridge_chat_web_interface.png?)
+
+### Use OpenAI Models for Search
+#### Setup
 1. Set `encoder-type`, `encoder` and `model-directory` under `asymmetric` and/or `symmetric` `search-type` in your `ridge.yml`[^1]:
    ```diff
       asymmetric:
@@ -218,27 +231,42 @@ pip install --upgrade ridge-assistant
    -    model_directory: "~/.ridge/search/asymmetric/"
    +    model-directory: null
    ```
-
-2. Set `openai-api-key` field under `processor.conversation` section in your `ridge.yml`[^1] is set to your [OpenAI API key](https://beta.openai.com/account/api-keys):
-   ```diff
-    processor:
-      conversation:
-   -    openai-api-key: # "YOUR_OPENAI_API_KEY"
-   +    openai-api-key: sk-aaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhh
-        model: "text-davinci-003"
-        conversation-logfile: "~/.ridge/processor/conversation/conversation_logs.json"
-   ```
-
+2. [Setup your OpenAI API key in Ridge](#set-your-openai-api-key-in-ridge)
 3. Restart Ridge server to generate embeddings. It will take longer than with offline models.
 
-[^1]: By default @ `~/.ridge/ridge.yml`
+#### Warnings
+  This configuration *uses an online model*
+  - It will **send all notes to OpenAI** to generate embeddings
+  - **All queries will be sent to OpenAI** when you search with Ridge
+  - You will be **charged by OpenAI** based on the total tokens processed
+  - It *requires an active internet connection* to search and index
+
 
 ## Miscellaneous
+### Set your OpenAI API key in Ridge
+If you want, Ridge can be configured to use OpenAI for search and chat.<br />
+Add your OpenAI API to Ridge by using either of the two options below:
+ - Open the Ridge desktop GUI, add your [OpenAI API key](https://beta.openai.com/account/api-keys) and click *Configure*
+   Ensure ridge is started without the `--no-gui` flag. Check your system tray to see if Ridge 🦅 is minimized there.
+ - Set `openai-api-key` field under `processor.conversation` section in your `ridge.yml`[^1] to your [OpenAI API key](https://beta.openai.com/account/api-keys) and restart ridge:
+    ```diff
+    processor:
+      conversation:
+    -    openai-api-key: # "YOUR_OPENAI_API_KEY"
+    +    openai-api-key: sk-aaaaaaaaaaaaaaaaaaaaaaaahhhhhhhhhhhhhhhhhhhhhhhh
+        model: "text-davinci-003"
+        conversation-logfile: "~/.ridge/processor/conversation/conversation_logs.json"
+    ```
 
-- The beta [chat](http://localhost:8000/api/beta/chat) and [search](http://localhost:8000/api/beta/search) API endpoints use [OpenAI API](https://openai.com/api/)
-  - It is disabled by default
-  - To use it add your `openai-api-key` via the app configure screen
-  - Warning: *If you use the above beta APIs, your query and top result(s) will be sent to OpenAI for processing*
+**Warning**: *This will enable ridge to send your query and note(s) to OpenAI for processing*
+
+### Beta API
+- The beta [chat](http://localhost:8000/api/beta/chat), [summarize](http://localhost:8000/api/beta/summarize) and [search](http://localhost:8000/api/beta/search) API endpoints use [OpenAI API](https://openai.com/api/)
+- They are disabled by default
+- To use them:
+  1. [Setup your OpenAI API key in Ridge](#set-your-openai-api-key-in-ridge)
+  2. Interact with them from the [Ridge Swagger docs](http://locahost:8000/docs)[^2]
+
 
 ## Performance
 
@@ -265,7 +293,7 @@ pip install --upgrade ridge-assistant
 
 *[Interactive Visualization](https://mango-dune-07a8b7110.1.azurestaticapps.net/?repo=debanjum%2Fridge)*
 
-![](https://github.com/debanjum/ridge/blob/master/docs/ridge_codebase_visualization_0.2.1.png)
+![](https://github.com/debanjum/ridge/blob/master/docs/ridge_codebase_visualization_0.2.1.png?)
 
 ### Setup
 #### Using Pip
@@ -379,3 +407,8 @@ pytest
 - Charles Cave for [OrgNode Parser](http://members.optusnet.com.au/~charles57/GTD/orgnode.html)
 - [Org.js](https://mooz.github.io/org-js/) to render Org-mode results on the Web interface
 - [Markdown-it](https://github.com/markdown-it/markdown-it) to render Markdown results on the Web interface
+
+
+[^1]: Default Ridge config file @ `~/.ridge/ridge.yml`
+
+[^2]: Default Ridge url @ http://localhost:8000
