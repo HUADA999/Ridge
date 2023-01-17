@@ -21,6 +21,17 @@ export default class Ridge extends Plugin {
             }
         });
 
+        // Add a similar notes command
+        this.addCommand({
+            id: 'similar',
+            name: 'Find Similar Notes',
+            checkCallback: (checking) => {
+                if (!checking && this.settings.connectedToBackend)
+                    new RidgeModal(this.app, this.settings, true).open();
+                return this.settings.connectedToBackend;
+            }
+        });
+
         // Create an icon in the left ribbon.
         this.addRibbonIcon('search', 'Ridge', (_: MouseEvent) => {
             // Called when the user clicks the icon.
