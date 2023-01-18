@@ -10,7 +10,7 @@ export default class Ridge extends Plugin {
     async onload() {
         await this.loadSettings();
 
-        // Add a search command. It can be triggered from anywhere
+        // Add search command. It can be triggered from anywhere
         this.addCommand({
             id: 'search',
             name: 'Search',
@@ -21,19 +21,27 @@ export default class Ridge extends Plugin {
             }
         });
 
+        // Add similar notes command. It can only be triggered from the editor
+        this.addCommand({
+            id: 'similar',
+            name: 'Find Similar Notes',
+            editorCheckCallback: (checking) => {
+                if (!checking && this.settings.connectedToBackend)
+                    new RidgeModal(this.app, this.settings, true).open();
+                return this.settings.connectedToBackend;
+            }
+        });
+
         // Create an icon in the left ribbon.
         this.addRibbonIcon('search', 'Ridge', (_: MouseEvent) => {
             // Called when the user clicks the icon.
             this.settings.connectedToBackend
-            ? new RidgeModal(this.app, this.settings).open()
-            : new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings`);
+                ? new RidgeModal(this.app, this.settings).open()
+                : new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings`);
         });
 
         // Add a settings tab so the user can configure ridge
         this.addSettingTab(new RidgeSettingTab(this.app, this));
-    }
-
-    onunload() {
     }
 
     async loadSettings() {
