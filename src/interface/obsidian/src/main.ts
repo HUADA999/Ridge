@@ -44,9 +44,6 @@ export default class Ridge extends Plugin {
         this.addSettingTab(new RidgeSettingTab(this.app, this));
     }
 
-    onunload() {
-    }
-
     async loadSettings() {
         // Load ridge obsidian plugin settings
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
