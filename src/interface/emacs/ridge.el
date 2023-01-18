@@ -6,7 +6,7 @@
 ;; Description: Natural, Incremental Search for your Second Brain
 ;; Keywords: search, org-mode, outlines, markdown, beancount, ledger, image
 ;; Version: 0.2.2
-;; Package-Requires: ((emacs "27.1"))
+;; Package-Requires: ((emacs "27.1") (transient "0.3.0"))
 ;; URL: https://github.com/debanjum/ridge/tree/master/src/interface/emacs
 
 ;; This file is NOT part of GNU Emacs.
@@ -48,6 +48,7 @@
 
 (require 'url)
 (require 'json)
+(require 'transient)
 
 (defcustom ridge-server-url "http://localhost:8000"
   "Location of Ridge API server."
@@ -332,14 +333,10 @@ Render results in BUFFER-NAME."
   (remove-hook 'post-command-hook #'ridge--incremental-search)
   (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
 
-
-;;;###autoload
-(defun ridge ()
+(defun ridge-incremental ()
   "Natural, Incremental Search for your personal notes, transactions and music."
   (interactive)
   (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
-    ;; set ridge search type to last used or based on current buffer
-    (setq ridge--search-type (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))
     ;; switch to ridge results buffer
     (switch-to-buffer ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
@@ -355,6 +352,32 @@ Render results in BUFFER-NAME."
           (add-hook 'post-command-hook #'ridge--incremental-search) ; do ridge incremental search after every user action
           (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
       (read-string ridge--query-prompt))))
+
+(transient-define-argument ridge--content-type-switch ()
+  :class 'transient-switches
+  :argument-format "--content-type=%s"
+  :argument-regexp ".+"
+  ;; set content type to last used or based on current buffer or to default
+  :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))))
+  :choices '("org" "markdown" "ledger" "music" "image"))
+
+(transient-define-suffix ridge--search (&optional args)
+  (interactive (list (transient-args transient-current-command)))
+    (progn
+      ;; set search type to last used or based on current buffer or to default
+      (setq ridge--search-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-search-type (buffer-name))))
+      ;; set results count to last used or to default
+      (setq ridge-results-count (or (transient-arg-value "--results-count=" args) ridge-results-count))
+      ;; trigger incremental search
+      (call-interactively #'ridge-incremental)))
+
+
+;;;###autoload
+(transient-define-prefix ridge ()
+  [["Set"
+    ("t" "Content Type" ridge--content-type-switch)
+    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))]]
+  [["Act" ("s" "Search" ridge--search)]])
 
 ;;;###autoload
 (defun ridge-simple (query)
