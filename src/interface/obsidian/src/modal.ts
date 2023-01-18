@@ -9,10 +9,15 @@ export interface SearchResult {
 export class RidgeModal extends SuggestModal<SearchResult> {
     setting: RidgeSetting;
     rerank: boolean = false;
+    find_similar_notes: boolean;
 
-    constructor(app: App, setting: RidgeSetting) {
+    constructor(app: App, setting: RidgeSetting, find_similar_notes: boolean = false) {
         super(app);
         this.setting = setting;
+        this.find_similar_notes = find_similar_notes;
+
+        // Hide input element in Similar Notes mode
+        this.inputEl.hidden = this.find_similar_notes;
 
         // Register Modal Keybindings to Rerank Results
         this.scope.register(['Mod'], 'Enter', async () => {
@@ -49,20 +54,34 @@ export class RidgeModal extends SuggestModal<SearchResult> {
         this.setPlaceholder('Search with Ridge 🦅...');
     }
 
+    async onOpen() {
+        if (this.find_similar_notes) {
+            // If markdown file is currently active
+            let file = this.app.workspace.getActiveFile();
+            if (file && file.extension === 'md') {
+                // Enable rerank of search results
+                this.rerank = true
+                // Set contents of active markdown file to input element
+                this.inputEl.value = await this.app.vault.read(file);
+                // Trigger search to get and render similar notes from ridge backend
+                this.inputEl.dispatchEvent(new Event('input'));
+                this.rerank = false
+            }
+            else {
+                this.resultContainerEl.setText('Cannot find similar notes for non-markdown files');
+            }
+        }
+    }
+
     async getSuggestions(query: string): Promise<SearchResult[]> {
         // Query Ridge backend for search results
-        let searchUrl = `${this.setting.ridgeUrl}/api/search?q=${query}&n=${this.setting.resultsCount}&r=${this.rerank}&t=markdown`
+        let encodedQuery = encodeURIComponent(query);
+        let searchUrl = `${this.setting.ridgeUrl}/api/search?q=${encodedQuery}&n=${this.setting.resultsCount}&r=${this.rerank}&t=markdown`
         let results = await request(searchUrl)
             .then(response => JSON.parse(response))
-            .then(data => {
-                return data.map((result: any) => {
-                    let processedResult: SearchResult = {
-                        entry: result.entry,
-                        file: result.additional.file
-                    };
-                    return processedResult;
-                })
-            });
+            .then(data => data
+                .filter((result: any) => !this.find_similar_notes || !result.additional.file.endsWith(this.app.workspace.getActiveFile()?.path))
+                .map((result: any) => { return { entry: result.entry, file: result.additional.file } as SearchResult; }));
 
         return results;
     }
