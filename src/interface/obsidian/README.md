@@ -96,13 +96,13 @@ To see other notes similar to the current one, run *Ridge: Find Similar Notes* f
   3. Click the *Update* button next to Ridge, if available
 
 ## Troubleshooting
-  1. Open the Ridge plugin settings pane, in case you need to configure Ridge
-  2. Toggle Enable/Disable Ridge, in case settings changes have not applied
-  3. Click *Update* button to force index to refresh if results are failing or stale
+  - Open the Ridge plugin settings pane, to configure Ridge
+  - Toggle Enable/Disable Ridge, if setting changes have not applied
+  - Click *Update* button to force index to refresh, if results are failing or stale
 
 ## Current Limitations
-- The plugin loads index of only one vault at a time.<br/>
-  So notes across multiple vaults **cannot** be search at the same time
+- The plugin loads the index of only one vault at a time.<br/>
+  So notes across multiple vaults **cannot** be searched at the same time
 
 ## Visualize Codebase
 <img src="https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_obsidian_codebase_visualization_0.2.1.png" width="700" />
@@ -115,4 +115,5 @@ The plugin implements the following functionality to search your notes with Ridg
   - Set Obsidian Vault to Index with Ridge. Defaults to all markdown files in current Vault
   - Set URL of Ridge backend
   - Set Number of Search Results to show in Search Modal
-- [X] Allow user to trigger reranking of result to improve search quality
+- [X] Allow reranking of result to improve search quality
+- [X] Allow Finding notes similar to current note being viewed
