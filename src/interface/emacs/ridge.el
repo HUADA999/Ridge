@@ -70,7 +70,7 @@
   :group 'ridge
   :type 'integer)
 
-(defcustom ridge-default-search-type "org"
+(defcustom ridge-default-content-type "org"
   "The default content type to perform search on."
   :group 'ridge
   :type '(choice (const "org")
@@ -88,7 +88,7 @@
 (defconst ridge--buffer-name "*🦅Ridge*"
   "Name of buffer to show results from Ridge.")
 
-(defvar ridge--search-type "org"
+(defvar ridge--content-type "org"
   "The type of content to perform search on.")
 
 (declare-function beancount-mode "beancount" ())
@@ -102,7 +102,7 @@ NO-PAGING FILTER))
   (let ((enabled-content-types (ridge--get-enabled-content-types)))
     (concat
      "
-     Set Search Type
+     Set Content Type
 -------------------------\n"
      (when (member 'markdown enabled-content-types)
          "C-x m  | markdown\n")
@@ -116,11 +116,11 @@ NO-PAGING FILTER))
        "C-x M  | music\n"))))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
-(defun ridge--search-markdown () "Set search-type to `markdown'." (interactive) (setq ridge--search-type "markdown"))
-(defun ridge--search-org () "Set search-type to `org-mode'." (interactive) (setq ridge--search-type "org"))
-(defun ridge--search-ledger () "Set search-type to `ledger'." (interactive) (setq ridge--search-type "ledger"))
-(defun ridge--search-images () "Set search-type to image." (interactive) (setq ridge--search-type "image"))
-(defun ridge--search-music () "Set search-type to music." (interactive) (setq ridge--search-type "music"))
+(defun ridge--search-markdown () "Set content-type to `markdown'." (interactive) (setq ridge--content-type "markdown"))
+(defun ridge--search-org () "Set content-type to `org-mode'." (interactive) (setq ridge--content-type "org"))
+(defun ridge--search-ledger () "Set content-type to `ledger'." (interactive) (setq ridge--content-type "ledger"))
+(defun ridge--search-images () "Set content-type to image." (interactive) (setq ridge--content-type "image"))
+(defun ridge--search-music () "Set content-type to music." (interactive) (setq ridge--content-type "music"))
 (defun ridge--improve-rank () "Use cross-encoder to rerank search results." (interactive) (ridge--incremental-search t))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search. Build of EXISTING-KEYMAP when passed."
@@ -221,8 +221,8 @@ Use `which-key` if available, else display simple message in echo area"
                (format "%s\n\n" (cdr (assoc 'entry args))))
              json-response)))))
 
-(defun ridge--buffer-name-to-search-type (buffer-name)
-  "Infer search type based on BUFFER-NAME."
+(defun ridge--buffer-name-to-content-type (buffer-name)
+  "Infer content type based on BUFFER-NAME."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (file-extension (file-name-extension buffer-name)))
     (cond
@@ -230,7 +230,7 @@ Use `which-key` if available, else display simple message in echo area"
      ((and (member 'ledger enabled-content-types) (or (equal file-extension "bean") (equal file-extension "beancount"))) "ledger")
      ((and (member 'org enabled-content-types) (equal file-extension "org")) "org")
      ((and (member 'markdown enabled-content-types) (or (equal file-extension "markdown") (equal file-extension "md"))) "markdown")
-     (t ridge-default-search-type))))
+     (t ridge-default-content-type))))
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
@@ -248,14 +248,14 @@ Use `which-key` if available, else display simple message in echo area"
           (lambda (a) (not (eq (cdr a) :null)))
           content-type))))))
 
-(defun ridge--construct-api-query (query search-type &optional rerank)
-  "Construct API Query from QUERY, SEARCH-TYPE and (optional) RERANK params."
+(defun ridge--construct-api-query (query content-type &optional rerank)
+  "Construct API Query from QUERY, CONTENT-TYPE and (optional) RERANK params."
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
-    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query search-type rerank ridge-results-count)))
+    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query content-type rerank ridge-results-count)))
 
-(defun ridge--query-api-and-render-results (query search-type query-url buffer-name)
-  "Query Ridge API using QUERY, SEARCH-TYPE, QUERY-URL.
+(defun ridge--query-api-and-render-results (query content-type query-url buffer-name)
+  "Query Ridge API using QUERY, CONTENT-TYPE, QUERY-URL.
 Render results in BUFFER-NAME."
   ;; get json response from api
   (with-current-buffer buffer-name
@@ -269,17 +269,17 @@ Render results in BUFFER-NAME."
           (json-response (json-parse-buffer :object-type 'alist)))
       (erase-buffer)
       (insert
-       (cond ((or (equal search-type "org") (equal search-type "music")) (ridge--extract-entries-as-org json-response query))
-             ((equal search-type "markdown") (ridge--extract-entries-as-markdown json-response query))
-             ((equal search-type "ledger") (ridge--extract-entries-as-ledger json-response query))
-             ((equal search-type "image") (ridge--extract-entries-as-images json-response query))
+       (cond ((or (equal content-type "org") (equal content-type "music")) (ridge--extract-entries-as-org json-response query))
+             ((equal content-type "markdown") (ridge--extract-entries-as-markdown json-response query))
+             ((equal content-type "ledger") (ridge--extract-entries-as-ledger json-response query))
+             ((equal content-type "image") (ridge--extract-entries-as-images json-response query))
              (t (format "%s" json-response))))
-      (cond ((equal search-type "org") (org-mode))
-            ((equal search-type "markdown") (markdown-mode))
-            ((equal search-type "ledger") (beancount-mode))
-            ((equal search-type "music") (progn (org-mode)
+      (cond ((equal content-type "org") (org-mode))
+            ((equal content-type "markdown") (markdown-mode))
+            ((equal content-type "ledger") (beancount-mode))
+            ((equal content-type "music") (progn (org-mode)
                                                 (org-music-mode)))
-            ((equal search-type "image") (progn (shr-render-region (point-min) (point-max))
+            ((equal content-type "image") (progn (shr-render-region (point-min) (point-max))
                                                 (goto-char (point-min))))
             (t (fundamental-mode))))
     (read-only-mode t)))
@@ -290,7 +290,7 @@ Render results in BUFFER-NAME."
   (let* ((rerank-str (cond (rerank "true") (t "false")))
          (ridge-buffer-name (get-buffer-create ridge--buffer-name))
          (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-api-query query ridge--search-type rerank-str)))
+         (query-url (ridge--construct-api-query query ridge--content-type rerank-str)))
     ;; Query ridge API only when user in ridge minibuffer and non-empty query
     ;; Prevents querying if
     ;;   1. user hasn't started typing query
@@ -311,7 +311,7 @@ Render results in BUFFER-NAME."
           (message "Ridge: Rerank Results"))
         (ridge--query-api-and-render-results
          query
-         ridge--search-type
+         ridge--content-type
          query-url
          ridge-buffer-name))))))
 
@@ -359,15 +359,15 @@ Render results in BUFFER-NAME."
   :argument-format "--content-type=%s"
   :argument-regexp ".+"
   ;; set content type to last used or based on current buffer or to default
-  :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--search-type (ridge--buffer-name-to-search-type (buffer-name))))))
+  :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
   ;; dynamically set choices to content types enabled on ridge backend
   :choices (mapcar #'symbol-name (ridge--get-enabled-content-types)))
 
 (transient-define-suffix ridge--search (&optional args)
   (interactive (list (transient-args transient-current-command)))
     (progn
-      ;; set search type to last used or based on current buffer or to default
-      (setq ridge--search-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-search-type (buffer-name))))
+      ;; set content type to last used or based on current buffer or to default
+      (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
       ;; set results count to last used or to default
       (setq ridge-results-count (or (transient-arg-value "--results-count=" args) ridge-results-count))
       ;; trigger incremental search
@@ -386,13 +386,13 @@ Render results in BUFFER-NAME."
   "Natural Search for QUERY on your personal notes, transactions, music and images."
   (interactive "s🦅Ridge: ")
   (let* ((rerank "true")
-         (default-type (ridge--buffer-name-to-search-type (buffer-name)))
-         (search-type (completing-read "Type: " '("org" "markdown" "ledger" "music" "image") nil t default-type))
-         (query-url (ridge--construct-api-query query search-type rerank))
-         (buffer-name (get-buffer-create (format "*%s (q:%s t:%s)*" ridge--buffer-name query search-type))))
+         (default-content-type (ridge--buffer-name-to-content-type (buffer-name)))
+         (content-type (completing-read "Type: " '("org" "markdown" "ledger" "music" "image") nil t default-content-type))
+         (query-url (ridge--construct-api-query query content-type rerank))
+         (buffer-name (get-buffer-create (format "*%s (q:%s t:%s)*" ridge--buffer-name query content-type))))
     (ridge--query-api-and-render-results
         query
-        search-type
+        content-type
         query-url
         buffer-name)
     (switch-to-buffer buffer-name)))
