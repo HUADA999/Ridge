@@ -76,13 +76,14 @@
   :type '(choice (const "org")
                  (const "markdown")
                  (const "ledger")
+                 (const "image")
                  (const "music")))
 
 (defvar ridge--minibuffer-window nil
-  "Minibuffer window being used by user to enter query.")
+  "Minibuffer window used to enter query.")
 
 (defconst ridge--query-prompt "🦅Ridge: "
-  "Query prompt shown to user in the minibuffer.")
+  "Query prompt shown in the minibuffer.")
 
 (defconst ridge--buffer-name "*🦅Ridge*"
   "Name of buffer to show results from Ridge.")
@@ -97,7 +98,7 @@
 NO-PAGING FILTER))
 
 (defun ridge--keybindings-info-message ()
-  "Show available ridge keybindings in-context, when user invokes Ridge."
+  "Show available ridge keybindings in-context, when ridge invoked."
   (let ((enabled-content-types (ridge--get-enabled-content-types)))
     (concat
      "
@@ -110,7 +111,7 @@ NO-PAGING FILTER))
      (when (member 'ledger enabled-content-types)
        "C-x l  | ledger\n")
      (when (member 'image enabled-content-types)
-       "C-x i  | images\n")
+       "C-x i  | image\n")
      (when (member 'music enabled-content-types)
        "C-x M  | music\n"))))
 
