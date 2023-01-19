@@ -421,7 +421,8 @@ Render results in BUFFER-NAME."
     ("-f" "Force Update" "--force-update")]]
   [["Act"
     ("s" "Search" ridge--search-command)
-    ("u" "Update" ridge--update-command)]])
+    ("u" "Update" ridge--update-command)
+    ("q" "Quit" transient-quit-one)]])
 
 
 ;; ----------
