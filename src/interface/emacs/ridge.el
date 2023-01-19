@@ -50,6 +50,11 @@
 (require 'json)
 (require 'transient)
 
+
+;; -------------------------
+;; Ridge Static Configuration
+;; -------------------------
+
 (defcustom ridge-server-url "http://localhost:8000"
   "Location of Ridge API server."
   :group 'ridge
@@ -79,6 +84,11 @@
                  (const "image")
                  (const "music")))
 
+
+;; --------------------------
+;; Ridge Dynamic Configuration
+;; --------------------------
+
 (defvar ridge--minibuffer-window nil
   "Minibuffer window used to enter query.")
 
@@ -105,7 +115,7 @@ NO-PAGING FILTER))
      Set Content Type
 -------------------------\n"
      (when (member 'markdown enabled-content-types)
-         "C-x m  | markdown\n")
+       "C-x m  | markdown\n")
      (when (member 'org enabled-content-types)
        "C-x o  | org-mode\n")
      (when (member 'ledger enabled-content-types)
@@ -149,6 +159,11 @@ Use `which-key` if available, else display simple message in echo area"
                                 (symbol-value 'ridge--keymap)
                                 nil t t))
     (message "%s" (ridge--keybindings-info-message))))
+
+
+;; -----------------------------------------------
+;; Extract and Render Entries of each Content Type
+;; -----------------------------------------------
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert JSON-RESPONSE, QUERY from API to markdown entries."
@@ -232,6 +247,11 @@ Use `which-key` if available, else display simple message in echo area"
      ((and (member 'markdown enabled-content-types) (or (equal file-extension "markdown") (equal file-extension "md"))) "markdown")
      (t ridge-default-content-type))))
 
+
+;; --------------
+;; Query Ridge API
+;; --------------
+
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
   (let ((config-url (format "%s/api/config/data" ridge-server-url))
@@ -284,6 +304,10 @@ Render results in BUFFER-NAME."
             (t (fundamental-mode))))
     (read-only-mode t)))
 
+
+;; ------------------
+;; Incremental Search
+;; ------------------
 
 (defun ridge--incremental-search (&optional rerank)
   "Perform Incremental Search on Ridge. Allow optional RERANK of results."
@@ -354,6 +378,11 @@ Render results in BUFFER-NAME."
           (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
       (read-string ridge--query-prompt))))
 
+
+;; ---------
+;; Ridge Menu
+;; ---------
+
 (transient-define-argument ridge--content-type-switch ()
   :class 'transient-switches
   :argument-format "--content-type=%s"
@@ -363,7 +392,7 @@ Render results in BUFFER-NAME."
   ;; dynamically set choices to content types enabled on ridge backend
   :choices (mapcar #'symbol-name (ridge--get-enabled-content-types)))
 
-(transient-define-suffix ridge--search (&optional args)
+(transient-define-suffix ridge--search-command (&optional args)
   (interactive (list (transient-args transient-current-command)))
     (progn
       ;; set content type to last used or based on current buffer or to default
@@ -373,19 +402,17 @@ Render results in BUFFER-NAME."
       ;; trigger incremental search
       (call-interactively #'ridge-incremental)))
 
-(transient-define-suffix ridge--update (&optional args)
+(transient-define-suffix ridge--update-command (&optional args)
+  "Call ridge API to update index of specified content type."
   (interactive (list (transient-args transient-current-command)))
   (let* ((force-update (if (member "--force-update" args) "true" "false"))
          (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-         (config-url (format "%s/api/update?t=%s&force=%s" ridge-server-url content-type force-update))
+         (update-url (format "%s/api/update?t=%s&force=%s" ridge-server-url content-type force-update))
          (url-request-method "GET"))
-    ;; Call ridge API to update content type
-    (url-retrieve
-     config-url
-     (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " ""))))))
+    (url-retrieve update-url (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " ""))))))
 
-;;;###autoload
-(transient-define-prefix ridge ()
+(transient-define-prefix ridge-menu ()
+  "Create Ridge Menu to Configure and Execute Commands."
   [["Set"
     ("t" "Content Type" ridge--content-type-switch)]
    ["Set Search"
@@ -393,24 +420,19 @@ Render results in BUFFER-NAME."
    ["Set Update"
     ("-f" "Force Update" "--force-update")]]
   [["Act"
-    ("s" "Search" ridge--search)
-    ("u" "Update" ridge--update)]])
+    ("s" "Search" ridge--search-command)
+    ("u" "Update" ridge--update-command)]])
+
+
+;; ----------
+;; Entrypoint
+;; ----------
 
 ;;;###autoload
-(defun ridge-simple (query)
-  "Natural Search for QUERY on your personal notes, transactions, music and images."
-  (interactive "s🦅Ridge: ")
-  (let* ((rerank "true")
-         (default-content-type (ridge--buffer-name-to-content-type (buffer-name)))
-         (content-type (completing-read "Type: " '("org" "markdown" "ledger" "music" "image") nil t default-content-type))
-         (query-url (ridge--construct-api-query query content-type rerank))
-         (buffer-name (get-buffer-create (format "*%s (q:%s t:%s)*" ridge--buffer-name query content-type))))
-    (ridge--query-api-and-render-results
-        query
-        content-type
-        query-url
-        buffer-name)
-    (switch-to-buffer buffer-name)))
+(defun ridge ()
+  "Natural, Incremental Search for your personal notes, transactions and images."
+  (interactive)
+  (ridge-menu))
 
 (provide 'ridge)
 
