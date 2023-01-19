@@ -373,13 +373,28 @@ Render results in BUFFER-NAME."
       ;; trigger incremental search
       (call-interactively #'ridge-incremental)))
 
+(transient-define-suffix ridge--update (&optional args)
+  (interactive (list (transient-args transient-current-command)))
+  (let* ((force-update (if (member "--force-update" args) "true" "false"))
+         (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
+         (config-url (format "%s/api/update?t=%s&force=%s" ridge-server-url content-type force-update))
+         (url-request-method "GET"))
+    ;; Call ridge API to update content type
+    (url-retrieve
+     config-url
+     (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " ""))))))
 
 ;;;###autoload
 (transient-define-prefix ridge ()
   [["Set"
-    ("t" "Content Type" ridge--content-type-switch)
-    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))]]
-  [["Act" ("s" "Search" ridge--search)]])
+    ("t" "Content Type" ridge--content-type-switch)]
+   ["Set Search"
+    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))]
+   ["Set Update"
+    ("-f" "Force Update" "--force-update")]]
+  [["Act"
+    ("s" "Search" ridge--search)
+    ("u" "Update" ridge--update)]])
 
 ;;;###autoload
 (defun ridge-simple (query)
