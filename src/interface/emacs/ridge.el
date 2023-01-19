@@ -390,7 +390,7 @@ Render results in BUFFER-NAME."
   ;; set content type to last used or based on current buffer or to default
   :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
   ;; dynamically set choices to content types enabled on ridge backend
-  :choices (mapcar #'symbol-name (ridge--get-enabled-content-types)))
+  :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("org" "markdown" "ledger" "music" "image")))
 
 (transient-define-suffix ridge--search-command (&optional args)
   (interactive (list (transient-args transient-current-command)))
