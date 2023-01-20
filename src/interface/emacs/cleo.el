@@ -50,7 +50,7 @@
 (require 'json)
 (require 'transient)
 
-
+
 ;; -------------------------
 ;; Ridge Static Configuration
 ;; -------------------------
@@ -84,7 +84,7 @@
                  (const "image")
                  (const "music")))
 
-
+
 ;; --------------------------
 ;; Ridge Dynamic Configuration
 ;; --------------------------
@@ -160,7 +160,7 @@ Use `which-key` if available, else display simple message in echo area"
                                 nil t t))
     (message "%s" (ridge--keybindings-info-message))))
 
-
+
 ;; -----------------------------------------------
 ;; Extract and Render Entries of each Content Type
 ;; -----------------------------------------------
@@ -247,7 +247,7 @@ Use `which-key` if available, else display simple message in echo area"
      ((and (member 'markdown enabled-content-types) (or (equal file-extension "markdown") (equal file-extension "md"))) "markdown")
      (t ridge-default-content-type))))
 
-
+
 ;; --------------
 ;; Query Ridge API
 ;; --------------
@@ -304,7 +304,7 @@ Render results in BUFFER-NAME."
             (t (fundamental-mode))))
     (read-only-mode t)))
 
-
+
 ;; ------------------
 ;; Incremental Search
 ;; ------------------
@@ -379,6 +379,7 @@ Render results in BUFFER-NAME."
       (read-string ridge--query-prompt))))
 
 
+
 ;; ---------
 ;; Ridge Menu
 ;; ---------
@@ -424,7 +425,7 @@ Render results in BUFFER-NAME."
     ("u" "Update" ridge--update-command)
     ("q" "Quit" transient-quit-one)]])
 
-
+
 ;; ----------
 ;; Entrypoint
 ;; ----------
