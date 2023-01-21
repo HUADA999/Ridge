@@ -275,9 +275,8 @@ Use `which-key` if available, else display simple message in echo area"
         (encoded-query (url-hexify-string query)))
     (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query content-type rerank ridge-results-count)))
 
-(defun ridge--query-api-and-render-results (query content-type query-url buffer-name)
-  "Query Ridge API using QUERY, CONTENT-TYPE, QUERY-URL.
-Render results in BUFFER-NAME."
+(defun ridge--query-api-and-render-results (query-url content-type query buffer-name)
+  "Query Ridge QUERY-URL. Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; get json response from api
   (with-current-buffer buffer-name
     (let ((inhibit-read-only t)
@@ -335,9 +334,9 @@ Render results in BUFFER-NAME."
           (setq ridge--rerank t)
           (message "Ridge: Rerank Results"))
         (ridge--query-api-and-render-results
-         query
-         ridge--content-type
          query-url
+         ridge--content-type
+         query
          ridge-buffer-name))))))
 
 (defun ridge--delete-open-network-connections-to-server ()
@@ -438,9 +437,9 @@ Render results in BUFFER-NAME."
          (buffer-name (get-buffer-create ridge--buffer-name)))
     (progn
       (ridge--query-api-and-render-results
-       query-title
-       content-type
        query-url
+       content-type
+       query-title
        buffer-name)
       (switch-to-buffer buffer-name)
       (goto-char (point-min)))))
