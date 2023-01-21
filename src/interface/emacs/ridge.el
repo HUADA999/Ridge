@@ -49,8 +49,9 @@
 (require 'url)
 (require 'json)
 (require 'transient)
+(require 'outline)
 
-
+
 ;; -------------------------
 ;; Ridge Static Configuration
 ;; -------------------------
@@ -84,7 +85,7 @@
                  (const "image")
                  (const "music")))
 
-
+
 ;; --------------------------
 ;; Ridge Dynamic Configuration
 ;; --------------------------
@@ -160,7 +161,7 @@ Use `which-key` if available, else display simple message in echo area"
                                 nil t t))
     (message "%s" (ridge--keybindings-info-message))))
 
-
+
 ;; -----------------------------------------------
 ;; Extract and Render Entries of each Content Type
 ;; -----------------------------------------------
@@ -247,7 +248,7 @@ Use `which-key` if available, else display simple message in echo area"
      ((and (member 'markdown enabled-content-types) (or (equal file-extension "markdown") (equal file-extension "md"))) "markdown")
      (t ridge-default-content-type))))
 
-
+
 ;; --------------
 ;; Query Ridge API
 ;; --------------
@@ -274,9 +275,8 @@ Use `which-key` if available, else display simple message in echo area"
         (encoded-query (url-hexify-string query)))
     (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query content-type rerank ridge-results-count)))
 
-(defun ridge--query-api-and-render-results (query content-type query-url buffer-name)
-  "Query Ridge API using QUERY, CONTENT-TYPE, QUERY-URL.
-Render results in BUFFER-NAME."
+(defun ridge--query-api-and-render-results (query-url content-type query buffer-name)
+  "Query Ridge QUERY-URL. Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; get json response from api
   (with-current-buffer buffer-name
     (let ((inhibit-read-only t)
@@ -304,7 +304,7 @@ Render results in BUFFER-NAME."
             (t (fundamental-mode))))
     (read-only-mode t)))
 
-
+
 ;; ------------------
 ;; Incremental Search
 ;; ------------------
@@ -334,9 +334,9 @@ Render results in BUFFER-NAME."
           (setq ridge--rerank t)
           (message "Ridge: Rerank Results"))
         (ridge--query-api-and-render-results
-         query
-         ridge--content-type
          query-url
+         ridge--content-type
+         query
          ridge-buffer-name))))))
 
 (defun ridge--delete-open-network-connections-to-server ()
@@ -378,7 +378,73 @@ Render results in BUFFER-NAME."
           (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
       (read-string ridge--query-prompt))))
 
+
+;; --------------
+;; Similar Search
+;; --------------
 
+(defun ridge--get-current-outline-entry-text ()
+  "Get text under current outline section."
+  (with-current-buffer (current-buffer)
+    ;; jump to cursor in current buffer
+    (goto-char (point))
+    ;; trim leading whitespaces from text
+    (replace-regexp-in-string
+     "^[ \t\n]*" ""
+     ;; trim trailing whitespaces from text
+     (replace-regexp-in-string
+      "[ \t\n]*$" ""
+      ;; get text of current outline entry
+      (buffer-substring-no-properties
+       (save-excursion (outline-previous-heading) (point))
+       (save-excursion (outline-next-heading) (point)))))))
+
+(defun ridge--get-current-paragraph-text ()
+  "Get text in current paragraph at point."
+  (with-current-buffer (current-buffer)
+    ;; jump to cursor in current buffer
+    (goto-char (point))
+    ;; trim leading whitespaces from text
+    (replace-regexp-in-string
+     "^[ \t\n]*" ""
+    ;; trim trailing whitespaces from text
+     (replace-regexp-in-string
+      "[ \t\n]*$" ""
+      ;; get text of current entry
+      (buffer-substring-no-properties
+       (save-excursion (backward-paragraph) (point))
+       (save-excursion (forward-paragraph) (point)))))))
+
+(defun ridge--find-similar (&optional content-type)
+  "Find items of CONTENT-TYPE in ridge index similar to text surrounding point."
+  (interactive)
+  (let* ((rerank "true")
+         ;; set content type to: specified > based on current buffer > default type
+         (content-type (or content-type (ridge--buffer-name-to-content-type (buffer-name))))
+         ;; get text surrounding current point based on the major mode context
+         (query (cond
+                 ;; get section outline derived mode like org or markdown
+                 ((or (derived-mode-p 'outline-mode) (equal major-mode 'markdown-mode))
+                  (ridge--get-current-outline-entry-text))
+                 ;; get paragraph, if in text mode
+                 (t
+                  (ridge--get-current-paragraph-text))))
+         (query-url (ridge--construct-api-query query content-type rerank))
+         ;; extract heading to show in result buffer from query
+         (query-title
+          (format "Similar to: %s"
+                  (replace-regexp-in-string "^[#\\*]* " "" (car (split-string query "\n")))))
+         (buffer-name (get-buffer-create ridge--buffer-name)))
+    (progn
+      (ridge--query-api-and-render-results
+       query-url
+       content-type
+       query-title
+       buffer-name)
+      (switch-to-buffer buffer-name)
+      (goto-char (point-min)))))
+
+
 ;; ---------
 ;; Ridge Menu
 ;; ---------
@@ -387,7 +453,7 @@ Render results in BUFFER-NAME."
   :class 'transient-switches
   :argument-format "--content-type=%s"
   :argument-regexp ".+"
-  ;; set content type to last used or based on current buffer or to default
+  ;; set content type to: last used > based on current buffer > default type
   :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
   ;; dynamically set choices to content types enabled on ridge backend
   :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("org" "markdown" "ledger" "music" "image")))
@@ -395,21 +461,34 @@ Render results in BUFFER-NAME."
 (transient-define-suffix ridge--search-command (&optional args)
   (interactive (list (transient-args transient-current-command)))
     (progn
-      ;; set content type to last used or based on current buffer or to default
+      ;; set content type to: specified > last used > based on current buffer > default type
       (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-      ;; set results count to last used or to default
+      ;; set results count to: specified > last used > to default
       (setq ridge-results-count (or (transient-arg-value "--results-count=" args) ridge-results-count))
       ;; trigger incremental search
       (call-interactively #'ridge-incremental)))
+
+(transient-define-suffix ridge--find-similar-command (&optional args)
+  "Find items similar to current item at point."
+  (interactive (list (transient-args transient-current-command)))
+    (progn
+      ;; set content type to: specified > last used > based on current buffer > default type
+      (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
+      ;; set results count to: specified > last used > to default
+      (setq ridge-results-count (or (transient-arg-value "--results-count=" args) ridge-results-count))
+      (ridge--find-similar ridge--content-type)))
 
 (transient-define-suffix ridge--update-command (&optional args)
   "Call ridge API to update index of specified content type."
   (interactive (list (transient-args transient-current-command)))
   (let* ((force-update (if (member "--force-update" args) "true" "false"))
+         ;; set content type to: specified > last used > based on current buffer > default type
          (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
          (update-url (format "%s/api/update?t=%s&force=%s" ridge-server-url content-type force-update))
          (url-request-method "GET"))
-    (url-retrieve update-url (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " ""))))))
+    (progn
+      (setq ridge--content-type content-type)
+      (url-retrieve update-url (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
 
 (transient-define-prefix ridge-menu ()
   "Create Ridge Menu to Configure and Execute Commands."
@@ -421,10 +500,11 @@ Render results in BUFFER-NAME."
     ("-f" "Force Update" "--force-update")]]
   [["Act"
     ("s" "Search" ridge--search-command)
+    ("f" "Find Similar" ridge--find-similar-command)
     ("u" "Update" ridge--update-command)
     ("q" "Quit" transient-quit-one)]])
 
-
+
 ;; ----------
 ;; Entrypoint
 ;; ----------
