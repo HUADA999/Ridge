@@ -1,7 +1,7 @@
 * Ridge Emacs 🦅
-  [[https://stable.melpa.org/#/ridge][file:https://stable.melpa.org/packages/ridge-badge.svg]] [[https://melpa.org/#/ridge][file:https://melpa.org/packages/ridge-badge.svg]] [[https://github.com/debanjum/ridge/actions/workflows/build_ridge_el.yml][https://github.com/debanjum/ridge/actions/workflows/build_ridge_el.yml/badge.svg?]]
+  [[https://stable.melpa.org/#/ridge][file:https://stable.melpa.org/packages/ridge-badge.svg]] [[https://melpa.org/#/ridge][file:https://melpa.org/packages/ridge-badge.svg]] [[https://github.com/debanjum/ridge/actions/workflows/build_ridge_el.yml][https://github.com/debanjum/ridge/actions/workflows/build_ridge_el.yml/badge.svg?]]  [[https://github.com/debanjum/ridge/actions/workflows/test_ridge_el.yml][https://github.com/debanjum/ridge/actions/workflows/test_ridge_el.yml/badge.svg?]]
  
-  /Natural language search from within Emacs using [[https://github.com/debanjum/ridge][Ridge]]/
+  /Natural, Incremental Search for your Second Brain/
 
 ** Table of Contents
   - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#features][Features]]
