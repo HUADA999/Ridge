@@ -150,6 +150,102 @@ Rule everything\n\
 \n\
 "))))
 
+
+
+;; -------------------------------------
+;; Test Helpers for Find Similar Feature
+;; -------------------------------------
+
+(ert-deftest ridge-tests--get-current-outline-entry-text ()
+  "Test get current outline-mode entry text'."
+  (with-temp-buffer
+    (insert "\
+* Become God\n\
+** Upgrade\n\
+\n\
+Penance to Immortality\n\
+** Act\n\
+\n\
+Rule everything\\n")
+    (goto-char (point-min))
+
+    ;; Test getting current entry text from cursor at start of outline heading
+    (outline-next-visible-heading 1)
+    (should
+     (equal
+      (ridge--get-current-outline-entry-text)
+      "\
+** Upgrade\n\
+\n\
+Penance to Immortality"))
+
+    ;; Test getting current entry text from cursor within outline entry
+    (forward-line)
+    (should
+     (equal
+      (ridge--get-current-outline-entry-text)
+      "\
+** Upgrade\n\
+\n\
+Penance to Immortality"))
+    ))
+
+
+(ert-deftest ridge-tests--get-current-paragraph-text ()
+  "Test get current paragraph text'."
+  (with-temp-buffer
+    (insert "\
+* Become God\n\
+** Upgrade\n\
+\n\
+Penance to Immortality\n\
+** Act\n\
+\n\
+Rule everything\n")
+    ;; Test getting current paragraph text from cursor at start of buffer
+    (goto-char (point-min))
+    (should
+     (equal
+      (ridge--get-current-paragraph-text)
+      "* Become God\n\
+** Upgrade"))
+
+    ;; Test getting current paragraph text from cursor within paragraph
+    (goto-char (point-min))
+    (forward-line 1)
+    (should
+     (equal
+      (ridge--get-current-paragraph-text)
+      "* Become God\n\
+** Upgrade"))
+
+    ;; Test getting current paragraph text from cursor at paragraph end
+    (goto-char (point-min))
+    (forward-line 2)
+    (should
+     (equal
+      (ridge--get-current-paragraph-text)
+      "* Become God\n\
+** Upgrade"))
+
+    ;; Test getting current paragraph text from cursor at start of middle paragraph
+    (goto-char (point-min))
+    (forward-line 3)
+    (should
+     (equal
+      (ridge--get-current-paragraph-text)
+      "Penance to Immortality\n\
+** Act"))
+
+    ;; Test getting current paragraph text from cursor at end of buffer
+    (goto-char (point-max))
+    (should
+     (equal
+      (ridge--get-current-paragraph-text)
+      "Rule everything"))
+    ))
+
+
 (provide 'ridge-tests)
 
 ;;; ridge-tests.el ends here
