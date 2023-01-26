@@ -49,11 +49,11 @@ export default class Ridge extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
         // Load, configure ridge server settings
-        await configureRidgeBackend(this.settings);
+        await configureRidgeBackend(this.app.vault, this.settings);
     }
 
     async saveSettings() {
-        await configureRidgeBackend(this.settings, false)
+        await configureRidgeBackend(this.app.vault, this.settings, false)
             .then(() => this.saveData(this.settings));
     }
 }
