@@ -1,16 +1,16 @@
-import { FileSystemAdapter, Notice, RequestUrlParam, request } from 'obsidian';
+import { FileSystemAdapter, Notice, RequestUrlParam, request, Vault } from 'obsidian';
 import { RidgeSetting } from 'src/settings'
 
-export function getVaultAbsolutePath(): string {
-    let adaptor = this.app.vault.adapter;
+export function getVaultAbsolutePath(vault: Vault): string {
+    let adaptor = vault.adapter;
     if (adaptor instanceof FileSystemAdapter) {
         return adaptor.getBasePath();
     }
     return '';
 }
 
-export async function configureRidgeBackend(setting: RidgeSetting, notify: boolean = true) {
-    let mdInVault = `${getVaultAbsolutePath()}/**/*.md`;
+export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting, notify: boolean = true) {
+    let mdInVault = `${getVaultAbsolutePath(vault)}/**/*.md`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
     // Check if ridge backend is configured, note if cannot connect to backend
@@ -28,7 +28,7 @@ export async function configureRidgeBackend(setting: RidgeSetting, notify: boole
     if (!setting.connectedToBackend) return;
 
     // Set index name from the path of the current vault
-    let indexName = getVaultAbsolutePath().replace(/\//g, '_').replace(/ /g, '_');
+    let indexName = getVaultAbsolutePath(vault).replace(/\//g, '_').replace(/ /g, '_');
     // Get default index directory from ridge backend
     let ridgeDefaultIndexDirectory = await request(`${ridgeConfigUrl}/default`)
         .then(response => JSON.parse(response))
