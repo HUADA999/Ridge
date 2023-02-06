@@ -44,8 +44,10 @@ https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8
 ![](https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_on_obsidian_0.2.5.png?)
 
 ## Setup
-### 1. Setup Backend
+*Note: Ensure you follow the ordering of the setup steps. Install the plugin after starting the ridge backend. This allows the plugin to configure the ridge backend.*
 
+### 1. Setup Backend
+Run below command in your terminal to install and start the ridge backend
 ```shell
 pip install ridge-assistant && ridge --no-gui
 ```
@@ -58,6 +60,8 @@ See [official docs](https://help.obsidian.md/Advanced+topics/Community+plugins#D
 ## Use
 ### Search
 Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Search* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
+
+*Note: Ensure the ridge server is running in the background before searching. Execute `ridge --no-gui` in your terminal if it is not already running*
 
 <details><summary>Query Filters</summary>
 
