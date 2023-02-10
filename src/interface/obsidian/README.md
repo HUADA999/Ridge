@@ -55,7 +55,7 @@ pip install ridge-assistant && ridge --no-gui
   1. Open [Ridge](https://obsidian.md/plugins?id=ridge) from the *Community plugins* tab in Obsidian settings panel
   2. Click *Install*, then *Enable* on the Ridge plugin page in Obsidian
 
-See [official docs](https://help.obsidian.md/Advanced+topics/Community+plugins#Discover+and+install+community+plugins) for details
+See [official Obsidian plugin docs](https://help.obsidian.md/Extending+Obsidian/Community+plugins) for details
 
 ## Use
 ### Search
