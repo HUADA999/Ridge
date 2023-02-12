@@ -44,10 +44,11 @@ https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8
 ![](https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_on_obsidian_0.2.5.png?)
 
 ## Setup
-*Note: Ensure you follow the ordering of the setup steps. Install the plugin after starting the ridge backend. This allows the plugin to configure the ridge backend.*
+- *Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
+- *Ensure you follow the ordering of the setup steps. Install the plugin after starting the ridge backend. This allows the plugin to configure the ridge backend*
 
 ### 1. Setup Backend
-Run below command in your terminal to install and start the ridge backend
+Open terminal/cmd and run below command to install and start the ridge backend
 ```shell
 pip install ridge-assistant && ridge --no-gui
 ```
