@@ -2,7 +2,7 @@
 import datetime
 
 # Internal Packages
-from src.processor.org_mode import orgnode
+from ridge.processor.org_mode import orgnode
 
 
 # Test
