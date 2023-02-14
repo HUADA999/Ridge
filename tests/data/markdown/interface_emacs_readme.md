@@ -28,7 +28,7 @@
         ;; Ridge Package for Semantic Search
         (use-package ridge
           :after org
-          :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/ridge/interface/emacs/ridge.el"))
+          :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
           :bind ("C-c s" . 'ridge))
         ```
 -   With [Quelpa](https://github.com/quelpa/quelpa#installation)

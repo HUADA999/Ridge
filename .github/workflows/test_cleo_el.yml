@@ -5,15 +5,15 @@ on:
     branches:
       - 'master'
     paths:
-      - src/ridge/interface/emacs/*.el
-      - src/ridge/interface/emacs/tests/*.el
+      - src/interface/emacs/*.el
+      - src/interface/emacs/tests/*.el
       - .github/workflows/test_ridge_el.yml
   pull_request:
     branches:
       - 'master'
     paths:
-      - src/ridge/interface/emacs/*.el
-      - src/ridge/interface/emacs/tests/*.el
+      - src/interface/emacs/*.el
+      - src/interface/emacs/tests/*.el
       - .github/workflows/test_ridge_el.yml
 
 jobs:
@@ -44,6 +44,6 @@ jobs:
                     (unless package-archive-contents (package-refresh-contents)) \
                     (unless (package-installed-p 'transient) (package-install 'transient)))" \
            -l ert \
-           -l ./src/ridge/interface/emacs/ridge.el \
-           -l ./src/ridge/interface/emacs/tests/ridge-tests.el \
+           -l ./src/interface/emacs/ridge.el \
+           -l ./src/interface/emacs/tests/ridge-tests.el \
            -f ert-run-tests-batch-and-exit

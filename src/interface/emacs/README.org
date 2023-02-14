@@ -4,19 +4,19 @@
   /Natural, Incremental Search for your Second Brain/
 
 ** Table of Contents
-  - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#features][Features]]
-  - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Interface][Interface]]
-  - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Setup][Setup]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#1-Setup-Backend][Setup Backend]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#2-Install-Ridgeel][Install Ridge.el]]
-  - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Use][Use]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Search][Search]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Find-similar-entries][Find Similar Entries]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Advanced-usage][Advanced Usage]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Ridge-menu][Ridge Menu]]
-  - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Upgrade][Upgrade]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Upgrade-Ridge-Backend][Upgrade Backend]]
-    - [[https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#Upgrade-Ridgeel][Upgrade Ridge.el]]
+  - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#features][Features]]
+  - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Interface][Interface]]
+  - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Setup][Setup]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#1-Setup-Backend][Setup Backend]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#2-Install-Ridgeel][Install Ridge.el]]
+  - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Use][Use]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Search][Search]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Find-similar-entries][Find Similar Entries]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Advanced-usage][Advanced Usage]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Ridge-menu][Ridge Menu]]
+  - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Upgrade][Upgrade]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Upgrade-Ridge-Backend][Upgrade Backend]]
+    - [[https://github.com/debanjum/ridge/tree/master/src/interface/emacs#Upgrade-Ridgeel][Upgrade Ridge.el]]
 
 ** Features
   - *Natural*: Advanced natural language understanding using Transformer based ML Models
@@ -58,7 +58,7 @@
     ;; Install Ridge Package using Straight.el
     (use-package ridge
       :after org
-      :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/ridge/interface/emacs/ridge.el"))
+      :straight (ridge :type git :host github :repo "debanjum/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
       :bind ("C-c s" . 'ridge))
   #+end_src
 
