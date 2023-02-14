@@ -5,12 +5,14 @@ export interface RidgeSetting {
     resultsCount: number;
     ridgeUrl: string;
     connectedToBackend: boolean;
+    autoConfigure: boolean;
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
     resultsCount: 6,
     ridgeUrl: 'http://localhost:8000',
     connectedToBackend: false,
+    autoConfigure: true,
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
@@ -48,6 +50,15 @@ export class RidgeSettingTab extends PluginSettingTab {
                 .setDynamicTooltip()
                 .onChange(async (value) => {
                     this.plugin.settings.resultsCount = value;
+                    await this.plugin.saveSettings();
+                }));
+        new Setting(containerEl)
+            .setName('Auto Configure')
+            .setDesc('Automatically configure the Ridge backend')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.autoConfigure)
+                .onChange(async (value) => {
+                    this.plugin.settings.autoConfigure = value;
                     await this.plugin.saveSettings();
                 }));
         let indexVaultSetting = new Setting(containerEl);

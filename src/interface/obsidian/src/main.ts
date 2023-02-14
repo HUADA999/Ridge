@@ -48,12 +48,16 @@ export default class Ridge extends Plugin {
         // Load ridge obsidian plugin settings
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-        // Load, configure ridge server settings
-        await configureRidgeBackend(this.app.vault, this.settings);
+        if (this.settings.autoConfigure) {
+            // Load, configure ridge server settings
+            await configureRidgeBackend(this.app.vault, this.settings);
+        }
     }
 
     async saveSettings() {
-        await configureRidgeBackend(this.app.vault, this.settings, false)
-            .then(() => this.saveData(this.settings));
-    }
+        if (this.settings.autoConfigure) {
+            await configureRidgeBackend(this.app.vault, this.settings, false);
+        }
+        this.saveData(this.settings);
+   }
 }
