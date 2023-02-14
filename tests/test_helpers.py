@@ -1,4 +1,4 @@
-from src.utils import helpers
+from ridge.utils import helpers
 
 def test_get_from_null_dict():
     # null handling

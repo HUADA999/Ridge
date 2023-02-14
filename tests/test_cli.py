@@ -3,8 +3,8 @@ from pathlib import Path
 from random import random
 
 # Internal Packages
-from src.utils.cli import cli
-from src.utils.helpers import resolve_absolute_path
+from ridge.utils.cli import cli
+from ridge.utils.helpers import resolve_absolute_path
 
 
 # Test

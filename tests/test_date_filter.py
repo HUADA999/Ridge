@@ -4,8 +4,8 @@ from datetime import datetime
 from math import inf
 
 # Application Packages
-from src.search_filter.date_filter import DateFilter
-from src.utils.rawconfig import Entry
+from ridge.search_filter.date_filter import DateFilter
+from ridge.utils.rawconfig import Entry
 
 
 def test_date_filter():

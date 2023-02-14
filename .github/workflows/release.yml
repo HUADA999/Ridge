@@ -66,7 +66,7 @@ jobs:
           # Create disk image with the app
           create-dmg \
             --volname "Ridge" \
-            --volicon "src/interface/web/assets/icons/favicon.icns" \
+            --volicon "src/ridge/interface/web/assets/icons/favicon.icns" \
             --window-pos 200 120 \
             --window-size 600 300 \
             --icon-size 100 \
@@ -92,7 +92,7 @@ jobs:
           # Copy app files into expected output directory structure
           mkdir -p package/opt package/usr/share/applications package/usr/share/icons/hicolor/128x128/apps
           cp -r dist/Ridge package/opt/Ridge
-          cp src/interface/web/assets/icons/favicon-128x128.png package/usr/share/icons/hicolor/128x128/apps/Ridge.png
+          cp src/ridge/interface/web/assets/icons/favicon-128x128.png package/usr/share/icons/hicolor/128x128/apps/Ridge.png
           cp Ridge.desktop package/usr/share/applications
 
           # Fix permissions to be usable by non-root users

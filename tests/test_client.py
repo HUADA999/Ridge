@@ -8,13 +8,13 @@ from urllib.parse import quote
 from fastapi.testclient import TestClient
 
 # Internal Packages
-from src.main import app
-from src.utils.state import model, config
-from src.search_type import text_search, image_search
-from src.utils.rawconfig import ContentConfig, SearchConfig
-from src.processor.org_mode.org_to_jsonl import OrgToJsonl
-from src.search_filter.word_filter import WordFilter
-from src.search_filter.file_filter import FileFilter
+from ridge.main import app
+from ridge.utils.state import model, config
+from ridge.search_type import text_search, image_search
+from ridge.utils.rawconfig import ContentConfig, SearchConfig
+from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
+from ridge.search_filter.word_filter import WordFilter
+from ridge.search_filter.file_filter import FileFilter
 
 
 # Arrange
