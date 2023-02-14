@@ -1,6 +1,6 @@
 # Application Packages
-from src.search_filter.word_filter import WordFilter
-from src.utils.rawconfig import Entry
+from ridge.search_filter.word_filter import WordFilter
+from ridge.utils.rawconfig import Entry
 
 
 def test_no_word_filter():

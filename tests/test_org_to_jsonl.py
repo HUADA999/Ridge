@@ -2,10 +2,10 @@
 import json
 
 # Internal Packages
-from src.processor.org_mode.org_to_jsonl import OrgToJsonl
-from src.processor.text_to_jsonl import TextToJsonl
-from src.utils.helpers import is_none_or_empty
-from src.utils.rawconfig import Entry
+from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
+from ridge.processor.text_to_jsonl import TextToJsonl
+from ridge.utils.helpers import is_none_or_empty
+from ridge.utils.rawconfig import Entry
 
 
 def test_configure_heading_entry_to_jsonl(tmp_path):

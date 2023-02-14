@@ -6,8 +6,8 @@
 *Allow natural language search on user content like notes, images,
 transactions using transformer ML models*
 
-User can interface with Ridge via [Web](./src/interface/web/index.html),
-[Emacs](./src/interface/emacs/ridge.el) or the API. All search is done
+User can interface with Ridge via [Web](./src/ridge/interface/web/index.html),
+[Emacs](./src/ridge/interface/emacs/ridge.el) or the API. All search is done
 locally[\*](https://github.com/debanjum/ridge#miscellaneous)
 
 ## Demo
@@ -47,8 +47,8 @@ just generating embeddings*
     -   [Update Index](http://localhost:8000/api/update?t=ledger)
     -   [Configure Application](https://localhost:8000/ui)
 -   **Ridge via Emacs**
-    -   [Install](https://github.com/debanjum/ridge/tree/master/src/interface/emacs#installation)
-        [ridge.el](./src/interface/emacs/ridge.el)
+    -   [Install](https://github.com/debanjum/ridge/tree/master/src/ridge/interface/emacs#installation)
+        [ridge.el](./src/ridge/interface/emacs/ridge.el)
     -   Run `M-x ridge <user-query>`
 
 ## Run Unit tests
@@ -118,7 +118,7 @@ docker-compose build --pull
     images, transactions etc specified in config YAML
 
     ``` shell
-    python3 -m src.main -c=config/ridge_sample.yml -vv
+    python3 -m src.ridge.main -c=config/ridge_sample.yml -vv
     ```
 
 ### Upgrade On Local Machine
