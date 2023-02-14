@@ -6,10 +6,10 @@ from pathlib import Path
 import pytest
 
 # Internal Packages
-from src.utils.state import model
-from src.search_type import text_search
-from src.utils.rawconfig import ContentConfig, SearchConfig, TextContentConfig
-from src.processor.org_mode.org_to_jsonl import OrgToJsonl
+from ridge.utils.state import model
+from ridge.search_type import text_search
+from ridge.utils.rawconfig import ContentConfig, SearchConfig, TextContentConfig
+from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
 
 
 # Test

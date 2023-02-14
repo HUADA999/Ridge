@@ -1,6 +1,6 @@
 # Application Packages
-from src.search_filter.file_filter import FileFilter
-from src.utils.rawconfig import Entry
+from ridge.search_filter.file_filter import FileFilter
+from ridge.utils.rawconfig import Entry
 
 
 def test_no_file_filter():

@@ -7,13 +7,13 @@ on:
     branches:
       - 'master'
     paths:
-      - src/interface/emacs/*.el
+      - src/ridge/interface/emacs/*.el
       - .github/workflows/build_ridge_el.yml
   pull_request:
     branches:
       - 'master'
     paths:
-      - src/interface/emacs/*.el
+      - src/ridge/interface/emacs/*.el
       - .github/workflows/build_ridge_el.yml
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
     - name: Run
       env:
         # Ridge recipe from https://github.com/melpa/melpa/pull/8321/files
-        RECIPE: (ridge :fetcher github :repo "debanjum/ridge" :files ("src/interface/emacs/*.el"))
+        RECIPE: (ridge :fetcher github :repo "debanjum/ridge" :files ("src/ridge/interface/emacs/*.el"))
         EXIST_OK: true
         LOCAL_REPO: ${{ github.workspace }}
       run: echo $GITHUB_REF && make -C ~/melpazoid
