@@ -1,5 +1,5 @@
 ![](https://github.com/debanjum/ridge/actions/workflows/test.yml/badge.svg)
-![](https://github.com/debanjum/ridge/actions/workflows/build.yml/badge.svg)
+![](https://github.com/debanjum/ridge/actions/workflows/dockerize.yml/badge.svg)
 
 # Ridge
 
