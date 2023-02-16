@@ -8,14 +8,14 @@ on:
       - 'master'
     paths:
       - src/ridge/**
-      - setup.py
+      - pyproject.toml
       - .github/workflows/pypi.yml
   pull_request:
     branches:
       - 'master'
     paths:
       - src/ridge/**
-      - setup.py
+      - pyproject.toml
       - .github/workflows/pypi.yml
 
 jobs:
