@@ -9,7 +9,7 @@ on:
     paths:
       - src/ridge/**
       - config/**
-      - setup.py
+      - pyproject.toml
       - Dockerfile
       - docker-compose.yml
       - .github/workflows/dockerize.yml
