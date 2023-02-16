@@ -73,3 +73,18 @@ include = ["src/ridge"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ridge"]
+
+[tool.mypy]
+files = "src/ridge"
+pretty = true
+strict_optional = false
+ignore_missing_imports = true
+install_types = true
+non_interactive = true
+show_error_codes = true
+warn_unused_ignores = true
+exclude = [
+    "src/ridge/interface/desktop/main_window.py",
+    "src/ridge/interface/desktop/file_browser.py",
+    "src/ridge/interface/desktop/system_tray.py",
+]
