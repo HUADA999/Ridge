@@ -64,7 +64,8 @@ ridge = "ridge.main:run"
 
 [project.optional-dependencies]
 test = [
-  "pytest == 7.1.2",
+  "pytest >= 7.1.2",
+  "black >= 23.1.0",
 ]
 dev = ["ridge-assistant[test]"]
 
@@ -88,3 +89,6 @@ exclude = [
     "src/ridge/interface/desktop/file_browser.py",
     "src/ridge/interface/desktop/system_tray.py",
 ]
+
+[tool.black]
+line-length = 120
