@@ -17,7 +17,7 @@ from ridge.processor.conversation.gpt import (
     understand,
     summarize,
 )
-from ridge.utils.config import SearchType
+from ridge.utils.state import SearchType
 from ridge.utils.helpers import get_from_dict, resolve_absolute_path
 from ridge.utils import state
 

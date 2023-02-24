@@ -8,6 +8,7 @@ import torch
 from pathlib import Path
 
 # Internal Packages
+from ridge.utils import config as utils_config
 from ridge.utils.config import SearchModels, ProcessorConfigModel
 from ridge.utils.helpers import LRU
 from ridge.utils.rawconfig import FullConfig
@@ -23,6 +24,7 @@ port: int = None
 cli_args: List[str] = None
 query_cache = LRU()
 search_index_lock = threading.Lock()
+SearchType = utils_config.SearchType
 
 if torch.cuda.is_available():
     # Use CUDA GPU
