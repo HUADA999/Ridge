@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 
 # Internal Packages
 from ridge.main import app
+from ridge.configure import configure_routes
 from ridge.utils.state import model, config
 from ridge.search_type import text_search, image_search
 from ridge.utils.rawconfig import ContentConfig, SearchConfig
@@ -19,6 +20,7 @@ from ridge.search_filter.file_filter import FileFilter
 
 # Arrange
 # ----------------------------------------------------------------------------------------------------
+configure_routes(app)
 client = TestClient(app)
 
 

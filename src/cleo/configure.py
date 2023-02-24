@@ -6,6 +6,7 @@ from enum import Enum
 
 # External Packages
 import schedule
+from fastapi.staticfiles import StaticFiles
 
 # Internal Packages
 from ridge.processor.ledger.beancount_to_jsonl import BeancountToJsonl
@@ -13,8 +14,8 @@ from ridge.processor.jsonl.jsonl_to_jsonl import JsonlToJsonl
 from ridge.processor.markdown.markdown_to_jsonl import MarkdownToJsonl
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
 from ridge.search_type import image_search, text_search
+from ridge.utils import constants, state
 from ridge.utils.config import SearchType, SearchModels, ProcessorConfigModel, ConversationProcessorConfigModel
-from ridge.utils import state
 from ridge.utils.helpers import LRU, resolve_absolute_path, merge_dicts
 from ridge.utils.rawconfig import FullConfig, ProcessorConfig
 from ridge.search_filter.date_filter import DateFilter
@@ -46,6 +47,18 @@ def configure_server(args, required=False):
     state.SearchType = configure_search_types(state.config)
     state.model = configure_search(state.model, state.config, args.regenerate)
     state.search_index_lock.release()
+
+
+def configure_routes(app):
+    # Import APIs here to setup search types before while configuring server
+    from ridge.routers.api import api
+    from ridge.routers.api_beta import api_beta
+    from ridge.routers.web_client import web_client
+
+    app.mount("/static", StaticFiles(directory=constants.web_directory), name="static")
+    app.include_router(api, prefix="/api")
+    app.include_router(api_beta, prefix="/api/beta")
+    app.include_router(web_client)
 
 
 @schedule.repeat(schedule.every(1).hour)
