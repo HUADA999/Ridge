@@ -12,9 +12,8 @@ from ridge.configure import configure_processor, configure_search
 from ridge.search_type import image_search, text_search
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import FullConfig, SearchResponse
-from ridge.utils.config import SearchType
+from ridge.utils.state import SearchType
 from ridge.utils import state, constants
-
 
 # Initialize Router
 api = APIRouter()
