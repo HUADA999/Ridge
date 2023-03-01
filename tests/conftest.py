@@ -1,9 +1,12 @@
 # External Packages
 from copy import deepcopy
+from fastapi.testclient import TestClient
 from pathlib import Path
 import pytest
 
 # Internal Packages
+from ridge.main import app
+from ridge.configure import configure_routes, configure_search_types
 from ridge.search_type import image_search, text_search
 from ridge.utils.helpers import resolve_absolute_path
 from ridge.utils.rawconfig import (
@@ -14,6 +17,8 @@ from ridge.utils.rawconfig import (
     TextSearchConfig,
     ImageSearchConfig,
 )
+from ridge.utils import state
+from ridge.processor.jsonl.jsonl_to_jsonl import JsonlToJsonl
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
 from ridge.search_filter.date_filter import DateFilter
 from ridge.search_filter.word_filter import WordFilter
@@ -64,14 +69,38 @@ def content_config(tmp_path_factory, search_config: SearchConfig):
     content_config.org = TextContentConfig(
         input_files=None,
         input_filter=["tests/data/org/*.org"],
-        compressed_jsonl=content_dir.joinpath("notes.jsonl.gz"),
+        compressed_jsonl=content_dir.joinpath("notes.jsonl"),
         embeddings_file=content_dir.joinpath("note_embeddings.pt"),
     )
 
     filters = [DateFilter(), WordFilter(), FileFilter()]
     text_search.setup(OrgToJsonl, content_config.org, search_config.asymmetric, regenerate=False, filters=filters)
 
+    content_config.plugins = {
+        "plugin1": TextContentConfig(
+            input_files=[content_dir.joinpath("notes.jsonl")],
+            input_filter=None,
+            compressed_jsonl=content_dir.joinpath("plugin.jsonl.gz"),
+            embeddings_file=content_dir.joinpath("plugin_embeddings.pt"),
+        )
+    }
+
+    filters = [DateFilter(), WordFilter(), FileFilter()]
+    text_search.setup(
+        JsonlToJsonl, content_config.plugins["plugin1"], search_config.asymmetric, regenerate=False, filters=filters
+    )
+
     return content_config
+
+
+@pytest.fixture(scope="session")
+def client(content_config: ContentConfig, search_config: SearchConfig):
+    state.config.content_type = content_config
+    state.config.search_type = search_config
+    state.SearchType = configure_search_types(state.config)
+
+    configure_routes(app)
+    return TestClient(app)
 
 
 @pytest.fixture(scope="function")
