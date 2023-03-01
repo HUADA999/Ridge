@@ -33,7 +33,7 @@ jobs:
         with:
           version: ${{ matrix.emacs_version }}
       - uses: actions/checkout@v3
-      - name: Test Ridge.el
+      - name: 🧪 Test Ridge.el
         run: |
            # Run ERT tests on ridge.el
            emacs -batch \
