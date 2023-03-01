@@ -52,10 +52,8 @@ def run():
 
     # Set Logging Level
     if args.verbose == 0:
-        logger.setLevel(logging.WARN)
-    elif args.verbose == 1:
         logger.setLevel(logging.INFO)
-    elif args.verbose >= 2:
+    elif args.verbose >= 1:
         logger.setLevel(logging.DEBUG)
 
     # Set Log File
@@ -63,7 +61,7 @@ def run():
     fh.setLevel(logging.DEBUG)
     logger.addHandler(fh)
 
-    logger.info("Starting Ridge...")
+    logger.info("🌘 Starting Ridge")
 
     if args.no_gui:
         # Setup task scheduler
@@ -122,7 +120,6 @@ def run():
 
 
 def sigint_handler(*args):
-    print("\nShutting down Ridge...")
     QtWidgets.QApplication.quit()
 
 
@@ -135,10 +132,12 @@ def set_state(args):
 
 
 def start_server(app, host=None, port=None, socket=None):
+    logger.info("🌖 Ridge is ready to use")
     if socket:
         uvicorn.run(app, proxy_headers=True, uds=socket, log_level="debug", use_colors=True, log_config=None)
     else:
         uvicorn.run(app, host=host, port=port, log_level="debug", use_colors=True, log_config=None)
+    logger.info("🌒 Stopping Ridge")
 
 
 def poll_task_scheduler():
