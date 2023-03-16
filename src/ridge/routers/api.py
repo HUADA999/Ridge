@@ -10,7 +10,8 @@ from fastapi import HTTPException
 
 # Internal Packages
 from ridge.configure import configure_processor, configure_search
-from ridge.processor.conversation.gpt import converse, message_to_log, message_to_prompt
+from ridge.processor.conversation.gpt import converse
+from ridge.processor.conversation.utils import message_to_log, message_to_prompt
 from ridge.search_type import image_search, text_search
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import FullConfig, SearchResponse
