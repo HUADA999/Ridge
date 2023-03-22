@@ -6,7 +6,7 @@
 ;; Description: Natural, Incremental Search for your Second Brain
 ;; Keywords: search, org-mode, outlines, markdown, beancount, ledger, image
 ;; Version: 0.4.1
-;; Package-Requires: ((emacs "27.1") (transient "0.3.0"))
+;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1")
 ;; URL: https://github.com/debanjum/ridge/tree/master/src/interface/emacs
 
 ;; This file is NOT part of GNU Emacs.
@@ -50,6 +50,7 @@
 (require 'json)
 (require 'transient)
 (require 'outline)
+(require 'dash)
 (eval-when-compile (require 'subr-x)) ;; for string-trim before Emacs 28.2
 
 
@@ -99,6 +100,9 @@
 
 (defconst ridge--search-buffer-name "*🦅Ridge Search*"
   "Name of buffer to show search results from Ridge.")
+
+(defconst ridge--chat-buffer-name "*🦅Ridge Chat*"
+  "Name of chat buffer for Ridge.")
 
 (defvar ridge--content-type "org"
   "The type of content to perform search on.")
@@ -284,13 +288,15 @@ Use `which-key` if available, else display simple message in echo area"
         (mapcar 'intern)))))
 
 (defun ridge--construct-search-api-query (query content-type &optional rerank)
-  "Construct Search API Query from QUERY, CONTENT-TYPE and (optional) RERANK params."
+  "Construct Search API Query.
+Use QUERY, CONTENT-TYPE and (optional) RERANK as query params"
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
     (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query content-type rerank ridge-results-count)))
 
 (defun ridge--query-search-api-and-render-results (query-url content-type query buffer-name)
-  "Query Ridge Search with QUERY-URL. Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
+  "Query Ridge Search with QUERY-URL.
+Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; get json response from api
   (with-current-buffer buffer-name
     (let ((inhibit-read-only t)
@@ -319,6 +325,67 @@ Use `which-key` if available, else display simple message in echo area"
                                                 (goto-char (point-min))))
             (t (fundamental-mode))))
     (read-only-mode t)))
+
+
+;; ----------------
+;; Ridge Chat
+;; ----------------
+
+(defun ridge--chat ()
+  "Chat with Ridge."
+  (let ((query (read-string "Query: ")))
+    (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name)
+    (switch-to-buffer ridge--chat-buffer-name)))
+
+(defun ridge--query-chat-api-and-render-messages (query buffer-name)
+  "Send QUERY to Ridge Chat. Render the chat messages from exchange in BUFFER-NAME."
+  ;; render json response into formatted chat messages
+  (with-current-buffer (get-buffer-create buffer-name)
+    (let ((inhibit-read-only t)
+          (json-response (ridge--query-chat-api query)))
+      (goto-char (point-max))
+      (insert
+       (ridge--render-chat-message query "you")
+       (ridge--render-chat-response json-response)))
+    (progn (org-mode)
+           (visual-line-mode))
+    (read-only-mode t)))
+
+(defun ridge--query-chat-api (query)
+  "Send QUERY to Ridge Chat API."
+  (let* ((url-request-method "GET")
+         (encoded-query (url-hexify-string query))
+         (query-url (format "%s/api/chat?q=%s" ridge-server-url encoded-query)))
+    (with-temp-buffer
+      (erase-buffer)
+      (url-insert-file-contents query-url)
+      (json-parse-buffer :object-type 'alist))))
+
+(defun ridge--render-chat-message (message sender &optional receive-date)
+  "Render chat messages as `org-mode' list item.
+MESSAGE is the text of the chat message.
+SENDER is the message sender.
+RECEIVE-DATE is the message receive date."
+  (let ((emojified-by (if (equal sender "you") "🤔 You" "🦅 Ridge"))
+        (received (or receive-date (format-time-string "%H:%M %d-%m-%Y"))))
+    (format "- %s: %s\n  /%s/\n\n" emojified-by message received)))
+
+(defun ridge--generate-reference (index reference)
+  "Create `org-mode' links with REFERENCE as link and INDEX as link description."
+  (format "[[[%s][%s]]]" (format "%s" reference) (format "%s" index)))
+
+(defun ridge--render-chat-response (json-response)
+  "Render chat message using JSON-RESPONSE from Ridge Chat API."
+  (let* ((context (or (cdr (assoc 'context json-response)) ""))
+         (reference-texts (split-string context "\n\n# " t))
+         (reference-links (-map-indexed #'ridge--generate-reference reference-texts)))
+    (thread-first
+      ;; extract ridge message from API response and make it bold
+      (format "*%s*" (cdr (assoc 'response json-response)))
+      ;; append references to ridge message
+      (concat " " (string-join reference-links " "))
+      ;; Set query as heading in rendered results buffer
+      (ridge--render-chat-message "ridge"))))
 
 
 ;; ------------------
@@ -503,15 +570,20 @@ Paragraph only starts at first text after blank line."
       (setq ridge--content-type content-type)
       (url-retrieve update-url (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
 
+(transient-define-suffix ridge--chat-command (&optional args)
+  "Command to Chat with Ridge."
+  (interactive (list (transient-args transient-current-command)))
+  (ridge--chat))
+
 (transient-define-prefix ridge-menu ()
   "Create Ridge Menu to Configure and Execute Commands."
-  [["Configure General"
+  [["Configure Search"
+    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
     ("t" "Content Type" ridge--content-type-switch)]
-   ["Configure Search"
-    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))]
    ["Configure Update"
     ("-f" "Force Update" "--force-update")]]
   [["Act"
+    ("c" "Chat" ridge--chat-command)
     ("s" "Search" ridge--search-command)
     ("f" "Find Similar" ridge--find-similar-command)
     ("u" "Update" ridge--update-command)
