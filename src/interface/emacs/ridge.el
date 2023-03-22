@@ -339,19 +339,35 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
     (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name)
     (switch-to-buffer ridge--chat-buffer-name)))
 
+(defun ridge--load-chat-history (buffer-name)
+  (let ((json-response (cdr (assoc 'response (ridge--query-chat-api "")))))
+    (with-current-buffer (get-buffer-create buffer-name)
+      (erase-buffer)
+      (thread-last
+        json-response
+        ;; generate chat messages from Ridge Chat API response
+        (mapcar #'ridge--render-chat-response)
+        ;; insert chat messages into Ridge Chat Buffer
+        (mapcar #'insert))
+      (progn (org-mode)
+             (visual-line-mode)
+             (read-only-mode t)))))
+
 (defun ridge--query-chat-api-and-render-messages (query buffer-name)
   "Send QUERY to Ridge Chat. Render the chat messages from exchange in BUFFER-NAME."
   ;; render json response into formatted chat messages
-  (with-current-buffer (get-buffer-create buffer-name)
-    (let ((inhibit-read-only t)
-          (json-response (ridge--query-chat-api query)))
-      (goto-char (point-max))
-      (insert
-       (ridge--render-chat-message query "you")
-       (ridge--render-chat-response json-response)))
-    (progn (org-mode)
-           (visual-line-mode))
-    (read-only-mode t)))
+  (if (not (get-buffer buffer-name))
+      (ridge--load-chat-history buffer-name)
+    (with-current-buffer (get-buffer buffer-name)
+      (let ((inhibit-read-only t)
+            (json-response (ridge--query-chat-api query)))
+        (goto-char (point-max))
+        (insert
+         (ridge--render-chat-message query "you")
+         (ridge--render-chat-response json-response)))
+        (progn (org-mode)
+               (visual-line-mode))
+    (read-only-mode t))))
 
 (defun ridge--query-chat-api (query)
   "Send QUERY to Ridge Chat API."
@@ -383,16 +399,19 @@ RECEIVE-DATE is the message receive date."
 
 (defun ridge--render-chat-response (json-response)
   "Render chat message using JSON-RESPONSE from Ridge Chat API."
-  (let* ((context (or (cdr (assoc 'context json-response)) ""))
+  (let* ((message (cdr (or (assoc 'response json-response) (assoc 'message json-response))))
+         (sender (cdr (assoc 'by json-response)))
+         (receive-date (cdr (assoc 'created json-response)))
+         (context (or (cdr (assoc 'context json-response)) ""))
          (reference-texts (split-string context "\n\n# " t))
          (reference-links (-map-indexed #'ridge--generate-reference reference-texts)))
     (thread-first
       ;; extract ridge message from API response and make it bold
-      (format "*%s*" (cdr (assoc 'response json-response)))
+      (format "*%s*" message)
       ;; append references to ridge message
       (concat " " (string-join reference-links " "))
-      ;; Set query as heading in rendered results buffer
-      (ridge--render-chat-message "ridge"))))
+      ;; Render chat message using data obtained from API
+      (ridge--render-chat-message sender receive-date))))
 
 
 ;; ------------------
