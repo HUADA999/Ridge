@@ -97,8 +97,8 @@
 (defconst ridge--query-prompt "🦅Ridge: "
   "Query prompt shown in the minibuffer.")
 
-(defconst ridge--buffer-name "*🦅Ridge*"
-  "Name of buffer to show results from Ridge.")
+(defconst ridge--search-buffer-name "*🦅Ridge Search*"
+  "Name of buffer to show search results from Ridge.")
 
 (defvar ridge--content-type "org"
   "The type of content to perform search on.")
@@ -283,14 +283,14 @@ Use `which-key` if available, else display simple message in echo area"
         (json-parse-buffer :object-type 'alist)
         (mapcar 'intern)))))
 
-(defun ridge--construct-api-query (query content-type &optional rerank)
-  "Construct API Query from QUERY, CONTENT-TYPE and (optional) RERANK params."
+(defun ridge--construct-search-api-query (query content-type &optional rerank)
+  "Construct Search API Query from QUERY, CONTENT-TYPE and (optional) RERANK params."
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
     (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query content-type rerank ridge-results-count)))
 
-(defun ridge--query-api-and-render-results (query-url content-type query buffer-name)
-  "Query Ridge QUERY-URL. Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
+(defun ridge--query-search-api-and-render-results (query-url content-type query buffer-name)
+  "Query Ridge Search with QUERY-URL. Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; get json response from api
   (with-current-buffer buffer-name
     (let ((inhibit-read-only t)
@@ -328,9 +328,9 @@ Use `which-key` if available, else display simple message in echo area"
 (defun ridge--incremental-search (&optional rerank)
   "Perform Incremental Search on Ridge. Allow optional RERANK of results."
   (let* ((rerank-str (cond (rerank "true") (t "false")))
-         (ridge-buffer-name (get-buffer-create ridge--buffer-name))
+         (ridge-buffer-name (get-buffer-create ridge--search-buffer-name))
          (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-api-query query ridge--content-type rerank-str)))
+         (query-url (ridge--construct-search-api-query query ridge--content-type rerank-str)))
     ;; Query ridge API only when user in ridge minibuffer and non-empty query
     ;; Prevents querying if
     ;;   1. user hasn't started typing query
@@ -349,7 +349,7 @@ Use `which-key` if available, else display simple message in echo area"
         (when rerank
           (setq ridge--rerank t)
           (message "Ridge: Rerank Results"))
-        (ridge--query-api-and-render-results
+        (ridge--query-search-api-and-render-results
          query-url
          ridge--content-type
          query
@@ -377,7 +377,7 @@ Use `which-key` if available, else display simple message in echo area"
 (defun ridge-incremental ()
   "Natural, Incremental Search for your personal notes, transactions and music."
   (interactive)
-  (let* ((ridge-buffer-name (get-buffer-create ridge--buffer-name)))
+  (let* ((ridge-buffer-name (get-buffer-create ridge--search-buffer-name)))
     ;; switch to ridge results buffer
     (switch-to-buffer ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
@@ -442,14 +442,14 @@ Paragraph only starts at first text after blank line."
                  ;; get paragraph, if in text mode
                  (t
                   (ridge--get-current-paragraph-text))))
-         (query-url (ridge--construct-api-query query content-type rerank))
+         (query-url (ridge--construct-search-api-query query content-type rerank))
          ;; extract heading to show in result buffer from query
          (query-title
           (format "Similar to: %s"
                   (replace-regexp-in-string "^[#\\*]* " "" (car (split-string query "\n")))))
-         (buffer-name (get-buffer-create ridge--buffer-name)))
+         (buffer-name (get-buffer-create ridge--search-buffer-name)))
     (progn
-      (ridge--query-api-and-render-results
+      (ridge--query-search-api-and-render-results
        query-url
        content-type
        query-title
