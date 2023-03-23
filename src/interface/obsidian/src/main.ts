@@ -1,6 +1,6 @@
 import { Notice, Plugin } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
-import { RidgeModal } from 'src/modal'
+import { RidgeSearchModal } from 'src/search_modal'
 import { configureRidgeBackend } from './utils';
 
 
@@ -16,7 +16,7 @@ export default class Ridge extends Plugin {
             name: 'Search',
             checkCallback: (checking) => {
                 if (!checking && this.settings.connectedToBackend)
-                    new RidgeModal(this.app, this.settings).open();
+                    new RidgeSearchModal(this.app, this.settings).open();
                 return this.settings.connectedToBackend;
             }
         });
@@ -27,7 +27,7 @@ export default class Ridge extends Plugin {
             name: 'Find similar notes',
             editorCheckCallback: (checking) => {
                 if (!checking && this.settings.connectedToBackend)
-                    new RidgeModal(this.app, this.settings, true).open();
+                    new RidgeSearchModal(this.app, this.settings, true).open();
                 return this.settings.connectedToBackend;
             }
         });
@@ -36,7 +36,7 @@ export default class Ridge extends Plugin {
         this.addRibbonIcon('search', 'Ridge', (_: MouseEvent) => {
             // Called when the user clicks the icon.
             this.settings.connectedToBackend
-                ? new RidgeModal(this.app, this.settings).open()
+                ? new RidgeSearchModal(this.app, this.settings).open()
                 : new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings`);
         });
 
@@ -59,5 +59,5 @@ export default class Ridge extends Plugin {
             await configureRidgeBackend(this.app.vault, this.settings, false);
         }
         this.saveData(this.settings);
-   }
+    }
 }

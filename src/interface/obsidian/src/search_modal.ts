@@ -6,7 +6,7 @@ export interface SearchResult {
     file: string;
 }
 
-export class RidgeModal extends SuggestModal<SearchResult> {
+export class RidgeSearchModal extends SuggestModal<SearchResult> {
     setting: RidgeSetting;
     rerank: boolean = false;
     find_similar_notes: boolean;
