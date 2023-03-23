@@ -1,6 +1,7 @@
 import { Notice, Plugin } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
+import { RidgeChatModal } from 'src/chat_modal'
 import { configureRidgeBackend } from './utils';
 
 
@@ -28,6 +29,17 @@ export default class Ridge extends Plugin {
             editorCheckCallback: (checking) => {
                 if (!checking && this.settings.connectedToBackend)
                     new RidgeSearchModal(this.app, this.settings, true).open();
+                return this.settings.connectedToBackend;
+            }
+        });
+
+        // Add chat command. It can be triggered from anywhere
+        this.addCommand({
+            id: 'chat',
+            name: 'Chat',
+            checkCallback: (checking) => {
+                if (!checking && this.settings.connectedToBackend)
+                    new RidgeChatModal(this.app, this.settings).open();
                 return this.settings.connectedToBackend;
             }
         });
