@@ -20,6 +20,14 @@ export class RidgeChatModal extends Modal {
         // Create area for chat logs
         contentEl.createDiv({ attr: { class: "chat-body" } });
 
+        // Get conversation history from Ridge backend
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat?`;
+        let response = await request(chatUrl);
+        let chatLogs = JSON.parse(response).response;
+        chatLogs.forEach( (chatLog: any) => {
+            this.renderMessage(chatLog.message, chatLog.by);
+        });
+
         // Add chat input field
         new Setting(contentEl)
             .addText((text) => {
