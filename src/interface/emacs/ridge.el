@@ -417,14 +417,16 @@ RECEIVE-DATE is the message receive date."
   (let ((first-message-line (car (split-string message "\n" t)))
         (rest-message-lines (string-join (cdr (split-string message "\n" t)) "\n"))
         (heading-level (if (equal sender "you") "**" "***"))
-        (emojified-by (if (equal sender "you") "🤔 *You*" "🦅 *Ridge*"))
+        (emojified-sender (if (equal sender "you") "🤔 *You*" "🦅 *Ridge*"))
+        (suffix-newlines (if (equal sender "ridge") "\n\n" ""))
         (received (or receive-date (format-time-string "%F %T"))))
-    (format "%s %s: %s\n   :PROPERTIES:\n   :RECEIVED: [%s]\n   :END:\n%s\n"
+    (format "%s %s: %s\n   :PROPERTIES:\n   :RECEIVED: [%s]\n   :END:\n%s\n%s"
             heading-level
-            emojified-by
+            emojified-sender
             first-message-line
             received
-            rest-message-lines)))
+            rest-message-lines
+            suffix-newlines)))
 
 (defun ridge--generate-reference (reference)
   "Create `org-mode' footnotes with REFERENCE."
@@ -447,13 +449,15 @@ RECEIVE-DATE is the message receive date."
          (footnote-links (mapcar #'car footnotes))
          (footnote-defs (mapcar #'cdr footnotes)))
     (thread-first
-      ;; extract ridge message from API response and make it bold
-      (format "%s" message)
-      ;; append reference links to ridge message
-      (concat (string-join footnote-links ""))
-      ;; append reference sub-section to ridge message
-      (concat (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" ""))
-      (concat (string-join footnote-defs " "))
+      ;; concatenate ridge message and references from API
+      (concat
+       ;; extract ridge message from API response and make it bold
+       message
+       ;; append reference links to ridge message
+       (string-join footnote-links "")
+       ;; append reference sub-section to ridge message and fold it
+       (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" "")
+       (string-join footnote-defs " "))
       ;; Render chat message using data obtained from API
       (ridge--render-chat-message sender receive-date))))
 
