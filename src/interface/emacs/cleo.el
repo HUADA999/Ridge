@@ -134,7 +134,7 @@ NO-PAGING FILTER))
        "C-x M  | music\n"))))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
-(defvar ridge--reference-count 0 "Track number of references current inserted into chat bufffer.")
+(defvar ridge--reference-count 0 "Track number of references currently in chat bufffer.")
 (defun ridge--search-markdown () "Set content-type to `markdown'." (interactive) (setq ridge--content-type "markdown"))
 (defun ridge--search-org () "Set content-type to `org-mode'." (interactive) (setq ridge--content-type "org"))
 (defun ridge--search-ledger () "Set content-type to `ledger'." (interactive) (setq ridge--content-type "ledger"))
@@ -336,6 +336,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
 
 (defun ridge--chat ()
   "Chat with Ridge."
+  (interactive)
   (when (not (get-buffer ridge--chat-buffer-name))
       (ridge--load-chat-history ridge--chat-buffer-name))
   (switch-to-buffer ridge--chat-buffer-name)
@@ -359,6 +360,9 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
       (progn (org-mode)
              (visual-line-mode)
              (ridge--add-hover-text-to-footnote-refs (point-min))
+             (use-local-map (copy-keymap org-mode-map))
+             (local-set-key (kbd "m") #'ridge--chat)
+             (local-set-key (kbd "C-x m") #'ridge--chat)
              (read-only-mode t)))))
 
 (defun ridge--add-hover-text-to-footnote-refs (start-pos)
