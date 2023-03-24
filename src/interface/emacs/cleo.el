@@ -134,6 +134,7 @@ NO-PAGING FILTER))
        "C-x M  | music\n"))))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
+(defvar ridge--reference-count 0 "Track number of references current inserted into chat bufffer.")
 (defun ridge--search-markdown () "Set content-type to `markdown'." (interactive) (setq ridge--content-type "markdown"))
 (defun ridge--search-org () "Set content-type to `org-mode'." (interactive) (setq ridge--content-type "org"))
 (defun ridge--search-ledger () "Set content-type to `ledger'." (interactive) (setq ridge--content-type "ledger"))
@@ -387,25 +388,26 @@ MESSAGE is the text of the chat message.
 SENDER is the message sender.
 RECEIVE-DATE is the message receive date."
   (let ((first-message-line (car (split-string message "\n" t)))
-        (rest-message-lines (string-join (cdr (split-string message "\n" t)) "\n   "))
+        (rest-message-lines (string-join (cdr (split-string message "\n" t)) "\n"))
         (heading-level (if (equal sender "you") "**" "***"))
         (emojified-by (if (equal sender "you") "🤔 *You*" "🦅 *Ridge*"))
         (received (or receive-date (format-time-string "%F %T"))))
-    (format "%s %s: %s\n   :PROPERTIES:\n   :RECEIVED: [%s]\n   :END:\n   %s\n"
+    (format "%s %s: %s\n   :PROPERTIES:\n   :RECEIVED: [%s]\n   :END:\n%s\n"
             heading-level
             emojified-by
             first-message-line
             received
             rest-message-lines)))
 
-(defun ridge--generate-reference (index reference)
-  "Create `org-mode' links with REFERENCE as link and INDEX as link description."
-  (with-temp-buffer
-    (org-insert-link
-     nil
-     (format "%s" (replace-regexp-in-string "\n" " " reference))
-     (format "%s" index))
-    (format "[%s]" (buffer-substring-no-properties (point-min) (point-max)))))
+(defun ridge--generate-reference (reference)
+  "Create `org-mode' footnotes with REFERENCE."
+  (setq ridge--reference-count (1+ ridge--reference-count))
+  (cons
+   (format "[fn:%x]" ridge--reference-count)
+   (thread-last
+     reference
+     (replace-regexp-in-string "\n\n" "\n")
+     (format "\n[fn:%x] %s" ridge--reference-count))))
 
 (defun ridge--render-chat-response (json-response)
   "Render chat message using JSON-RESPONSE from Ridge Chat API."
@@ -413,13 +415,18 @@ RECEIVE-DATE is the message receive date."
          (sender (cdr (assoc 'by json-response)))
          (receive-date (cdr (assoc 'created json-response)))
          (context (or (cdr (assoc 'context json-response)) ""))
-         (reference-texts (split-string context "\n\n# " t))
-         (reference-links (-map-indexed #'ridge--generate-reference reference-texts)))
+         (reference-source-texts (split-string context "\n\n# " t))
+         (footnotes (mapcar #'ridge--generate-reference reference-source-texts))
+         (footnote-links (mapcar #'car footnotes))
+         (footnote-defs (mapcar #'cdr footnotes)))
     (thread-first
       ;; extract ridge message from API response and make it bold
       (format "%s" message)
-      ;; append references to ridge message
-      (concat " " (string-join reference-links " "))
+      ;; append reference links to ridge message
+      (concat " " (string-join footnote-links " "))
+      ;; append reference sub-section to ridge message
+      (concat (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" ""))
+      (concat (string-join footnote-defs " "))
       ;; Render chat message using data obtained from API
       (ridge--render-chat-message sender receive-date))))
 
