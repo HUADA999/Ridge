@@ -363,10 +363,11 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; render json response into formatted chat messages
   (with-current-buffer (get-buffer buffer-name)
     (let ((inhibit-read-only t)
+          (query-time (format-time-string "%F %T"))
           (json-response (ridge--query-chat-api query)))
       (goto-char (point-max))
       (insert
-       (ridge--render-chat-message query "you")
+       (ridge--render-chat-message query "you" query-time)
        (ridge--render-chat-response json-response)))
     (progn (org-mode)
            (visual-line-mode))
