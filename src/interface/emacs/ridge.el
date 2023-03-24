@@ -335,9 +335,12 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
 
 (defun ridge--chat ()
   "Chat with Ridge."
+  (when (not (get-buffer ridge--chat-buffer-name))
+      (ridge--load-chat-history ridge--chat-buffer-name))
+  (switch-to-buffer ridge--chat-buffer-name)
   (let ((query (read-string "Query: ")))
-    (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name)
-    (switch-to-buffer ridge--chat-buffer-name)))
+    (when (not (string-empty-p query))
+      (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name))))
 
 (defun ridge--load-chat-history (buffer-name)
   (let ((json-response (cdr (assoc 'response (ridge--query-chat-api "")))))
@@ -357,18 +360,16 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
 (defun ridge--query-chat-api-and-render-messages (query buffer-name)
   "Send QUERY to Ridge Chat. Render the chat messages from exchange in BUFFER-NAME."
   ;; render json response into formatted chat messages
-  (if (not (get-buffer buffer-name))
-      (ridge--load-chat-history buffer-name)
-    (with-current-buffer (get-buffer buffer-name)
-      (let ((inhibit-read-only t)
-            (json-response (ridge--query-chat-api query)))
-        (goto-char (point-max))
-        (insert
-         (ridge--render-chat-message query "you")
-         (ridge--render-chat-response json-response)))
-        (progn (org-mode)
-               (visual-line-mode))
-    (read-only-mode t))))
+  (with-current-buffer (get-buffer buffer-name)
+    (let ((inhibit-read-only t)
+          (json-response (ridge--query-chat-api query)))
+      (goto-char (point-max))
+      (insert
+       (ridge--render-chat-message query "you")
+       (ridge--render-chat-response json-response)))
+    (progn (org-mode)
+           (visual-line-mode))
+    (read-only-mode t)))
 
 (defun ridge--query-chat-api (query)
   "Send QUERY to Ridge Chat API."
