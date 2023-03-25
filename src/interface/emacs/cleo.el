@@ -360,13 +360,24 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
         (mapcar #'ridge--render-chat-response)
         ;; insert chat messages into Ridge Chat Buffer
         (mapc #'insert))
-      (progn (org-mode)
-             (visual-line-mode)
-             (ridge--add-hover-text-to-footnote-refs (point-min))
-             (use-local-map (copy-keymap org-mode-map))
-             (local-set-key (kbd "m") #'ridge--chat)
-             (local-set-key (kbd "C-x m") #'ridge--chat)
-             (read-only-mode t)))))
+      (progn
+        (ridge--add-hover-text-to-footnote-refs (point-min))
+
+        ;; render reference footnotes as superscript
+        (setq-local
+         org-use-sub-superscripts '{}
+         org-pretty-entities-include-sub-superscripts t
+         org-pretty-entities t)
+
+        ;; create ridge chat shortcut keybindings
+        (use-local-map (copy-keymap org-mode-map))
+        (local-set-key (kbd "m") #'ridge--chat)
+        (local-set-key (kbd "C-x m") #'ridge--chat)
+
+        ;; enable appropriate ridge chat major, minor modes
+        (org-mode)
+        (visual-line-mode)
+        (read-only-mode t)))))
 
 (defun ridge--add-hover-text-to-footnote-refs (start-pos)
   "Show footnote defs on mouse hover on footnote refs from START-POS."
