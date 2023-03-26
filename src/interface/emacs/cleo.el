@@ -218,7 +218,8 @@ for example), set this to the full interpreter path."
   :group 'ridge)
 
 (defvar ridge--server-process nil "Track Ridge server process.")
-(defvar ridge--server-name "ridge-server" "Track Ridge server buffer.")
+(defvar ridge--server-name "*ridge-server*" "Track Ridge server buffer.")
+(defvar ridge--server-ready? nil "Track if ridge server is ready to receive API calls.")
 
 (defun ridge--server-get-version ()
   "Return the ridge server version."
@@ -250,14 +251,25 @@ for example), set this to the full interpreter path."
                                     (format "--port=%s" server-port)))))
     (message "ridge.el: Starting server at %s %s..." server-host server-port)
     (setq ridge--server-process
-          (apply 'start-process
-                 ridge--server-name
-                 ridge--server-name
-                 ridge-server-command
-                 server-args))
-    (if (not ridge--server-process)
-        (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string))
-      (message "ridge.el: Ridge server running at: %s" ridge-server-url))))
+          (make-process
+           :name ridge--server-name
+           :buffer ridge--server-name
+           :command (append (list ridge-server-command) server-args)
+           :sentinel (lambda (process event)
+                       (message "ridge.el: ridge server stopped with: %s" event)
+                       (setq ridge--server-ready? nil))
+           :filter (lambda (process msg)
+                     (cond ((string-match (format "Uvicorn running on %s" ridge-server-url) msg)
+                            (setq ridge--server-ready? t))
+                           ((not ridge--server-ready?)
+                            (dolist (line (split-string msg "\n"))
+                              (message "ridge.el: %s" (nth 1 (split-string msg "  " t " *"))))))
+                     ;; call default process filter to write output to process buffer
+                     (internal-default-process-filter process msg))
+           ))
+    (set-process-query-on-exit-flag ridge--server-process nil)
+    (when (not ridge--server-process)
+        (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string)))))
 
 (defun ridge--server-running? ()
   "Check if the ridge server is running."
@@ -823,6 +835,8 @@ Paragraph only starts at first text after blank line."
   (when (and (not (ridge--server-running?))
              (y-or-n-p "Could not connect to Ridge server. Should I install and start it?"))
     (ridge--server-setup))
+  (while (not ridge--server-ready?)
+    (sleep-for 0.5))
   (ridge-menu))
 
 (provide 'ridge)
