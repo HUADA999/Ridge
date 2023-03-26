@@ -183,6 +183,11 @@ Use `which-key` if available, else display simple message in echo area"
   :group 'ridge
   :type 'string)
 
+(defcustom ridge-server-args '("--no-gui")
+  "Arguments to pass to Ridge server on startup."
+  :group 'ridge
+  :type '(repeat string))
+
 (defcustom ridge-server-python-command
   (if (equal system-type 'windows-nt)
       (or (executable-find "py")
@@ -207,6 +212,9 @@ for example), set this to the full interpreter path."
           (member val '("python" "python3" "pythonw" "py")))
   :group 'ridge)
 
+(defvar ridge--server-process nil "Track Ridge server process.")
+(defvar ridge--server-name "ridge-server" "Track Ridge server buffer.")
+
 (defun ridge--server-get-version ()
   "Return the ridge server version."
   (with-temp-buffer
@@ -226,6 +234,25 @@ for example), set this to the full interpreter path."
             0)
         (message "ridge.el: Failed to install Ridge server. Please install it manually using pip install `ridge-assistant'.\n%s" (buffer-string))
       (message "ridge.el: Installed and upgraded Ridge server version: %s" (ridge--server-get-version)))))
+
+(defun ridge--server-start ()
+  "Start the ridge server."
+  (let* ((url-parts (split-string (cadr (split-string ridge-server-url "://")) ":"))
+         (server-host (nth 0 url-parts))
+         (server-port (or (nth 1 url-parts) "80"))
+         (server-args (append ridge-server-args
+                              (list (format "--host=%s" server-host)
+                                    (format "--port=%s" server-port)))))
+    (message "ridge.el: Starting server at %s %s..." server-host server-port)
+    (setq ridge--server-process
+          (apply 'start-process
+                 ridge--server-name
+                 ridge--server-name
+                 ridge-server-command
+                 server-args))
+    (if (not ridge--server-process)
+        (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string))
+      (message "ridge.el: Ridge server running at: %s" ridge-server-url))))
 
 
 ;; -----------------------------------------------
