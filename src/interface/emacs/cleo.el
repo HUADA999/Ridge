@@ -274,12 +274,14 @@ for example), set this to the full interpreter path."
                             (progn
                               (setq ridge--server-ready? t)
                               (ridge--server-configure)))
-                           ((not ridge--server-ready?)
+                           ((and (not ridge--server-ready?)
+                                 (or (string-match "configure.py" msg)
+                                     (string-match "main.py" msg)
+                                     (string-match "api.py" msg)))
                             (dolist (line (split-string msg "\n"))
                               (message "ridge.el: %s" (nth 1 (split-string msg "  " t " *"))))))
                      ;; call default process filter to write output to process buffer
-                     (internal-default-process-filter process msg))
-           ))
+                     (internal-default-process-filter process msg))))
     (set-process-query-on-exit-flag ridge--server-process nil)
     (when (not ridge--server-process)
         (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string)))))
