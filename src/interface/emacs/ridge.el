@@ -217,6 +217,11 @@ for example), set this to the full interpreter path."
           (member val '("python" "python3" "pythonw" "py")))
   :group 'ridge)
 
+(defcustom ridge-org-files-index (org-agenda-files t t)
+  "List of org-files to index on ridge server"
+  :group 'ridge
+  :type '(repeat string))
+
 (defvar ridge--server-process nil "Track Ridge server process.")
 (defvar ridge--server-name "*ridge-server*" "Track Ridge server buffer.")
 (defvar ridge--server-ready? nil "Track if ridge server is ready to receive API calls.")
@@ -303,6 +308,72 @@ for example), set this to the full interpreter path."
   ;; Start ridge server if not running at expected URL
   (when (not (ridge--server-running?))
     (ridge--server-start)))
+
+(defun ridge--get-content-index-dir (config type)
+  "Extract directory containing index files of specified content TYPE from CONFIG.
+CONFIG is json obtained from Ridge config API."
+  (--> config
+       (cdr (assoc 'content-type it))
+       (cdr (assoc type it))
+       (cdr (assoc 'embeddings-file it))
+       (split-string it "/")
+       (butlast it)
+       (string-join it "/")))
+
+(defun ridge--server-configure ()
+  "Configure the ridge server to index specified files."
+  (interactive)
+  (let* ((current-config
+          (with-temp-buffer
+            (url-insert-file-contents (format "%s/api/config/data" ridge-server-url))
+            (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
+         (default-config
+           (with-temp-buffer
+             (url-insert-file-contents (format "%s/api/config/data/default" ridge-server-url))
+             (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
+         (default-index-dir (ridge--get-content-index-dir default-config 'org))
+         (config (or current-config default-config)))
+    (cond
+     ;; If ridge backend is not configured yet
+     ((not current-config)
+      (setq config (delq (assoc 'content-type config) config))
+      (setq config (delq (assoc 'processor config) config))
+      (add-to-list 'config `(content-type . ((org . ((input-files . ,ridge-org-files-index)
+                                                     (input-filter . ,json-null)
+                                                     (compressed-jsonl . ,(format "%s/org.jsonl.gz" default-index-dir))
+                                                     (embeddings-file . ,(format "%s/org.pt" default-index-dir))
+                                                     (index-heading-entries . ,json-false))))))
+      (ridge--post-new-config config)
+      (message "ridge.el: ⚙️ Generated new ridge server configuration."))
+
+     ;; Else if ridge config has no org content config
+     ((not (alist-get 'org (alist-get 'content-type config)))
+      (let ((new-content-type (alist-get 'content-type config)))
+        (setq new-content-type (delq (assoc 'org new-content-type) new-content-type))
+        (add-to-list 'new-content-type `(org . ((input-files . ,ridge-org-files-index)
+                                                (input-filter . ,json-null)
+                                                (compressed-jsonl . ,(format "%s/org.jsonl.gz" default-index-dir))
+                                                (embeddings-file . ,(format "%s/org.pt" default-index-dir))
+                                                (index-heading-entries . ,json-false))))
+        (setq config (delq (assoc 'content-type config) config))
+        (add-to-list 'config `(content-type . ,new-content-type)))
+      (ridge--post-new-config config)
+      (message "Ridge: ⚙️ Added org content to index on ridge server."))
+
+     ;; Else if ridge is not configured to index org files
+     ((not (equal (alist-get 'input-files (alist-get 'org (alist-get 'content-type config))) ridge-org-files-index))
+      (let* ((index-directory (ridge--get-content-index-dir config 'org))
+             (new-content-type (alist-get 'content-type config)))
+        (setq new-content-type (delq (assoc 'org new-content-type) new-content-type))
+        (add-to-list 'new-content-type `(org . ((input-files . ,ridge-org-files-index)
+                                                (input-filter . ,json-null)
+                                                (compressed-jsonl . ,(format "%s/org.jsonl.gz" index-directory))
+                                                (embeddings-file . ,(format "%s/org.pt" index-directory))
+                                                (index-heading-entries . ,json-false))))
+        (setq config (delq (assoc 'content-type config) config))
+        (add-to-list 'config `(content-type . ,new-content-type)))
+      (ridge--post-new-config config)
+      (message "Ridge: ⚙️ Updated org content in index on ridge server")))))
 
 
 ;; -----------------------------------------------
@@ -412,6 +483,19 @@ for example), set this to the full interpreter path."
 ;; --------------
 ;; Query Ridge API
 ;; --------------
+
+(defun ridge--post-new-config (config)
+  "Configure ridge server with provided CONFIG."
+  ;; POST provided config to ridge server
+  (let ((url-request-method "POST")
+        (url-request-extra-headers '(("Content-Type" . "application/json")))
+        (url-request-data (json-encode-alist config))
+        (config-url (format "%s/api/config/data" ridge-server-url)))
+    (with-current-buffer (url-retrieve-synchronously config-url)
+      (buffer-string)))
+  ;; Update index on ridge server after configuration update
+  (let ((ridge--server-ready? nil))
+    (url-retrieve (format "%s/api/update?t=org" ridge-server-url) #'identity)))
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
