@@ -172,6 +172,62 @@ Use `which-key` if available, else display simple message in echo area"
     (message "%s" (ridge--keybindings-info-message))))
 
 
+;; ----------------
+;; Ridge Setup
+;; ----------------
+(defcustom ridge-server-command
+  (or (executable-find "ridge")
+      (executable-find "ridge.exe")
+      "ridge")
+  "Command to interact with Ridge server."
+  :group 'ridge
+  :type 'string)
+
+(defcustom ridge-server-python-command
+  (if (equal system-type 'windows-nt)
+      (or (executable-find "py")
+          (executable-find "pythonw")
+          "python")
+    (if (executable-find "python")
+        "python"
+      ;; Fallback on systems where python is not
+      ;; symlinked to python3.
+      "python3"))
+  "The Python interpreter used for the Ridge server.
+
+Ridge will try to use the system interpreter if it exists. If you wish
+to use a specific python interpreter (from a virtual environment
+for example), set this to the full interpreter path."
+  :type '(choice (const :tag "python" "python")
+                 (const :tag "python3" "python3")
+                 (const :tag "pythonw (Python on Windows)" "pythonw")
+                 (const :tag "py (other Python on Windows)" "py")
+                 (string :tag "Other"))
+  :safe (lambda (val)
+          (member val '("python" "python3" "pythonw" "py")))
+  :group 'ridge)
+
+(defun ridge--server-get-version ()
+  "Return the ridge server version."
+  (with-temp-buffer
+    (call-process ridge-server-command nil t nil "--version")
+    (goto-char (point-min))
+    (re-search-forward "\\([a-z0-9.]+\\)")
+    (match-string 1)))
+
+(defun ridge--server-install-upgrade ()
+  "Install or upgrade the ridge server."
+  (with-temp-buffer
+    (message "ridge.el: Installing server...")
+    (if (/= (apply 'call-process ridge-server-python-command
+                     nil t nil
+                     "-m" "pip" "install" "--upgrade"
+                     '("ridge-assistant"))
+            0)
+        (message "ridge.el: Failed to install Ridge server. Please install it manually using pip install `ridge-assistant'.\n%s" (buffer-string))
+      (message "ridge.el: Installed and upgraded Ridge server version: %s" (ridge--server-get-version)))))
+
+
 ;; -----------------------------------------------
 ;; Extract and Render Entries of each Content Type
 ;; -----------------------------------------------
