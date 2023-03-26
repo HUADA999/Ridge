@@ -281,13 +281,14 @@ for example), set this to the full interpreter path."
 
 (defun ridge--server-running? ()
   "Check if the ridge server is running."
-  (or
-   ;; check for when server process handled from within emacs
-   (and ridge--server-process
-        (not (null (process-live-p ridge--server-process))))
-   ;; else general check via ping to ridge-server-url
-   (ignore-errors
-     (not (null (ridge--get-enabled-content-types) t)))))
+  (when (or
+       ;; check for when server process handled from within emacs
+       (and ridge--server-process
+            (not (null (process-live-p ridge--server-process))))
+       ;; else general check via ping to ridge-server-url
+       (ignore-errors
+         (not (null (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url))))))
+      (setq ridge--server-ready? t)))
 
 (defun ridge--server-stop ()
   "Stop the ridge server."
