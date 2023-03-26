@@ -266,7 +266,9 @@ for example), set this to the full interpreter path."
                        (setq ridge--server-ready? nil))
            :filter (lambda (process msg)
                      (cond ((string-match (format "Uvicorn running on %s" ridge-server-url) msg)
-                            (setq ridge--server-ready? t))
+                            (progn
+                              (setq ridge--server-ready? t)
+                              (ridge--server-configure)))
                            ((not ridge--server-ready?)
                             (dolist (line (split-string msg "\n"))
                               (message "ridge.el: %s" (nth 1 (split-string msg "  " t " *"))))))
@@ -923,6 +925,7 @@ Paragraph only starts at first text after blank line."
     (ridge--server-setup))
   (while (not ridge--server-ready?)
     (sleep-for 0.5))
+  (ridge--server-configure)
   (ridge--menu))
 
 (provide 'ridge)
