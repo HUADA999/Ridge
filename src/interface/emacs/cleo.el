@@ -230,6 +230,8 @@ for example), set this to the full interpreter path."
 (defvar ridge--server-process nil "Track Ridge server process.")
 (defvar ridge--server-name "*ridge-server*" "Track Ridge server buffer.")
 (defvar ridge--server-ready? nil "Track if ridge server is ready to receive API calls.")
+(defvar ridge--server-configured? t "Track if ridge server is configured to receive API calls.")
+(defvar ridge--progressbar '(🌑 🌘 🌗 🌖 🌕 🌔 🌓 🌒) "Track progress via moon phase animations.")
 
 (defun ridge--server-get-version ()
   "Return the ridge server version."
@@ -274,6 +276,15 @@ for example), set this to the full interpreter path."
                             (progn
                               (setq ridge--server-ready? t)
                               (ridge--server-configure)))
+                           ((string-match "Batches:  " msg)
+                            (when (string-match "\\([0-9]+\\.[0-9]+\\|\\([0-9]+\\)\\)%?" msg)
+                              (message "ridge.el: %s updating index %s"
+                                       (nth (% (string-to-number (match-string 1 msg)) (length ridge--progressbar)) ridge--progressbar)
+                                       (match-string 0 msg)))
+                            (setq ridge--server-configured? nil))
+                           ((and (not ridge--server-configured?)
+                                 (string-match "Processor reconfigured via API" msg))
+                            (setq ridge--server-configured? t))
                            ((and (not ridge--server-ready?)
                                  (or (string-match "configure.py" msg)
                                      (string-match "main.py" msg)
@@ -976,7 +987,7 @@ Paragraph only starts at first text after blank line."
              (y-or-n-p "Could not connect to Ridge server. Should I install and start it?"))
     (ridge--server-setup))
   (while (not ridge--server-ready?)
-    (sleep-for 0.5))
+    (sit-for 0.5))
   (ridge--server-configure)
   (ridge--menu))
 
