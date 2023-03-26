@@ -65,6 +65,11 @@
   :group 'ridge
   :type 'string)
 
+(defcustom is-ridge-server-local t
+  "Is Ridge server on local machine?."
+  :group 'ridge
+  :type 'boolean)
+
 (defcustom ridge-image-width 156
   "Width of rendered images returned by Ridge."
   :group 'ridge
@@ -253,6 +258,39 @@ for example), set this to the full interpreter path."
     (if (not ridge--server-process)
         (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string))
       (message "ridge.el: Ridge server running at: %s" ridge-server-url))))
+
+(defun ridge--server-running? ()
+  "Check if the ridge server is running."
+  (or
+   ;; check for when server process handled from within emacs
+   (and ridge--server-process
+        (not (null (process-live-p ridge--server-process))))
+   ;; else general check via ping to ridge-server-url
+   (ignore-errors
+     (not (null (ridge--get-enabled-content-types) t)))))
+
+(defun ridge--server-stop ()
+  "Stop the ridge server."
+  (when (ridge--server-running?)
+    (message "ridge.el: Stopping server...")
+    (kill-process ridge--server-process)
+    (message "ridge.el: Stopped server.")))
+
+(defun ridge--server-restart ()
+  "Restart the ridge server."
+  (ridge--server-stop)
+  (ridge--server-start))
+
+(defun ridge--server-setup ()
+  "Install and start the ridge server, if required."
+  ;; Install ridge server, if not available but expected on local machine
+  (when (and is-ridge-server-local
+             (or (not (executable-find ridge-server-command))
+                 (not (ridge--server-get-version))))
+      (ridge--server-install-upgrade))
+  ;; Start ridge server if not running at expected URL
+  (when (not (ridge--server-running?))
+    (ridge--server-start)))
 
 
 ;; -----------------------------------------------
@@ -781,6 +819,10 @@ Paragraph only starts at first text after blank line."
 (defun ridge ()
   "Natural, Incremental Search for your personal notes, transactions and images."
   (interactive)
+  ;; Setup ridge server if not running before executing user commands
+  (when (and (not (ridge--server-running?))
+             (y-or-n-p "Could not connect to Ridge server. Should I install and start it?"))
+    (ridge--server-setup))
   (ridge-menu))
 
 (provide 'ridge)
