@@ -248,6 +248,7 @@ for example), set this to the full interpreter path."
 
 (defun ridge--server-start ()
   "Start the ridge server."
+  (interactive)
   (let* ((url-parts (split-string (cadr (split-string ridge-server-url "://")) ":"))
          (server-host (nth 0 url-parts))
          (server-port (or (nth 1 url-parts) "80"))
@@ -288,6 +289,7 @@ for example), set this to the full interpreter path."
 
 (defun ridge--server-stop ()
   "Stop the ridge server."
+  (interactive)
   (when (ridge--server-running?)
     (message "ridge.el: Stopping server...")
     (kill-process ridge--server-process)
@@ -295,11 +297,13 @@ for example), set this to the full interpreter path."
 
 (defun ridge--server-restart ()
   "Restart the ridge server."
+  (interactive)
   (ridge--server-stop)
   (ridge--server-start))
 
 (defun ridge--server-setup ()
   "Install and start the ridge server, if required."
+  (interactive)
   ;; Install ridge server, if not available but expected on local machine
   (when (and is-ridge-server-local
              (or (not (executable-find ridge-server-command))
@@ -502,7 +506,6 @@ CONFIG is json obtained from Ridge config API."
   (let ((config-url (format "%s/api/config/types" ridge-server-url))
         (url-request-method "GET"))
     (with-temp-buffer
-      (erase-buffer)
       (url-insert-file-contents config-url)
       (thread-last
         (json-parse-buffer :object-type 'alist)
@@ -649,7 +652,6 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
          (encoded-query (url-hexify-string query))
          (query-url (format "%s/api/chat?q=%s" ridge-server-url encoded-query)))
     (with-temp-buffer
-      (erase-buffer)
       (url-insert-file-contents query-url)
       (json-parse-buffer :object-type 'alist))))
 
@@ -892,7 +894,7 @@ Paragraph only starts at first text after blank line."
   (interactive (list (transient-args transient-current-command)))
   (ridge--chat))
 
-(transient-define-prefix ridge-menu ()
+(transient-define-prefix ridge--menu ()
   "Create Ridge Menu to Configure and Execute Commands."
   [["Configure Search"
     ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
@@ -921,7 +923,7 @@ Paragraph only starts at first text after blank line."
     (ridge--server-setup))
   (while (not ridge--server-ready?)
     (sleep-for 0.5))
-  (ridge-menu))
+  (ridge--menu))
 
 (provide 'ridge)
 
