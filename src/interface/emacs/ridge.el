@@ -233,13 +233,13 @@ for example), set this to the full interpreter path."
   :group 'ridge)
 
 (defcustom ridge-auto-setup t
-  "Automate install, configure and starting ridge server.
+  "Automate install, configure and start of ridge server.
 Auto invokes setup steps on calling main entrypoint."
   :type 'string
   :group 'ridge)
 
-(defvar ridge--server-process nil "Track Ridge server process.")
-(defvar ridge--server-name "*ridge-server*" "Track Ridge server buffer.")
+(defvar ridge--server-process nil "Track ridge server process.")
+(defvar ridge--server-name "*ridge-server*" "Track ridge server buffer.")
 (defvar ridge--server-ready? nil "Track if ridge server is ready to receive API calls.")
 (defvar ridge--server-configured? t "Track if ridge server is configured to receive API calls.")
 (defvar ridge--progressbar '(🌑 🌘 🌗 🌖 🌕 🌔 🌓 🌒) "Track progress via moon phase animations.")
@@ -322,6 +322,12 @@ Auto invokes setup steps on calling main entrypoint."
         (setq ridge--server-ready? t)
       nil)))
 
+(defun ridge--server-restart ()
+  "Restart the ridge server."
+  (interactive)
+  (ridge--server-stop)
+  (ridge--server-start))
+
 (defun ridge--server-stop ()
   "Stop the ridge server."
   (interactive)
@@ -329,12 +335,6 @@ Auto invokes setup steps on calling main entrypoint."
     (message "ridge.el: Stopping server...")
     (kill-process ridge--server-process)
     (message "ridge.el: Stopped server.")))
-
-(defun ridge--server-restart ()
-  "Restart the ridge server."
-  (interactive)
-  (ridge--server-stop)
-  (ridge--server-start))
 
 (defun ridge--server-setup ()
   "Install and start the ridge server, if required."
