@@ -65,6 +65,11 @@
   :group 'ridge
   :type 'string)
 
+(defcustom ridge-server-is-local t
+  "Is Ridge server on local machine?."
+  :group 'ridge
+  :type 'boolean)
+
 (defcustom ridge-image-width 156
   "Width of rendered images returned by Ridge."
   :group 'ridge
@@ -172,6 +177,305 @@ Use `which-key` if available, else display simple message in echo area"
     (message "%s" (ridge--keybindings-info-message))))
 
 
+;; ----------------
+;; Ridge Setup
+;; ----------------
+(defcustom ridge-server-command
+  (or (executable-find "ridge")
+      (executable-find "ridge.exe")
+      "ridge")
+  "Command to interact with Ridge server."
+  :type 'string
+  :group 'ridge)
+
+(defcustom ridge-server-args '("--no-gui")
+  "Arguments to pass to Ridge server on startup."
+  :type '(repeat string)
+  :group 'ridge)
+
+(defcustom ridge-server-python-command
+  (if (equal system-type 'windows-nt)
+      (or (executable-find "py")
+          (executable-find "pythonw")
+          "python")
+    (if (executable-find "python")
+        "python"
+      ;; Fallback on systems where python is not
+      ;; symlinked to python3.
+      "python3"))
+  "The Python interpreter used for the Ridge server.
+
+Ridge will try to use the system interpreter if it exists. If you wish
+to use a specific python interpreter (from a virtual environment
+for example), set this to the full interpreter path."
+  :type '(choice (const :tag "python" "python")
+                 (const :tag "python3" "python3")
+                 (const :tag "pythonw (Python on Windows)" "pythonw")
+                 (const :tag "py (other Python on Windows)" "py")
+                 (string :tag "Other"))
+  :safe (lambda (val)
+          (member val '("python" "python3" "pythonw" "py")))
+  :group 'ridge)
+
+(defcustom ridge-org-files (org-agenda-files t t)
+  "List of org-files to index on ridge server."
+  :type '(repeat string)
+  :group 'ridge)
+
+(defcustom ridge-org-directories nil
+  "List of directories with org-mode files to index on ridge server."
+  :type '(repeat string)
+  :group 'ridge)
+
+(defcustom ridge-openai-api-key nil
+  "OpenAI API key used to configure chat on ridge server."
+  :type 'string
+  :group 'ridge)
+
+(defcustom ridge-auto-setup t
+  "Automate install, configure and start of ridge server.
+Auto invokes setup steps on calling main entrypoint."
+  :type 'string
+  :group 'ridge)
+
+(defvar ridge--server-process nil "Track ridge server process.")
+(defvar ridge--server-name "*ridge-server*" "Track ridge server buffer.")
+(defvar ridge--server-ready? nil "Track if ridge server is ready to receive API calls.")
+(defvar ridge--server-configured? t "Track if ridge server is configured to receive API calls.")
+(defvar ridge--progressbar '(🌑 🌘 🌗 🌖 🌕 🌔 🌓 🌒) "Track progress via moon phase animations.")
+
+(defun ridge--server-get-version ()
+  "Return the ridge server version."
+  (with-temp-buffer
+    (call-process ridge-server-command nil t nil "--version")
+    (goto-char (point-min))
+    (re-search-forward "\\([a-z0-9.]+\\)")
+    (match-string 1)))
+
+(defun ridge--server-install-upgrade ()
+  "Install or upgrade the ridge server."
+  (with-temp-buffer
+    (message "ridge.el: Installing server...")
+    (if (/= (apply 'call-process ridge-server-python-command
+                     nil t nil
+                     "-m" "pip" "install" "--upgrade"
+                     '("ridge-assistant"))
+            0)
+        (message "ridge.el: Failed to install Ridge server. Please install it manually using pip install `ridge-assistant'.\n%s" (buffer-string))
+      (message "ridge.el: Installed and upgraded Ridge server version: %s" (ridge--server-get-version)))))
+
+(defun ridge--server-start ()
+  "Start the ridge server."
+  (interactive)
+  (let* ((url-parts (split-string (cadr (split-string ridge-server-url "://")) ":"))
+         (server-host (nth 0 url-parts))
+         (server-port (or (nth 1 url-parts) "80"))
+         (server-args (append ridge-server-args
+                              (list (format "--host=%s" server-host)
+                                    (format "--port=%s" server-port)))))
+    (message "ridge.el: Starting server at %s %s..." server-host server-port)
+    (setq ridge--server-process
+          (make-process
+           :name ridge--server-name
+           :buffer ridge--server-name
+           :command (append (list ridge-server-command) server-args)
+           :sentinel (lambda (process event)
+                       (message "ridge.el: ridge server stopped with: %s" event)
+                       (setq ridge--server-ready? nil))
+           :filter (lambda (process msg)
+                     (cond ((string-match (format "Uvicorn running on %s" ridge-server-url) msg)
+                            (progn
+                              (setq ridge--server-ready? t)
+                              (ridge--server-configure)))
+                           ((string-match "Batches:  " msg)
+                            (when (string-match "\\([0-9]+\\.[0-9]+\\|\\([0-9]+\\)\\)%?" msg)
+                              (message "ridge.el: %s updating index %s"
+                                       (nth (% (string-to-number (match-string 1 msg)) (length ridge--progressbar)) ridge--progressbar)
+                                       (match-string 0 msg)))
+                            (setq ridge--server-configured? nil))
+                           ((and (not ridge--server-configured?)
+                                 (string-match "Processor reconfigured via API" msg))
+                            (setq ridge--server-configured? t))
+                           ((and (not ridge--server-ready?)
+                                 (or (string-match "configure.py" msg)
+                                     (string-match "main.py" msg)
+                                     (string-match "api.py" msg)))
+                            (dolist (line (split-string msg "\n"))
+                              (message "ridge.el: %s" (nth 1 (split-string msg "  " t " *"))))))
+                     ;; call default process filter to write output to process buffer
+                     (internal-default-process-filter process msg))))
+    (set-process-query-on-exit-flag ridge--server-process nil)
+    (when (not ridge--server-process)
+        (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string)))))
+
+(defun ridge--server-started? ()
+  "Check if the ridge server has been started."
+  ;; check for when server process handled from within emacs
+  (if (and ridge--server-process
+           (not (null (process-live-p ridge--server-process))))
+      t
+    ;; else general check via ping to ridge-server-url
+    (if (ignore-errors
+          (not (null (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url)))))
+        ;; Successful ping to non-emacs ridge server indicates it is started and ready.
+        ;; So update ready state tracker variable (and implicitly return true for started)
+        (setq ridge--server-ready? t)
+      nil)))
+
+(defun ridge--server-restart ()
+  "Restart the ridge server."
+  (interactive)
+  (ridge--server-stop)
+  (ridge--server-start))
+
+(defun ridge--server-stop ()
+  "Stop the ridge server."
+  (interactive)
+  (when (ridge--server-started?)
+    (message "ridge.el: Stopping server...")
+    (kill-process ridge--server-process)
+    (message "ridge.el: Stopped server.")))
+
+(defun ridge--server-setup ()
+  "Install and start the ridge server, if required."
+  (interactive)
+  ;; Install ridge server, if not available but expected on local machine
+  (when (and ridge-server-is-local
+             (or (not (executable-find ridge-server-command))
+                 (not (ridge--server-get-version))))
+      (ridge--server-install-upgrade))
+  ;; Start ridge server if not already started
+  (when (not (ridge--server-started?))
+    (ridge--server-start)))
+
+(defun ridge--get-directory-from-config (config keys &optional level)
+  "Extract directory under specified KEYS in CONFIG and trim it to LEVEL.
+CONFIG is json obtained from Ridge config API."
+  (let ((item config))
+    (dolist (key keys)
+      (setq item (cdr (assoc key item))))
+      (-> item
+          (split-string "/")
+          (butlast (or level nil))
+          (string-join "/"))))
+
+(defun ridge--server-configure ()
+  "Configure the the Ridge server for search and chat."
+  (interactive)
+  (let* ((org-directory-regexes (or (mapcar (lambda (dir) (format "%s/**/*.org" dir)) ridge-org-directories) json-null))
+         (current-config
+          (with-temp-buffer
+            (url-insert-file-contents (format "%s/api/config/data" ridge-server-url))
+            (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
+         (default-config
+           (with-temp-buffer
+             (url-insert-file-contents (format "%s/api/config/data/default" ridge-server-url))
+             (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
+         (default-index-dir (ridge--get-directory-from-config default-config '(content-type org embeddings-file)))
+         (default-chat-dir (ridge--get-directory-from-config default-config '(processor conversation conversation-logfile)))
+         (default-model (or (alist-get 'model (alist-get 'conversation (alist-get 'processor default-config))) "text-davinci-003"))
+         (config (or current-config default-config)))
+
+    ;; Configure content types
+    (cond
+     ;; If ridge backend is not configured yet
+     ((not current-config)
+      (setq config (delq (assoc 'content-type config) config))
+      (add-to-list 'config
+                   `(content-type . ((org . ((input-files . ,ridge-org-files)
+                                             (input-filter . ,org-directory-regexes)
+                                             (compressed-jsonl . ,(format "%s/org.jsonl.gz" default-index-dir))
+                                             (embeddings-file . ,(format "%s/org.pt" default-index-dir))
+                                             (index-heading-entries . ,json-false)))))))
+
+     ;; Else if ridge config has no org content config
+     ((not (alist-get 'org (alist-get 'content-type config)))
+      (let ((new-content-type (alist-get 'content-type config)))
+        (setq new-content-type (delq (assoc 'org new-content-type) new-content-type))
+        (add-to-list 'new-content-type `(org . ((input-files . ,ridge-org-files)
+                                                (input-filter . ,org-directory-regexes)
+                                                (compressed-jsonl . ,(format "%s/org.jsonl.gz" default-index-dir))
+                                                (embeddings-file . ,(format "%s/org.pt" default-index-dir))
+                                                (index-heading-entries . ,json-false))))
+        (setq config (delq (assoc 'content-type config) config))
+        (add-to-list 'config `(content-type . ,new-content-type))))
+
+     ;; Else if ridge is not configured to index specified org files
+     ((not (and (equal (alist-get 'input-files (alist-get 'org (alist-get 'content-type config))) ridge-org-files)
+                (equal (alist-get 'input-filter (alist-get 'org (alist-get 'content-type config))) org-directory-regexes)))
+      (let* ((index-directory (ridge--get-directory-from-config config '(content-type org embeddings-file)))
+             (new-content-type (alist-get 'content-type config)))
+        (setq new-content-type (delq (assoc 'org new-content-type) new-content-type))
+        (add-to-list 'new-content-type `(org . ((input-files . ,ridge-org-files)
+                                                (input-filter . ,org-directory-regexes)
+                                                (compressed-jsonl . ,(format "%s/org.jsonl.gz" index-directory))
+                                                (embeddings-file . ,(format "%s/org.pt" index-directory))
+                                                (index-heading-entries . ,json-false))))
+        (setq config (delq (assoc 'content-type config) config))
+        (add-to-list 'config `(content-type . ,new-content-type)))))
+
+    ;; Configure processors
+    (cond
+     ((not ridge-openai-api-key)
+      (setq config (delq (assoc 'processor config) config)))
+
+     ((not current-config)
+      (setq config (delq (assoc 'processor config) config))
+      (add-to-list 'config
+                   `(processor . ((conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
+                                                   (model . ,default-model)
+                                                   (openai-api-key . ,ridge-openai-api-key)))))))
+
+     ((not (alist-get 'conversation (alist-get 'processor config)))
+       (let ((new-processor-type (alist-get 'processor config)))
+         (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
+         (add-to-list 'new-processor-type `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
+                                                            (model . ,default-model)
+                                                            (openai-api-key . ,ridge-openai-api-key))))
+        (setq config (delq (assoc 'processor config) config))
+        (add-to-list 'config `(processor . ,new-processor-type))))
+
+     ;; Else if ridge is not configured with specified openai api key
+     ((not (equal (alist-get 'openai-api-key (alist-get 'conversation (alist-get 'processor config))) ridge-openai-api-key))
+      (let* ((chat-directory (ridge--get-directory-from-config config '(processor conversation conversation-logfile)))
+             (model-name (ridge--get-directory-from-config config '(processor conversation model)))
+             (new-processor-type (alist-get 'processor config)))
+        (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
+        (add-to-list 'new-processor-type `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" chat-directory))
+                                                           (model . ,model-name)
+                                                           (openai-api-key . ,ridge-openai-api-key))))
+        (setq config (delq (assoc 'processor config) config))
+        (add-to-list 'config `(processor . ,new-processor-type)))))
+
+     ;; Update server with latest configuration
+     (ridge--post-new-config config)
+     (cond ((not current-config)
+            (message "ridge.el: ⚙️ Generated new ridge server configuration."))
+           ((not (equal config current-config))
+            (message "Ridge: ⚙️ Updated ridge server configuration")))))
+
+(defun ridge-setup (&optional interact)
+  "Install, start and configure Ridge server."
+  (interactive "p")
+  ;; Setup ridge server if not running
+  (let* ((not-started (not (ridge--server-started?)))
+         (permitted (if (and not-started interact)
+                        (y-or-n-p "Could not connect to Ridge server. Should I install, start and configure it for you?")
+                      t)))
+    ;; Install, start server if user permitted and server not ready
+    (when (and permitted not-started)
+      (ridge--server-setup))
+
+    ;; Server can be started but not ready (to use/configure)
+    ;; Wait until server is ready if setup was permitted
+    (while (and permitted (not ridge--server-ready?))
+      (sit-for 0.5))
+
+    ;; Configure server once server ready if user permitted
+    (when permitted
+      (ridge--server-configure))))
+
+
 ;; -----------------------------------------------
 ;; Extract and Render Entries of each Content Type
 ;; -----------------------------------------------
@@ -196,22 +500,21 @@ Use `which-key` if available, else display simple message in echo area"
 
 (defun ridge--extract-entries-as-org (json-response query)
   "Convert JSON-RESPONSE, QUERY from API to `org-mode' entries."
-  (let ((org-results-buffer-format-str "* %s\n%s\n#+STARTUP: showall hidestars inlineimages"))
-    (thread-last
-      json-response
-      ;; Extract and render each org-mode entry from response
-      (mapcar (lambda (json-response-item)
-                (thread-last
-                  ;; Extract org entry from each item in json response
-                  (cdr (assoc 'entry json-response-item))
-                  ;; Format org entry as a string
-                  (format "%s")
-                  ;; Standardize results to 2nd level heading for consistent rendering
-                  (replace-regexp-in-string "^\*+" "**"))))
-      ;; Render entries into org formatted string with query set as as top level heading
-      (format org-results-buffer-format-str query)
-      ;; remove leading (, ) or SPC from extracted entries string
-      (replace-regexp-in-string "^[\(\) ]" ""))))
+  (thread-last
+    json-response
+    ;; Extract and render each org-mode entry from response
+    (mapcar (lambda (json-response-item)
+              (thread-last
+                ;; Extract org entry from each item in json response
+                (cdr (assoc 'entry json-response-item))
+                ;; Format org entry as a string
+                (format "%s")
+                ;; Standardize results to 2nd level heading for consistent rendering
+                (replace-regexp-in-string "^\*+" "**"))))
+    ;; Render entries into org formatted string with query set as as top level heading
+    (format "* %s\n%s\n" query)
+    ;; remove leading (, ) or SPC from extracted entries string
+    (replace-regexp-in-string "^[\(\) ]" "")))
 
 (defun ridge--extract-entries-as-ledger (json-response query)
   "Convert JSON-RESPONSE, QUERY from API to ledger entries."
@@ -281,12 +584,24 @@ Use `which-key` if available, else display simple message in echo area"
 ;; Query Ridge API
 ;; --------------
 
+(defun ridge--post-new-config (config)
+  "Configure ridge server with provided CONFIG."
+  ;; POST provided config to ridge server
+  (let ((url-request-method "POST")
+        (url-request-extra-headers '(("Content-Type" . "application/json")))
+        (url-request-data (json-encode-alist config))
+        (config-url (format "%s/api/config/data" ridge-server-url)))
+    (with-current-buffer (url-retrieve-synchronously config-url)
+      (buffer-string)))
+  ;; Update index on ridge server after configuration update
+  (let ((ridge--server-ready? nil))
+    (url-retrieve (format "%s/api/update?t=org" ridge-server-url) #'identity)))
+
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
   (let ((config-url (format "%s/api/config/types" ridge-server-url))
         (url-request-method "GET"))
     (with-temp-buffer
-      (erase-buffer)
       (url-insert-file-contents config-url)
       (thread-last
         (json-parse-buffer :object-type 'alist)
@@ -319,8 +634,13 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
              ((equal content-type "ledger") (ridge--extract-entries-as-ledger json-response query))
              ((equal content-type "image") (ridge--extract-entries-as-images json-response query))
              (t (ridge--extract-entries json-response query))))
-      (cond ((equal content-type "org") (progn (org-mode)
-                                               (visual-line-mode)))
+      (cond ((equal content-type "org") (progn (visual-line-mode)
+                                               (org-mode)
+                                               (setq-local
+                                                org-startup-folded "showall"
+                                                org-hide-leading-stars t
+                                                org-startup-with-inline-images t)
+                                               (org-set-startup-visibility)))
             ((equal content-type "markdown") (progn (markdown-mode)
                                                     (visual-line-mode)))
             ((equal content-type "ledger") (beancount-mode))
@@ -428,9 +748,14 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
          (encoded-query (url-hexify-string query))
          (query-url (format "%s/api/chat?q=%s" ridge-server-url encoded-query)))
     (with-temp-buffer
-      (erase-buffer)
-      (url-insert-file-contents query-url)
-      (json-parse-buffer :object-type 'alist))))
+      (condition-case ex
+          (progn
+            (url-insert-file-contents query-url)
+            (json-parse-buffer :object-type 'alist))
+        ('file-error (cond ((string-match "Internal server error" (nth 2 ex))
+                      (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
+                     (t (message "Chat exception: [%s]" ex))))))))
+
 
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
@@ -671,7 +996,7 @@ Paragraph only starts at first text after blank line."
   (interactive (list (transient-args transient-current-command)))
   (ridge--chat))
 
-(transient-define-prefix ridge-menu ()
+(transient-define-prefix ridge--menu ()
   "Create Ridge Menu to Configure and Execute Commands."
   [["Configure Search"
     ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
@@ -692,9 +1017,11 @@ Paragraph only starts at first text after blank line."
 
 ;;;###autoload
 (defun ridge ()
-  "Natural, Incremental Search for your personal notes, transactions and images."
+  "Provide natural, search assistance for your notes, transactions and images."
   (interactive)
-  (ridge-menu))
+  (when ridge-auto-setup
+    (ridge-setup t))
+  (ridge--menu))
 
 (provide 'ridge)
 
