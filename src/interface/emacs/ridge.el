@@ -227,6 +227,12 @@ for example), set this to the full interpreter path."
   :type 'string
   :group 'ridge)
 
+(defcustom ridge-auto-setup t
+  "Automate install, configure and starting ridge server.
+Auto invokes setup steps on calling main entrypoint."
+  :type 'string
+  :group 'ridge)
+
 (defvar ridge--server-process nil "Track Ridge server process.")
 (defvar ridge--server-name "*ridge-server*" "Track Ridge server buffer.")
 (defvar ridge--server-ready? nil "Track if ridge server is ready to receive API calls.")
@@ -297,21 +303,24 @@ for example), set this to the full interpreter path."
     (when (not ridge--server-process)
         (message "ridge.el: Failed to start Ridge server. Please start it manually by running `ridge' on terminal.\n%s" (buffer-string)))))
 
-(defun ridge--server-running? ()
-  "Check if the ridge server is running."
-  (when (or
-       ;; check for when server process handled from within emacs
-       (and ridge--server-process
-            (not (null (process-live-p ridge--server-process))))
-       ;; else general check via ping to ridge-server-url
-       (ignore-errors
-         (not (null (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url))))))
-      (setq ridge--server-ready? t)))
+(defun ridge--server-started? ()
+  "Check if the ridge server has been started."
+  ;; check for when server process handled from within emacs
+  (if (and ridge--server-process
+           (not (null (process-live-p ridge--server-process))))
+      t
+    ;; else general check via ping to ridge-server-url
+    (if (ignore-errors
+          (not (null (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url)))))
+        ;; Successful ping to non-emacs ridge server indicates it is started and ready.
+        ;; So update ready state tracker variable (and implicitly return true for started)
+        (setq ridge--server-ready? t)
+      nil)))
 
 (defun ridge--server-stop ()
   "Stop the ridge server."
   (interactive)
-  (when (ridge--server-running?)
+  (when (ridge--server-started?)
     (message "ridge.el: Stopping server...")
     (kill-process ridge--server-process)
     (message "ridge.el: Stopped server.")))
@@ -330,8 +339,8 @@ for example), set this to the full interpreter path."
              (or (not (executable-find ridge-server-command))
                  (not (ridge--server-get-version))))
       (ridge--server-install-upgrade))
-  ;; Start ridge server if not running at expected URL
-  (when (not (ridge--server-running?))
+  ;; Start ridge server if not already started
+  (when (not (ridge--server-started?))
     (ridge--server-start)))
 
 (defun ridge--get-directory-from-config (config keys &optional level)
@@ -437,6 +446,27 @@ CONFIG is json obtained from Ridge config API."
             (message "ridge.el: ⚙️ Generated new ridge server configuration."))
            ((not (equal config current-config))
             (message "Ridge: ⚙️ Updated ridge server configuration")))))
+
+(defun ridge-setup (&optional interact)
+  "Install, start and configure Ridge server."
+  (interactive "p")
+  ;; Setup ridge server if not running
+  (let* ((not-started (not (ridge--server-started?)))
+         (permitted (if (and not-started interact)
+                        (y-or-n-p "Could not connect to Ridge server. Should I install, start and configure it for you?")
+                      t)))
+    ;; Install, start server if user permitted and server not ready
+    (when (and permitted not-started)
+      (ridge--server-setup))
+
+    ;; Server can be started but not ready (to use/configure)
+    ;; Wait until server is ready if setup was permitted
+    (while (and permitted (not ridge--server-ready?))
+      (sit-for 0.5))
+
+    ;; Configure server once server ready if user permitted
+    (when permitted
+      (ridge--server-configure))))
 
 
 ;; -----------------------------------------------
@@ -980,15 +1010,10 @@ Paragraph only starts at first text after blank line."
 
 ;;;###autoload
 (defun ridge ()
-  "Natural, Incremental Search for your personal notes, transactions and images."
+  "Provide natural, search assistance for your notes, transactions and images."
   (interactive)
-  ;; Setup ridge server if not running before executing user commands
-  (when (and (not (ridge--server-running?))
-             (y-or-n-p "Could not connect to Ridge server. Should I install and start it?"))
-    (ridge--server-setup))
-  (while (not ridge--server-ready?)
-    (sit-for 0.5))
-  (ridge--server-configure)
+  (when ridge-auto-setup
+    (ridge-setup t))
   (ridge--menu))
 
 (provide 'ridge)
