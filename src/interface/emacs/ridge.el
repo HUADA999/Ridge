@@ -65,7 +65,7 @@
   :group 'ridge
   :type 'string)
 
-(defcustom is-ridge-server-local t
+(defcustom ridge-server-is-local t
   "Is Ridge server on local machine?."
   :group 'ridge
   :type 'boolean)
@@ -185,13 +185,13 @@ Use `which-key` if available, else display simple message in echo area"
       (executable-find "ridge.exe")
       "ridge")
   "Command to interact with Ridge server."
-  :group 'ridge
-  :type 'string)
+  :type 'string
+  :group 'ridge)
 
 (defcustom ridge-server-args '("--no-gui")
   "Arguments to pass to Ridge server on startup."
-  :group 'ridge
-  :type '(repeat string))
+  :type '(repeat string)
+  :group 'ridge)
 
 (defcustom ridge-server-python-command
   (if (equal system-type 'windows-nt)
@@ -219,13 +219,13 @@ for example), set this to the full interpreter path."
 
 (defcustom ridge-org-files-index (org-agenda-files t t)
   "List of org-files to index on ridge server."
-  :group 'ridge
-  :type '(repeat string))
+  :type '(repeat string)
+  :group 'ridge)
 
 (defcustom ridge-openai-api-key nil
   "OpenAI API key used to configure chat on ridge server."
-  :group 'ridge
-  :type 'string)
+  :type 'string
+  :group 'ridge)
 
 (defvar ridge--server-process nil "Track Ridge server process.")
 (defvar ridge--server-name "*ridge-server*" "Track Ridge server buffer.")
@@ -326,7 +326,7 @@ for example), set this to the full interpreter path."
   "Install and start the ridge server, if required."
   (interactive)
   ;; Install ridge server, if not available but expected on local machine
-  (when (and is-ridge-server-local
+  (when (and ridge-server-is-local
              (or (not (executable-find ridge-server-command))
                  (not (ridge--server-get-version))))
       (ridge--server-install-upgrade))
