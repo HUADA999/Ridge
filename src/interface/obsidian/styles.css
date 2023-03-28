@@ -10,13 +10,12 @@ If your plugin does not need CSS, delete this file.
 :root {
     --ridge-chat-blue: #017eff;
     --ridge-chat-dark-grey: #475569;
-    --ridge-chat-light-grey: #aaa;
-    --ridge-chat-white: #f8fafc;
 }
 
 .ridge-chat {
     display: grid;
-    color: var(--ridge-chat-dark-grey);
+    background: var(--background-primary);
+    color: var(--text-normal);
     text-align: center;
     font-family: roboto, karma, segoe ui, sans-serif;
     font-size: 20px;
@@ -28,37 +27,37 @@ If your plugin does not need CSS, delete this file.
     margin: 10px;
 }
 
-#chat-title {
+#ridge-chat-title {
     font-weight: 200;
     color: var(--ridge-chat-blue);
 }
 
-#chat-body {
+#ridge-chat-body {
     font-size: medium;
     margin: 0px;
     line-height: 20px;
     overflow-y: scroll; /* Make chat body scroll to see history */
 }
 /* add chat metatdata to bottom of bubble */
-.chat-message::after {
+.ridge-chat-message::after {
     content: attr(data-meta);
     display: block;
     font-size: x-small;
-    color: var(--ridge-chat-dark-grey);
+    color: var(--text-muted);
     margin: -12px 7px 0 -5px;
 }
 /* move message by ridge to left */
-.chat-message.ridge {
+.ridge-chat-message.ridge {
     margin-left: auto;
     text-align: left;
 }
 /* move message by you to right */
-.chat-message.you {
+.ridge-chat-message.you {
     margin-right: auto;
     text-align: right;
 }
 /* basic style chat message text */
-.chat-message-text {
+.ridge-chat-message-text {
     margin: 10px;
     border-radius: 10px;
     padding: 10px;
@@ -68,14 +67,14 @@ If your plugin does not need CSS, delete this file.
     text-align: left;
 }
 /* color chat bubble by ridge blue */
-.chat-message-text.ridge {
-    color: var(--ridge-chat-white);
+.ridge-chat-message-text.ridge {
+    color: var(--text-on-accent);
     background: var(--ridge-chat-blue);
     margin-left: auto;
     white-space: pre-line;
 }
 /* add left protrusion to ridge chat bubble */
-.chat-message-text.ridge:after {
+.ridge-chat-message-text.ridge:after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -86,13 +85,13 @@ If your plugin does not need CSS, delete this file.
     transform: rotate(-60deg);
 }
 /* color chat bubble by you dark grey */
-.chat-message-text.you {
-    color: var(--ridge-chat-white);
+.ridge-chat-message-text.you {
+    color: var(--text-on-accent);
     background: var(--ridge-chat-dark-grey);
     margin-right: auto;
 }
 /* add right protrusion to you chat bubble */
-.chat-message-text.you:after {
+.ridge-chat-message-text.you:after {
     content: '';
     position: absolute;
     top: 91%;
@@ -104,32 +103,33 @@ If your plugin does not need CSS, delete this file.
     transform: rotate(-60deg)
 }
 
-#chat-footer {
+#ridge-chat-footer {
     padding: 0;
     display: grid;
     grid-template-columns: minmax(70px, 100%);
     grid-column-gap: 10px;
     grid-row-gap: 10px;
 }
-#chat-footer > * {
+#ridge-chat-footer > * {
     padding: 15px;
     border-radius: 5px;
     border: 1px solid var(--ridge-chat-dark-grey);
     background: #f9fafc
 }
-#chat-input.option:hover {
-    box-shadow: 0 0 11px var(--ridge-chat-light-grey);
+#ridge-chat-input.option:hover {
+    box-shadow: 0 0 11px var(--background-modifier-box-shadow);
 }
-#chat-input {
+#ridge-chat-input {
     font-size: medium;
+}
 }
 
 @media (pointer: coarse), (hover: none) {
-    #chat-body.abbr[title] {
+    #ridge-chat-body.abbr[title] {
         position: relative;
         padding-left: 4px;  /* space references out to ease tapping */
     }
-    #chat-body.abbr[title]:focus:after {
+    #ridge-chat-body.abbr[title]:focus:after {
         content: attr(title);
 
         /* position tooltip */
@@ -139,10 +139,10 @@ If your plugin does not need CSS, delete this file.
         z-index: 1;  /* show tooltip above chat messages */
 
         /* style tooltip */
-        background-color: #aaa;
-        color: var(--ridge-chat-white);
+        background-color: var(--background-secondary);
+        color: var(--text-muted);
         border-radius: 2px;
-        box-shadow: 1px 1px 4px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 1px 1px 4px 0 var(--background-modifier-box-shadow);
         font-size: 14px;
         padding: 2px 4px;
     }
