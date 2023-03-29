@@ -6,3 +6,142 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+:root {
+    --ridge-chat-blue: #017eff;
+    --ridge-chat-dark-grey: #475569;
+}
+
+.ridge-chat {
+    display: grid;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    text-align: center;
+    font-family: roboto, karma, segoe ui, sans-serif;
+    font-size: var(--font-ui-large);
+    font-weight: 300;
+    line-height: 1.5em;
+}
+.ridge-chat > * {
+    padding: 10px;
+    margin: 10px;
+}
+
+#ridge-chat-title {
+    font-weight: 200;
+    color: var(--ridge-chat-blue);
+}
+
+#ridge-chat-body {
+    font-size: var(--font-ui-medium);
+    margin: 0px;
+    line-height: 20px;
+    overflow-y: scroll; /* Make chat body scroll to see history */
+}
+/* add chat metatdata to bottom of bubble */
+.ridge-chat-message::after {
+    content: attr(data-meta);
+    display: block;
+    font-size: var(--font-ui-smaller);
+    color: var(--text-muted);
+    margin: -12px 7px 0 -5px;
+}
+/* move message by ridge to left */
+.ridge-chat-message.ridge {
+    margin-left: auto;
+    text-align: left;
+}
+/* move message by you to right */
+.ridge-chat-message.you {
+    margin-right: auto;
+    text-align: right;
+}
+/* basic style chat message text */
+.ridge-chat-message-text {
+    margin: 10px;
+    border-radius: 10px;
+    padding: 10px;
+    position: relative;
+    display: inline-block;
+    max-width: 80%;
+    text-align: left;
+}
+/* color chat bubble by ridge blue */
+.ridge-chat-message-text.ridge {
+    color: var(--text-on-accent);
+    background: var(--ridge-chat-blue);
+    margin-left: auto;
+    white-space: pre-line;
+}
+/* add left protrusion to ridge chat bubble */
+.ridge-chat-message-text.ridge:after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: -7px;
+    border: 10px solid transparent;
+    border-top-color: var(--ridge-chat-blue);
+    border-bottom: 0;
+    transform: rotate(-60deg);
+}
+/* color chat bubble by you dark grey */
+.ridge-chat-message-text.you {
+    color: var(--text-on-accent);
+    background: var(--ridge-chat-dark-grey);
+    margin-right: auto;
+}
+/* add right protrusion to you chat bubble */
+.ridge-chat-message-text.you:after {
+    content: '';
+    position: absolute;
+    top: 91%;
+    right: -2px;
+    border: 10px solid transparent;
+    border-left-color: var(--ridge-chat-dark-grey);
+    border-right: 0;
+    margin-top: -10px;
+    transform: rotate(-60deg)
+}
+
+#ridge-chat-footer {
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(70px, 100%);
+    grid-column-gap: 10px;
+    grid-row-gap: 10px;
+}
+#ridge-chat-footer > * {
+    padding: 15px;
+    background: #f9fafc
+}
+#ridge-chat-input.option:hover {
+    box-shadow: 0 0 11px var(--background-modifier-box-shadow);
+}
+#ridge-chat-input {
+    font-size: var(--font-ui-medium);
+    padding: 25px 20px;
+}
+
+@media (pointer: coarse), (hover: none) {
+    #ridge-chat-body.abbr[title] {
+        position: relative;
+        padding-left: 4px;  /* space references out to ease tapping */
+    }
+    #ridge-chat-body.abbr[title]:focus:after {
+        content: attr(title);
+
+        /* position tooltip */
+        position: absolute;
+        left: 16px;  /* open tooltip to right of ref link, instead of on top of it */
+        width: auto;
+        z-index: 1;  /* show tooltip above chat messages */
+
+        /* style tooltip */
+        background-color: var(--background-secondary);
+        color: var(--text-muted);
+        border-radius: 2px;
+        box-shadow: 1px 1px 4px 0 var(--background-modifier-box-shadow);
+        font-size: var(--font-ui-small);
+        padding: 2px 4px;
+    }
+}
