@@ -67,14 +67,16 @@ See [official Obsidian plugin docs](https://help.obsidian.md/Extending+Obsidian/
 
 ## Use
 ### Chat
-Run *Ridge: Chat* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette) and ask questions in a natural, conversational style.
+Run *Ridge: Chat* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette) and ask questions in a natural, conversational style.<br />
 E.g "When did I file my taxes last year?"
 
 Notes:
 - *Using Ridge Chat will result in query relevant notes being shared with OpenAI for ChatGPT to respond.*
 - *To use Ridge Chat, ensure you've set your [OpenAI API key](https://platform.openai.com/account/api-keys) in the Ridge plugin settings.*
 
-See [[https://github.com/debanjum/ridge/tree/master/#Ridge-Chat][Ridge Chat]] for more details
+See [Ridge Chat](https://github.com/debanjum/ridge/tree/master/#Ridge-Chat) for more details
+
+![](https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_chat_on_obsidian_0.6.0.png?)
 
 ### Search
 Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Search* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
