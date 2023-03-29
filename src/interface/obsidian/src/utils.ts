@@ -29,10 +29,11 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
 
     // Set index name from the path of the current vault
     let indexName = getVaultAbsolutePath(vault).replace(/\//g, '_').replace(/ /g, '_');
-    // Get default index directory from ridge backend
-    let ridgeDefaultIndexDirectory = await request(`${ridgeConfigUrl}/default`)
-        .then(response => JSON.parse(response))
-        .then(data => { return getIndexDirectoryFromBackendConfig(data); });
+    // Get default config fields from ridge backend
+    let defaultConfig = await request(`${ridgeConfigUrl}/default`).then(response => JSON.parse(response));
+    let ridgeDefaultIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["markdown"]["embeddings-file"]);
+    let ridgeDefaultChatDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["processor"]["conversation"]["conversation-logfile"]);
+    let ridgeDefaultChatModelName = defaultConfig["processor"]["conversation"]["model"];
 
     // Get current config if ridge backend configured, else get default config from ridge backend
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
@@ -49,14 +50,7 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                         "compressed-jsonl": `${ridgeDefaultIndexDirectory}/${indexName}.jsonl.gz`,
                     }
                 }
-                // Disable ridge processors, as not required
-                delete data["processor"];
-
-                // Save new config and refresh index on ridge backend
-                updateRidgeBackend(setting.ridgeUrl, data);
-                console.log(`Ridge: Created ridge backend config:\n${JSON.stringify(data)}`)
             }
-
             // Else if ridge config has no markdown content config
             else if (!data["content-type"]["markdown"]) {
                 // Add markdown config to ridge content-type config
@@ -67,28 +61,59 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                     "embeddings-file": `${ridgeDefaultIndexDirectory}/${indexName}.pt`,
                     "compressed-jsonl": `${ridgeDefaultIndexDirectory}/${indexName}.jsonl.gz`,
                 }
-
-                // Save updated config and refresh index on ridge backend
-                updateRidgeBackend(setting.ridgeUrl, data);
-                console.log(`Ridge: Added markdown config to ridge backend config:\n${JSON.stringify(data["content-type"])}`)
             }
-
             // Else if ridge is not configured to index markdown files in configured obsidian vault
             else if (data["content-type"]["markdown"]["input-filter"].length != 1 ||
                 data["content-type"]["markdown"]["input-filter"][0] !== mdInVault) {
                 // Update markdown config in ridge content-type config
                 // Set markdown config to only index markdown files in configured obsidian vault
-                let ridgeIndexDirectory = getIndexDirectoryFromBackendConfig(data);
+                let ridgeIndexDirectory = getIndexDirectoryFromBackendConfig(data["content-type"]["markdown"]["embeddings-file"]);
                 data["content-type"]["markdown"] = {
                     "input-filter": [mdInVault],
                     "input-files": null,
                     "embeddings-file": `${ridgeIndexDirectory}/${indexName}.pt`,
                     "compressed-jsonl": `${ridgeIndexDirectory}/${indexName}.jsonl.gz`,
                 }
-                // Save updated config and refresh index on ridge backend
-                updateRidgeBackend(setting.ridgeUrl, data);
-                console.log(`Ridge: Updated markdown config in ridge backend config:\n${JSON.stringify(data["content-type"]["markdown"])}`)
             }
+
+            // If OpenAI API key not set in Ridge plugin settings
+            if (!setting.openaiApiKey) {
+                // Disable ridge processors, as not required
+                delete data["processor"];
+            }
+            // Else if ridge backend not configured yet
+            else if (!ridge_already_configured || !data["processor"]) {
+                data["processor"] = {
+                    "conversation": {
+                        "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
+                        "model": ridgeDefaultChatModelName,
+                        "openai-api-key": setting.openaiApiKey,
+                    }
+                }
+            }
+            // Else if ridge config has no conversation processor config
+            else if (!data["processor"]["conversation"]) {
+                data["processor"]["conversation"] = {
+                    "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
+                    "model": ridgeDefaultChatModelName,
+                    "openai-api-key": setting.openaiApiKey,
+                }
+            }
+            // Else if ridge is not configured with OpenAI API key from ridge plugin settings
+            else if (data["processor"]["conversation"]["openai-api-key"] !== setting.openaiApiKey) {
+                data["processor"]["conversation"] = {
+                    "conversation-logfile": data["processor"]["conversation"]["conversation-logfile"],
+                    "model": data["procesor"]["conversation"]["model"],
+                    "openai-api-key": setting.openaiApiKey,
+                }
+            }
+
+            // Save updated config and refresh index on ridge backend
+            updateRidgeBackend(setting.ridgeUrl, data);
+            if (!ridge_already_configured)
+                console.log(`Ridge: Created ridge backend config:\n${JSON.stringify(data)}`)
+            else
+                console.log(`Ridge: Updated ridge backend config:\n${JSON.stringify(data)}`)
         })
         .catch(error => {
             if (notify)
@@ -111,6 +136,6 @@ export async function updateRidgeBackend(ridgeUrl: string, ridgeConfig: Object) 
         .then(_ => request(`${ridgeUrl}/api/update?t=markdown`));
 }
 
-function getIndexDirectoryFromBackendConfig(ridgeConfig: any) {
-    return ridgeConfig["content-type"]["markdown"]["embeddings-file"].split("/").slice(0, -1).join("/");
+function getIndexDirectoryFromBackendConfig(filepath: string) {
+    return filepath.split("/").slice(0, -1).join("/");
 }
