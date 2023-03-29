@@ -2,6 +2,7 @@ import { App, Notice, PluginSettingTab, request, Setting } from 'obsidian';
 import Ridge from 'src/main';
 
 export interface RidgeSetting {
+    openaiApiKey: string;
     resultsCount: number;
     ridgeUrl: string;
     connectedToBackend: boolean;
@@ -13,6 +14,7 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     ridgeUrl: 'http://localhost:8000',
     connectedToBackend: false,
     autoConfigure: true,
+    openaiApiKey: '',
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
@@ -41,7 +43,16 @@ export class RidgeSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                     containerEl.firstElementChild?.setText(this.getBackendStatusMessage());
                 }));
-         new Setting(containerEl)
+        new Setting(containerEl)
+            .setName('OpenAI API Key')
+            .setDesc('Your OpenAI API Key for Ridge Chat')
+            .addText(text => text
+                .setValue(`${this.plugin.settings.openaiApiKey}`)
+                .onChange(async (value) => {
+                    this.plugin.settings.openaiApiKey = value.trim();
+                    await this.plugin.saveSettings();
+                }));
+        new Setting(containerEl)
             .setName('Results Count')
             .setDesc('The number of search results to show')
             .addSlider(slider => slider
@@ -110,7 +121,7 @@ export class RidgeSettingTab extends PluginSettingTab {
 
     getBackendStatusMessage() {
         return !this.plugin.settings.connectedToBackend
-        ? '❗Disconnected from Ridge backend. Ensure Ridge backend is running and Ridge URL is correctly set below.'
-        : '✅ Connected to Ridge backend.';
+            ? '❗Disconnected from Ridge backend. Ensure Ridge backend is running and Ridge URL is correctly set below.'
+            : '✅ Connected to Ridge backend.';
     }
 }
