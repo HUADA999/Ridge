@@ -62,9 +62,16 @@ https://user-images.githubusercontent.com/6413477/210486007-36ee3407-e6aa-4185-8
 
 ### 1. Setup Backend
 Open terminal/cmd and run below command to install and start the ridge backend
-```shell
-pip install ridge-assistant && ridge --no-gui
-```
+- On Linux/MacOS
+  ```shell
+  python -m pip install ridge-assistant && ridge --no-gui
+  ```
+
+- On Windows
+  ```shell
+  py -m pip install ridge-assistant && ridge --no-gui
+  ```
+
 ### 2. Setup Plugin
   1. Open [Ridge](https://obsidian.md/plugins?id=ridge) from the *Community plugins* tab in Obsidian settings panel
   2. Click *Install*, then *Enable* on the Ridge plugin page in Obsidian
