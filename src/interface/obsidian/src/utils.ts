@@ -10,7 +10,8 @@ export function getVaultAbsolutePath(vault: Vault): string {
 }
 
 export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting, notify: boolean = true) {
-    let mdInVault = `${getVaultAbsolutePath(vault)}/**/*.md`;
+    let vaultPath = getVaultAbsolutePath(vault);
+    let mdInVault = `${vaultPath}/**/*.md`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
     // Check if ridge backend is configured, note if cannot connect to backend
@@ -28,7 +29,7 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     if (!setting.connectedToBackend) return;
 
     // Set index name from the path of the current vault
-    let indexName = getVaultAbsolutePath(vault).replace(/\//g, '_').replace(/ /g, '_');
+    let indexName = vaultPath.replace(/\//g, '_').replace(/\\/g, '_').replace(/ /g, '_').replace(/:/g, '_');
     // Get default config fields from ridge backend
     let defaultConfig = await request(`${ridgeConfigUrl}/default`).then(response => JSON.parse(response));
     let ridgeDefaultIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["markdown"]["embeddings-file"]);
