@@ -282,7 +282,7 @@ Auto invokes setup steps on calling main entrypoint."
            :name ridge--server-name
            :buffer ridge--server-name
            :command (append (list ridge-server-command) server-args)
-           :sentinel (lambda (process event)
+           :sentinel (lambda (_ event)
                        (message "ridge.el: ridge server stopped with: %s" event)
                        (setq ridge--server-ready? nil))
            :filter (lambda (process msg)
@@ -304,7 +304,7 @@ Auto invokes setup steps on calling main entrypoint."
                                      (string-match "main.py" msg)
                                      (string-match "api.py" msg)))
                             (dolist (line (split-string msg "\n"))
-                              (message "ridge.el: %s" (nth 1 (split-string msg "  " t " *"))))))
+                              (message "ridge.el: %s" (nth 1 (split-string line "  " t " *"))))))
                      ;; call default process filter to write output to process buffer
                      (internal-default-process-filter process msg))))
     (set-process-query-on-exit-flag ridge--server-process nil)
