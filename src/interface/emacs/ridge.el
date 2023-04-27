@@ -465,17 +465,19 @@ CONFIG is json obtained from Ridge config API."
          (permitted (if (and not-started interact)
                         (y-or-n-p "Could not connect to Ridge server. Should I install, start and configure it for you?")
                       t)))
-    ;; Install, start server if user permitted and server not ready
-    (when (and permitted not-started)
-      (ridge--server-setup))
-
-    ;; Server can be started but not ready (to use/configure)
-    ;; Wait until server is ready if setup was permitted
-    (while (and permitted (not ridge--server-ready?))
-      (sit-for 0.5))
-
-    ;; Configure server once server ready if user permitted
+    ;; If user permits setup of ridge server from ridge.el
     (when permitted
+      ; Install, start server if server not running
+      (when not-started
+        (ridge--server-setup))
+
+      ;; Wait until server is ready
+      ;; As server can be started but not ready to use/configure
+      (while (not ridge--server-ready?)
+        (message "Ridge: Waiting for server to start...")
+        (sit-for 0.5))
+
+      ;; Configure server once it's ready
       (ridge--server-configure))))
 
 
