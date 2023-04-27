@@ -383,6 +383,7 @@ CONFIG is json obtained from Ridge config API."
     (cond
      ;; If ridge backend is not configured yet
      ((not current-config)
+      (message "ridge.el: Server not configured yet.")
       (setq config (delq (assoc 'content-type config) config))
       (add-to-list 'config
                    `(content-type . ((org . ((input-files . ,ridge-org-files)
@@ -393,7 +394,8 @@ CONFIG is json obtained from Ridge config API."
 
      ;; Else if ridge config has no org content config
      ((not (alist-get 'org (alist-get 'content-type config)))
-      (let ((new-content-type (alist-get 'content-type config)))
+      (message "ridge.el: Org-mode content on server not configured yet.")
+     (let ((new-content-type (alist-get 'content-type config)))
         (setq new-content-type (delq (assoc 'org new-content-type) new-content-type))
         (add-to-list 'new-content-type `(org . ((input-files . ,ridge-org-files)
                                                 (input-filter . ,org-directory-regexes)
@@ -406,6 +408,7 @@ CONFIG is json obtained from Ridge config API."
      ;; Else if ridge is not configured to index specified org files
      ((not (and (equal (alist-get 'input-files (alist-get 'org (alist-get 'content-type config))) ridge-org-files)
                 (equal (alist-get 'input-filter (alist-get 'org (alist-get 'content-type config))) org-directory-regexes)))
+      (message "ridge.el: Org-mode content on server is stale.")
       (let* ((index-directory (ridge--get-directory-from-config config '(content-type org embeddings-file)))
              (new-content-type (alist-get 'content-type config)))
         (setq new-content-type (delq (assoc 'org new-content-type) new-content-type))
@@ -423,6 +426,7 @@ CONFIG is json obtained from Ridge config API."
       (setq config (delq (assoc 'processor config) config)))
 
      ((not current-config)
+      (message "ridge.el: Chat not configured yet.")
       (setq config (delq (assoc 'processor config) config))
       (add-to-list 'config
                    `(processor . ((conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
@@ -430,6 +434,7 @@ CONFIG is json obtained from Ridge config API."
                                                    (openai-api-key . ,ridge-openai-api-key)))))))
 
      ((not (alist-get 'conversation (alist-get 'processor config)))
+      (message "ridge.el: Chat not configured yet.")
        (let ((new-processor-type (alist-get 'processor config)))
          (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
          (add-to-list 'new-processor-type `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
@@ -440,6 +445,7 @@ CONFIG is json obtained from Ridge config API."
 
      ;; Else if ridge is not configured with specified openai api key
      ((not (equal (alist-get 'openai-api-key (alist-get 'conversation (alist-get 'processor config))) ridge-openai-api-key))
+      (message "ridge.el: Chat configuration has gone stale.")
       (let* ((chat-directory (ridge--get-directory-from-config config '(processor conversation conversation-logfile)))
              (model-name (ridge--get-directory-from-config config '(processor conversation model)))
              (new-processor-type (alist-get 'processor config)))
@@ -450,12 +456,13 @@ CONFIG is json obtained from Ridge config API."
         (setq config (delq (assoc 'processor config) config))
         (add-to-list 'config `(processor . ,new-processor-type)))))
 
-     ;; Update server with latest configuration
-     (ridge--post-new-config config)
-     (cond ((not current-config)
+      ;; Update server with latest configuration, if required
+      (cond ((not current-config)
+            (ridge--post-new-config config)
             (message "ridge.el: ⚙️ Generated new ridge server configuration."))
            ((not (equal config current-config))
-            (message "Ridge: ⚙️ Updated ridge server configuration")))))
+            (ridge--post-new-config config)
+            (message "ridge.el: ⚙️ Updated ridge server configuration.")))))
 
 (defun ridge-setup (&optional interact)
   "Install, start and configure Ridge server."
