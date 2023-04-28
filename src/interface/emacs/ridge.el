@@ -304,7 +304,8 @@ Auto invokes setup steps on calling main entrypoint."
                                      (string-match "main.py" msg)
                                      (string-match "api.py" msg)))
                             (dolist (line (split-string msg "\n"))
-                              (message "ridge.el: %s" (nth 1 (split-string line "  " t " *"))))))
+                              (when (string-match "  " line)
+                                (message "ridge.el: %s" (nth 1 (split-string line "  " t " *")))))))
                      ;; call default process filter to write output to process buffer
                      (internal-default-process-filter process msg))))
     (set-process-query-on-exit-flag ridge--server-process nil)
@@ -481,7 +482,6 @@ CONFIG is json obtained from Ridge config API."
       ;; Wait until server is ready
       ;; As server can be started but not ready to use/configure
       (while (not ridge--server-ready?)
-        (message "Ridge: Waiting for server to start...")
         (sit-for 0.5))
 
       ;; Configure server once it's ready
@@ -848,7 +848,7 @@ RECEIVE-DATE is the message receive date."
       (progn
         (when rerank
           (setq ridge--rerank t)
-          (message "Ridge: Rerank Results"))
+          (message "ridge.el: Rerank Results"))
         (ridge--query-search-api-and-render-results
          query-url
          ridge--content-type
@@ -865,7 +865,7 @@ RECEIVE-DATE is the message receive date."
 
 (defun ridge--teardown-incremental-search ()
   "Teardown hooks used for incremental search."
-  (message "Ridge: Teardown Incremental Search")
+  (message "ridge.el: Teardown Incremental Search")
   ;; unset ridge minibuffer window
   (setq ridge--minibuffer-window nil)
   ;; delete open connections to ridge server
@@ -1001,7 +1001,7 @@ Paragraph only starts at first text after blank line."
          (url-request-method "GET"))
     (progn
       (setq ridge--content-type content-type)
-      (url-retrieve update-url (lambda (_) (message "Ridge %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
+      (url-retrieve update-url (lambda (_) (message "ridge.el: %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
 
 (transient-define-suffix ridge--chat-command (&optional _)
   "Command to Chat with Ridge."
