@@ -226,7 +226,7 @@ for example), set this to the full interpreter path."
   :group 'ridge)
 
 (defcustom ridge-org-directories nil
-  "List of directories with org-mode files to index on ridge server."
+  "List of directories with `org-mode' files to index on ridge server."
   :type '(repeat string)
   :group 'ridge)
 
@@ -259,10 +259,10 @@ Auto invokes setup steps on calling main entrypoint."
   "Install or upgrade the ridge server."
   (with-temp-buffer
     (message "ridge.el: Installing server...")
-    (if (/= (apply 'call-process ridge-server-python-command
-                     nil t nil
-                     "-m" "pip" "install" "--upgrade"
-                     '("ridge-assistant"))
+    (if (/= (apply #'call-process ridge-server-python-command
+                   nil t nil
+                   "-m" "pip" "install" "--upgrade"
+                   '("ridge-assistant"))
             0)
         (message "ridge.el: Failed to install Ridge server. Please install it manually using pip install `ridge-assistant'.\n%s" (buffer-string))
       (message "ridge.el: Installed and upgraded Ridge server version: %s" (ridge--server-get-version)))))
@@ -316,11 +316,11 @@ Auto invokes setup steps on calling main entrypoint."
   "Check if the ridge server has been started."
   ;; check for when server process handled from within emacs
   (if (and ridge--server-process
-           (not (null (process-live-p ridge--server-process))))
+           (process-live-p ridge--server-process))
       t
     ;; else general check via ping to ridge-server-url
     (if (ignore-errors
-          (not (null (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url)))))
+          (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url)))
         ;; Successful ping to non-emacs ridge server indicates it is started and ready.
         ;; So update ready state tracker variable (and implicitly return true for started)
         (setq ridge--server-ready? t)
@@ -470,7 +470,7 @@ CONFIG is json obtained from Ridge config API."
             (message "ridge.el: ⚙️ Updated ridge server configuration.")))))
 
 (defun ridge-setup (&optional interact)
-  "Install, start and configure Ridge server."
+  "Install, start and configure Ridge server. Get permission if INTERACT is non-nil."
   (interactive "p")
   ;; Setup ridge server if not running
   (let* ((not-started (not (ridge--server-started?)))
