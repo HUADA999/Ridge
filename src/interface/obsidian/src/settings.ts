@@ -108,6 +108,7 @@ export class RidgeSettingTab extends PluginSettingTab {
                     this.plugin.registerInterval(progress_indicator);
 
                     await request(`${this.plugin.settings.ridgeUrl}/api/update?t=markdown&force=true`);
+                    await request(`${this.plugin.settings.ridgeUrl}/api/update?t=pdf&force=true`);
                     new Notice('✅ Updated Ridge index.');
 
                     // Reset button once index is updated
