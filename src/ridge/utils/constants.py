@@ -28,6 +28,12 @@ default_config = {
             "compressed-jsonl": "~/.ridge/content/ledger/ledger.jsonl.gz",
             "embeddings-file": "~/.ridge/content/ledger/ledger_embeddings.pt",
         },
+        "pdf": {
+            "input-files": None,
+            "input-filter": None,
+            "compressed-jsonl": "~/.ridge/content/pdf/pdf.jsonl.gz",
+            "embeddings-file": "~/.ridge/content/pdf/pdf_embeddings.pt",
+        },
         "image": {
             "input-directories": None,
             "input-filter": None,
