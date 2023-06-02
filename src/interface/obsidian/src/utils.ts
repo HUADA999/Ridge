@@ -12,6 +12,7 @@ export function getVaultAbsolutePath(vault: Vault): string {
 export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting, notify: boolean = true) {
     let vaultPath = getVaultAbsolutePath(vault);
     let mdInVault = `${vaultPath}/**/*.md`;
+    let pdfInVault = `${vaultPath}/**/*.pdf`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
     // Check if ridge backend is configured, note if cannot connect to backend
@@ -32,7 +33,8 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     let indexName = vaultPath.replace(/\//g, '_').replace(/\\/g, '_').replace(/ /g, '_').replace(/:/g, '_');
     // Get default config fields from ridge backend
     let defaultConfig = await request(`${ridgeConfigUrl}/default`).then(response => JSON.parse(response));
-    let ridgeDefaultIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["markdown"]["embeddings-file"]);
+    let ridgeDefaultMdIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["markdown"]["embeddings-file"]);
+    let ridgeDefaultPdfIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["pdf"]["embeddings-file"]);
     let ridgeDefaultChatDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["processor"]["conversation"]["conversation-logfile"]);
     let ridgeDefaultChatModelName = defaultConfig["processor"]["conversation"]["model"];
 
@@ -47,8 +49,14 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                     "markdown": {
                         "input-filter": [mdInVault],
                         "input-files": null,
-                        "embeddings-file": `${ridgeDefaultIndexDirectory}/${indexName}.pt`,
-                        "compressed-jsonl": `${ridgeDefaultIndexDirectory}/${indexName}.jsonl.gz`,
+                        "embeddings-file": `${ridgeDefaultMdIndexDirectory}/${indexName}.pt`,
+                        "compressed-jsonl": `${ridgeDefaultMdIndexDirectory}/${indexName}.jsonl.gz`,
+                    },
+                    "pdf": {
+                        "input-filter": [pdfInVault],
+                        "input-files": null,
+                        "embeddings-file": `${ridgeDefaultPdfIndexDirectory}/${indexName}.pt`,
+                        "compressed-jsonl": `${ridgeDefaultPdfIndexDirectory}/${indexName}.jsonl.gz`,
                     }
                 }
             }
@@ -59,8 +67,8 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                 data["content-type"]["markdown"] = {
                     "input-filter": [mdInVault],
                     "input-files": null,
-                    "embeddings-file": `${ridgeDefaultIndexDirectory}/${indexName}.pt`,
-                    "compressed-jsonl": `${ridgeDefaultIndexDirectory}/${indexName}.jsonl.gz`,
+                    "embeddings-file": `${ridgeDefaultMdIndexDirectory}/${indexName}.pt`,
+                    "compressed-jsonl": `${ridgeDefaultMdIndexDirectory}/${indexName}.jsonl.gz`,
                 }
             }
             // Else if ridge is not configured to index markdown files in configured obsidian vault
@@ -68,12 +76,37 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                 data["content-type"]["markdown"]["input-filter"][0] !== mdInVault) {
                 // Update markdown config in ridge content-type config
                 // Set markdown config to only index markdown files in configured obsidian vault
-                let ridgeIndexDirectory = getIndexDirectoryFromBackendConfig(data["content-type"]["markdown"]["embeddings-file"]);
+                let ridgeMdIndexDirectory = getIndexDirectoryFromBackendConfig(data["content-type"]["markdown"]["embeddings-file"]);
                 data["content-type"]["markdown"] = {
                     "input-filter": [mdInVault],
                     "input-files": null,
-                    "embeddings-file": `${ridgeIndexDirectory}/${indexName}.pt`,
-                    "compressed-jsonl": `${ridgeIndexDirectory}/${indexName}.jsonl.gz`,
+                    "embeddings-file": `${ridgeMdIndexDirectory}/${indexName}.pt`,
+                    "compressed-jsonl": `${ridgeMdIndexDirectory}/${indexName}.jsonl.gz`,
+                }
+            }
+
+            if (ridge_already_configured && !data["content-type"]["pdf"]) {
+                // Add pdf config to ridge content-type config
+                // Set pdf config to index pdf files in configured obsidian vault
+                data["content-type"]["pdf"] = {
+                    "input-filter": [pdfInVault],
+                    "input-files": null,
+                    "embeddings-file": `${ridgeDefaultPdfIndexDirectory}/${indexName}.pt`,
+                    "compressed-jsonl": `${ridgeDefaultPdfIndexDirectory}/${indexName}.jsonl.gz`,
+                }
+            }
+            // Else if ridge is not configured to index pdf files in configured obsidian vault
+            else if (ridge_already_configured &&
+                (data["content-type"]["pdf"]["input-filter"].length != 1 ||
+                data["content-type"]["pdf"]["input-filter"][0] !== pdfInVault)) {
+                // Update pdf config in ridge content-type config
+                // Set pdf config to only index pdf files in configured obsidian vault
+                let ridgePdfIndexDirectory = getIndexDirectoryFromBackendConfig(data["content-type"]["pdf"]["embeddings-file"]);
+                data["content-type"]["pdf"] = {
+                    "input-filter": [pdfInVault],
+                    "input-files": null,
+                    "embeddings-file": `${ridgePdfIndexDirectory}/${indexName}.pt`,
+                    "compressed-jsonl": `${ridgePdfIndexDirectory}/${indexName}.jsonl.gz`,
                 }
             }
 
