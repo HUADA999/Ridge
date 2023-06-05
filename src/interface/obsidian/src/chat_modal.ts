@@ -35,7 +35,7 @@ export class RidgeChatModal extends Modal {
         contentEl.createDiv({ attr: { id: "ridge-chat-body", class: "ridge-chat-body" } });
 
         // Get conversation history from Ridge backend
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?`;
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat?client=obsidian`;
         let response = await request(chatUrl);
         let chatLogs = JSON.parse(response).response;
         chatLogs.forEach((chatLog: any) => {
@@ -120,7 +120,7 @@ export class RidgeChatModal extends Modal {
 
         // Get chat response from Ridge backend
         let encodedQuery = encodeURIComponent(query);
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}`;
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&client=obsidian`;
         let response = await request(chatUrl);
         let data = JSON.parse(response);
 
