@@ -1,11 +1,7 @@
 from ridge.processor.conversation import utils
 from langchain.schema import ChatMessage
 import factory
-import logging
 import tiktoken
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 class ChatMessageFactory(factory.Factory):
     class Meta:
