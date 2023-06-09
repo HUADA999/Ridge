@@ -634,7 +634,7 @@ CONFIG is json obtained from Ridge config API."
       (buffer-string)))
   ;; Update index on ridge server after configuration update
   (let ((ridge--server-ready? nil))
-    (url-retrieve (format "%s/api/update?t=org" ridge-server-url) #'identity)))
+    (url-retrieve (format "%s/api/update?t=org&client=emacs" ridge-server-url) #'identity)))
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
@@ -651,7 +651,7 @@ CONFIG is json obtained from Ridge config API."
 Use QUERY, CONTENT-TYPE and (optional) RERANK as query params"
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
-    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s" ridge-server-url encoded-query content-type rerank ridge-results-count)))
+    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s&client=emacs" ridge-server-url encoded-query content-type rerank ridge-results-count)))
 
 (defun ridge--query-search-api-and-render-results (query-url content-type query buffer-name)
   "Query Ridge Search with QUERY-URL.
@@ -788,7 +788,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   "Send QUERY to Ridge Chat API."
   (let* ((url-request-method "GET")
          (encoded-query (url-hexify-string query))
-         (query-url (format "%s/api/chat?q=%s" ridge-server-url encoded-query)))
+         (query-url (format "%s/api/chat?q=%s&client=emacs" ridge-server-url encoded-query)))
     (with-temp-buffer
       (condition-case ex
           (progn
@@ -1031,7 +1031,7 @@ Paragraph only starts at first text after blank line."
   (let* ((force-update (if (member "--force-update" args) "true" "false"))
          ;; set content type to: specified > last used > based on current buffer > default type
          (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-         (update-url (format "%s/api/update?t=%s&force=%s" ridge-server-url content-type force-update))
+         (update-url (format "%s/api/update?t=%s&force=%s&client=emacs" ridge-server-url content-type force-update))
          (url-request-method "GET"))
     (progn
       (setq ridge--content-type content-type)
