@@ -6,14 +6,14 @@ from typing import Callable, List, Tuple
 from ridge.utils.helpers import timer
 
 # Internal Packages
-from ridge.utils.rawconfig import Entry, TextContentConfig
+from ridge.utils.rawconfig import Entry, TextConfigBase
 
 
 logger = logging.getLogger(__name__)
 
 
 class TextToJsonl(ABC):
-    def __init__(self, config: TextContentConfig):
+    def __init__(self, config: TextConfigBase):
         self.config = config
 
     @abstractmethod
