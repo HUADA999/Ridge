@@ -1,6 +1,7 @@
 # System Packages
 import logging
 from pathlib import Path
+import os
 
 # External Packages
 import pytest
@@ -10,6 +11,7 @@ from ridge.utils.state import model
 from ridge.search_type import text_search
 from ridge.utils.rawconfig import ContentConfig, SearchConfig, TextContentConfig
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
+from ridge.processor.github.github_to_jsonl import GithubToJsonl
 
 
 # Test
@@ -170,3 +172,14 @@ def test_incremental_update(content_config: ContentConfig, search_config: Search
     # Cleanup
     # reset input_files in config to empty list
     content_config.org.input_files = []
+
+
+# ----------------------------------------------------------------------------------------------------
+@pytest.mark.skipif(os.getenv("GITHUB_PAT_TOKEN") is None, reason="GITHUB_PAT_TOKEN not set")
+def test_asymmetric_setup_github(content_config: ContentConfig, search_config: SearchConfig):
+    # Act
+    # Regenerate notes embeddings during asymmetric setup
+    github_model = text_search.setup(GithubToJsonl, content_config.github, search_config.asymmetric, regenerate=True)
+
+    # Assert
+    assert len(github_model.entries) > 1
