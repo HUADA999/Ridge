@@ -15,9 +15,10 @@ from ridge.processor.conversation.gpt import converse, extract_questions
 from ridge.processor.conversation.utils import message_to_log, message_to_prompt
 from ridge.search_type import image_search, text_search
 from ridge.utils.helpers import log_telemetry, timer
-from ridge.utils.rawconfig import FullConfig, SearchResponse
+from ridge.utils.rawconfig import FullConfig, SearchResponse, TextContentConfig, ConversationProcessorConfig
 from ridge.utils.state import SearchType
 from ridge.utils import state, constants
+from ridge.utils.yaml import save_config_to_file_updated_state
 
 # Initialize Router
 api = APIRouter()
@@ -60,6 +61,18 @@ async def set_config_data(updated_config: FullConfig):
         yaml.dump(yaml.safe_load(state.config.json(by_alias=True)), outfile)
         outfile.close()
     return state.config
+
+
+@api.post("/config/data/content_type/{content_type}")
+async def set_content_config_data(content_type: str, updated_config: TextContentConfig):
+    state.config.content_type[content_type] = updated_config
+    save_config_to_file_updated_state()
+
+
+@api.post("/config/data/processor/conversation")
+async def set_processor_conversation_config_data(updated_config: ConversationProcessorConfig):
+    state.config.processor.conversation = updated_config
+    save_config_to_file_updated_state()
 
 
 @api.get("/search", response_model=List[SearchResponse])
