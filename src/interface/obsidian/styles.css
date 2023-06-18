@@ -148,9 +148,9 @@ If your plugin does not need CSS, delete this file.
 
 .ridge-result-file {
     font-weight: 600;
-  }
+}
 
-  .ridge-result-entry {
+.ridge-result-entry {
     color: var(--text-muted);
     margin-left: 2em;
     padding-left: 0.5em;
@@ -160,17 +160,25 @@ If your plugin does not need CSS, delete this file.
     border-left-style: solid;
     border-left-color: var(--color-accent-2);
     white-space: normal;
-  }
+}
 
-  .ridge-result-entry > * {
+.ridge-result-entry > * {
     font-size: var(--font-ui-medium);
-  }
+}
 
-  .ridge-result-entry > p {
+.ridge-result-entry > p {
     margin-top: 0.2em;
     margin-bottom: 0.2em;
-  }
+}
 
-  .ridge-result-entry p br {
+.ridge-result-entry p br {
     display: none;
-  }
+}
+
+.ridge-info-hint {
+    color: var(--text-muted);
+    font-size: var(--font-ui-small);
+    font-style: italic;
+    text-align: center;
+    margin-bottom: 0.5em;
+}

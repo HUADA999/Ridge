@@ -47,6 +47,14 @@ default_config = {
             "compressed-jsonl": "~/.ridge/content/music/music.jsonl.gz",
             "embeddings-file": "~/.ridge/content/music/music_embeddings.pt",
         },
+        "github": {
+            "pat-token": None,
+            "repo-name": None,
+            "repo-owner": None,
+            "repo-branch": "master",
+            "compressed-jsonl": "~/.ridge/content/github/github.jsonl.gz",
+            "embeddings-file": "~/.ridge/content/github/github_embeddings.pt",
+        },
     },
     "search-type": {
         "symmetric": {
