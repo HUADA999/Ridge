@@ -50,7 +50,7 @@ pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 if system() != 'Darwin':
     # Add Splash screen to show on app launch
     splash = Splash(
-        'src/ridge/interface/web/assets/icons/favicon-144x144.png',
+        'src/ridge/interface/web/assets/icons/favicon-128x128.png',
         binaries=a.binaries,
         datas=a.datas,
         text_pos=(10, 160),
@@ -82,7 +82,7 @@ if system() != 'Darwin':
         target_arch='x86_64',
         codesign_identity=None,
         entitlements_file=None,
-        icon='src/ridge/interface/web/assets/icons/favicon-144x144.ico',
+        icon='src/ridge/interface/web/assets/icons/favicon-128x128.ico',
     )
 else:
     exe = EXE(
