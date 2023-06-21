@@ -1,8 +1,8 @@
 * Emacs Ridge
-  /An Emacs interface for [[https://github.com/debanjum/ridge][ridge]]/
+  /An Emacs interface for [[https://github.com/ridge-ai/ridge][ridge]]/
 
 ** Requirements
-   - Install and Run [[https://github.com/debanjum/ridge][ridge]]
+   - Install and Run [[https://github.com/ridge-ai/ridge][ridge]]
 
 ** Installation
    - Direct Install
@@ -22,7 +22,7 @@
        #+begin_src elisp
          ;; Ridge Package
          (use-package ridge
-           :quelpa (ridge :fetcher url :url "https://raw.githubusercontent.com/debanjum/ridge/master/interface/emacs/ridge.el")
+           :quelpa (ridge :fetcher url :url "https://raw.githubusercontent.com/ridge-ai/ridge/master/interface/emacs/ridge.el")
            :bind ("C-c s" . 'ridge))
        #+end_src
 
