@@ -61,10 +61,10 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Homepage = "https://github.com/debanjum/ridge#readme"
-Issues = "https://github.com/debanjum/ridge/issues"
-Discussions = "https://github.com/debanjum/ridge/discussions"
-Releases = "https://github.com/debanjum/ridge/releases"
+Homepage = "https://github.com/ridge-ai/ridge#readme"
+Issues = "https://github.com/ridge-ai/ridge/issues"
+Discussions = "https://github.com/ridge-ai/ridge/discussions"
+Releases = "https://github.com/ridge-ai/ridge/releases"
 
 [project.scripts]
 ridge = "ridge.main:run"
