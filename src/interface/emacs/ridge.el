@@ -651,7 +651,9 @@ CONFIG is json obtained from Ridge config API."
 Use QUERY, CONTENT-TYPE and (optional) RERANK as query params"
   (let ((rerank (or rerank "false"))
         (encoded-query (url-hexify-string query)))
-    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s&client=emacs" ridge-server-url encoded-query content-type rerank ridge-results-count)))
+    (if content-type
+      (format "%s/api/search?q=%s&r=%s&n=%s&client=emacs" ridge-server-url encoded-query rerank ridge-results-count)
+    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s&client=emacs&t=%s" ridge-server-url content-type encoded-query rerank ridge-results-count))))
 
 (defun ridge--query-search-api-and-render-results (query-url content-type query buffer-name)
   "Query Ridge Search with QUERY-URL.
