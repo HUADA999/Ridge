@@ -1,4 +1,6 @@
-* Ridge Emacs 🦅
+[[https://github.com/ridge-ai/ridge/edit/master/src/interface/emacs/README.org][file:/src/ridge/interface/web/assets/icons/ridge-logo-sideways-200.png]] Emacs
+
+
   [[https://stable.melpa.org/#/ridge][file:https://stable.melpa.org/packages/ridge-badge.svg]] [[https://melpa.org/#/ridge][file:https://melpa.org/packages/ridge-badge.svg]] [[https://github.com/ridge-ai/ridge/actions/workflows/build_ridge_el.yml][https://github.com/ridge-ai/ridge/actions/workflows/build_ridge_el.yml/badge.svg?]]  [[https://github.com/ridge-ai/ridge/actions/workflows/test_ridge_el.yml][https://github.com/ridge-ai/ridge/actions/workflows/test_ridge_el.yml/badge.svg?]]
 
   /An AI personal assistant for your digital brain/
