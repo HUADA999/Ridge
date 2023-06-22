@@ -6,39 +6,53 @@
     	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
     </head>
     <body class="ridge-configure">
-        <header>
-            <div>
-                <h1>Ridge Settings</h1>
-                <p>Check out our <a href="https://github.com/ridge-ai/ridge">source code on Github</a></p>
-            </div>
-            <div>
-                <h2>Ready?</h2>
-                <div id="actions">
-                    <button onclick="window.location.href='/';" >
-                        Search
-                    </button>
-                    <button onclick="window.location.href='/chat';">
-                        Chat
-                    </button>
-                </div>
-            </div>
-        </header>
+        <div class="ridge-header">
+            <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
+            <nav class="ridge-nav">
+                <a href="/chat">Chat</a>
+                <a href="/">Search</a>
+                <a href="/config">Settings</a>
+            </nav>
+        </div>
         <div class=”content”>
             {% block content %}
             {% endblock %}
         </div>
     </body>
     <style>
-        header {
+        .ridge-configure {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-gap: 12px;
+            grid-template-columns: 1fr;
+            padding: 0 24px;
         }
-
-        @media screen and (max-width: 600px) {
-            header {
-                grid-template-columns: 1fr;
-            }
+        .ridge-header {
+            display: grid;
+            grid-auto-flow: row;
+            gap: 20px;
+            padding: 16px 0;
+            margin-bottom: 16px;
+        }
+        .ridge-nav {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 32px;
+            justify-self: center;
+        }
+        .ridge-nav a {
+            color: #333;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: normal;
+            padding: 8px;
+            border-radius: 4px;
+            justify-self: center;
+        }
+        .ridge-nav a:hover {
+            background-color: var(--evening-sun);
+        }
+        img.ridge-logo {
+            width: min(60vw, 150px);
+            justify-self: center;
         }
     </style>
 </html>
