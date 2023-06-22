@@ -188,9 +188,15 @@
     </script>
 
     <body>
-        <h1>
-            <img class="ridge-logo" src="static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
-        </h1>
+        <!--Add Header Logo and Nav Pane-->
+        <div class="ridge-header">
+            <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
+            <nav class="ridge-nav">
+                <a href="/chat">Chat</a>
+                <a href="/">Search</a>
+                <a href="/config">Settings</a>
+            </nav>
+        </div>
 
         <!--Add Text Box To Enter Query, Trigger Incremental Search OnChange -->
         <input type="text" id="query" class="option" onkeyup=incrementalSearch(event) autofocus="autofocus" placeholder="What is the meaning of life?">
@@ -215,7 +221,7 @@
             body {
                 display: grid;
                 grid-template-columns: 1fr;
-                grid-template-rows: 1fr 1fr 1fr minmax(80px, 100%);
+                grid-template-rows: 1fr auto auto minmax(80px, 100%);
             }
             body > * {
                 grid-column: 1;
@@ -225,7 +231,7 @@
             body {
                 display: grid;
                 grid-template-columns: 1fr min(70vw, 100%) 1fr;
-                grid-template-rows: 1fr 1fr 1fr minmax(80px, 100%);
+                grid-template-rows: 1fr auto auto minmax(80px, 100%);
                 padding-top: 60vw;
             }
             body > * {
@@ -248,12 +254,34 @@
             padding: 10px;
             margin: 10px;
         }
-        h1 {
-            margin: 8px 0;
-            padding: 0;
+        .ridge-header {
+            display: grid;
+            grid-auto-flow: row;
+            gap: 20px;
+            padding: 16px 0;
+            margin: 0;
+        }
+        .ridge-nav {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 32px;
+            justify-self: center;
+        }
+        .ridge-nav a {
+            color: #333;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: normal;
+            padding: 8px;
+            border-radius: 4px;
+            justify-self: center;
+        }
+        .ridge-nav a:hover {
+            background-color: var(--evening-sun);
         }
         img.ridge-logo {
             width: min(60vw, 150px);
+            justify-self: center;
         }
 
         #options {
