@@ -103,10 +103,15 @@
         }
     </script>
     <body>
-        <!-- Chat Header -->
-        <h1>
-            <img class="ridge-logo" src="static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
-        </h1>
+       <!--Add Header Logo and Nav Pane-->
+        <div class="ridge-header">
+            <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
+            <nav class="ridge-nav">
+                <a href="/chat">Chat</a>
+                <a href="/">Search</a>
+                <a href="/config">Settings</a>
+            </nav>
+        </div>
 
         <!-- Chat Body -->
         <div id="chat-body"></div>
@@ -142,12 +147,34 @@
             padding: 10px;
             margin: 10px;
         }
-        h1 {
-            margin: 8px 0;
-            padding: 0;
+        .ridge-header {
+            display: grid;
+            grid-auto-flow: row;
+            gap: 20px;
+            padding: 16px 0;
+            margin: 0;
+        }
+        .ridge-nav {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 32px;
+            justify-self: center;
+        }
+        .ridge-nav a {
+            color: #333;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: normal;
+            padding: 8px;
+            border-radius: 4px;
+            justify-self: center;
+        }
+        .ridge-nav a:hover {
+            background-color: var(--evening-sun);
         }
         img.ridge-logo {
             width: min(60vw, 150px);
+            justify-self: center;
         }
 
         #chat-body {
