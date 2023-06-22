@@ -64,6 +64,9 @@
 .ridge-nav a:hover {
     background-color: var(--primary-hover);
 }
+.ridge-nav-selected {
+    background-color: var(--primary);
+}
 img.ridge-logo {
     width: min(60vw, 150px);
     justify-self: center;
