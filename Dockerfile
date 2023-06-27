@@ -1,14 +1,14 @@
 # syntax=docker/dockerfile:1
 FROM ubuntu:kinetic
-LABEL org.opencontainers.image.source https://github.com/debanjum/ridge
+LABEL org.opencontainers.image.source https://github.com/ridge-ai/ridge
 
 # Install System Dependencies
 RUN apt update -y && \
-    apt -y install python3-pip python3-pyqt6
+    apt -y install python3-pip python3-pyqt6 git
 
 # Install Python Dependencies
 RUN pip install --upgrade pip && \
-    pip install --upgrade --pre ridge-assistant
+    pip install git+https://github.com/ridge-ai/ridge.git
 
 # Run the Application
 # There are more arguments required for the application to run,
