@@ -49,9 +49,7 @@ default_config = {
         },
         "github": {
             "pat-token": None,
-            "repos": [
-                {"name": "ridge", "owner": "ridge-ai", "branch": "master"},
-            ],
+            "repos": [],
             "compressed-jsonl": "~/.ridge/content/github/github.jsonl.gz",
             "embeddings-file": "~/.ridge/content/github/github_embeddings.pt",
         },
