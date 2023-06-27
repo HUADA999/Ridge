@@ -7,7 +7,7 @@
 ;; Keywords: search, chat, org-mode, outlines, markdown, pdf, beancount, image
 ;; Version: 0.6.2
 ;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1"))
-;; URL: https://github.com/debanjum/ridge/tree/master/src/interface/emacs
+;; URL: https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -106,13 +106,13 @@
 (defvar ridge--minibuffer-window nil
   "Minibuffer window used to enter query.")
 
-(defconst ridge--query-prompt "🦅Ridge: "
+(defconst ridge--query-prompt "🏮 Ridge: "
   "Query prompt shown in the minibuffer.")
 
-(defconst ridge--search-buffer-name "*🦅Ridge Search*"
+(defconst ridge--search-buffer-name "*🏮 Ridge Search*"
   "Name of buffer to show search results from Ridge.")
 
-(defconst ridge--chat-buffer-name "*🦅Ridge Chat*"
+(defconst ridge--chat-buffer-name "*🏮 Ridge Chat*"
   "Name of chat buffer for Ridge.")
 
 (defvar ridge--content-type "org"
@@ -784,7 +784,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
     (progn
       (org-set-startup-visibility)
       (visual-line-mode)
-      (re-search-backward "^\*+ 🦅" nil t))))
+      (re-search-backward "^\*+ 🏮" nil t))))
 
 (defun ridge--query-chat-api (query)
   "Send QUERY to Ridge Chat API."
@@ -809,7 +809,7 @@ RECEIVE-DATE is the message receive date."
   (let ((first-message-line (car (split-string message "\n" t)))
         (rest-message-lines (string-join (cdr (split-string message "\n" t)) "\n"))
         (heading-level (if (equal sender "you") "**" "***"))
-        (emojified-sender (if (equal sender "you") "🤔 *You*" "🦅 *Ridge*"))
+        (emojified-sender (if (equal sender "you") "🤔 *You*" "🏮 *Ridge*"))
         (suffix-newlines (if (equal sender "ridge") "\n\n" ""))
         (received (or receive-date (format-time-string "%F %T"))))
     (format "%s %s: %s\n   :PROPERTIES:\n   :RECEIVED: [%s]\n   :END:\n%s\n%s"

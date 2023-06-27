@@ -9,7 +9,7 @@
 
 ** Install
    #+begin_src shell
-   git clone https://github.com/debanjum/ridge && cd ridge
+   git clone https://github.com/ridge-ai/ridge && cd ridge
    conda env create -f environment.yml
    conda activate ridge
    #+end_src
@@ -23,7 +23,7 @@
 
 ** Use
    - *Ridge via Emacs*
-     - [[https://github.com/debanjum/ridge/tree/master/interface/emacs#installation][Install]] [[./interface/emacs/ridge.el][ridge.el]]
+     - [[https://github.com/ridge-ai/ridge/tree/master/interface/emacs#installation][Install]] [[./interface/emacs/ridge.el][ridge.el]]
      - Run ~M-x ridge <user-query>~ or Call ~C-c C-s~
 
    - *Ridge via API*

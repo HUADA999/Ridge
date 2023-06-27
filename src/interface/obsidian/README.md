@@ -1,5 +1,6 @@
-# Ridge Obsidian 🦅
-> Natural language search for your Obsidian notes using [Ridge](https://github.com/debanjum/ridge)
+<img src="/src/ridge/interface/web/assets/icons/ridge-logo-sideways.svg" width="200" alt="Ridge Logo">Obsidian
+
+> Natural language search for your Obsidian notes using [Ridge](https://github.com/ridge-ai/ridge)
 
 ## Table of Contents
 
@@ -35,7 +36,7 @@
 
 ## Demo
 ### Search Demo
-https://github.com/debanjum/ridge/assets/6413477/3e33d8ea-25bb-46c8-a3bf-c92f78d0f56b
+https://github.com/ridge-ai/ridge/assets/6413477/3e33d8ea-25bb-46c8-a3bf-c92f78d0f56b
 
 <details><summary>Description</summary>
 
@@ -51,10 +52,10 @@ https://github.com/debanjum/ridge/assets/6413477/3e33d8ea-25bb-46c8-a3bf-c92f78d
 
 ## Interfaces
 ### Search Modal
-![](https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_on_obsidian_0.2.5.png?)
+![](https://github.com/ridge-ai/ridge/blob/master/src/interface/obsidian/docs/ridge_on_obsidian_0.2.5.png?)
 
 ### Chat Modal
-![](https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_chat_on_obsidian_0.6.0.png?)
+![](https://github.com/ridge-ai/ridge/blob/master/src/interface/obsidian/docs/ridge_chat_on_obsidian_0.6.0.png?)
 
 ## Setup
 - *Make sure [python](https://realpython.com/installing-python/) (version 3.10 or lower) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
@@ -88,9 +89,9 @@ Notes:
 - *Using Ridge Chat will result in query relevant notes being shared with OpenAI for ChatGPT to respond.*
 - *To use Ridge Chat, ensure you've set your [OpenAI API key](https://platform.openai.com/account/api-keys) in the Ridge plugin settings.*
 
-See [Ridge Chat](https://github.com/debanjum/ridge/tree/master/#Ridge-Chat) for more details
+See [Ridge Chat](https://github.com/ridge-ai/ridge/tree/master/#Ridge-Chat) for more details
 
-![](https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_chat_on_obsidian_0.6.0.png?)
+![](https://github.com/ridge-ai/ridge/blob/master/src/interface/obsidian/docs/ridge_chat_on_obsidian_0.6.0.png?)
 
 ### Search
 Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Search* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
@@ -144,7 +145,7 @@ To see other notes similar to the current one, run *Ridge: Find Similar Notes* f
   So notes across multiple vaults **cannot** be searched at the same time
 
 ## Visualize Codebase
-<img src="https://github.com/debanjum/ridge/blob/master/src/interface/obsidian/docs/ridge_obsidian_codebase_visualization_0.2.1.png" width="700" />
+<img src="https://github.com/ridge-ai/ridge/blob/master/src/interface/obsidian/docs/ridge_obsidian_codebase_visualization_0.2.1.png" width="700" />
 
 ## Implementation
 The plugin implements the following functionality to search your notes with Ridge:
