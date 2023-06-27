@@ -10,13 +10,17 @@ from ridge.processor.text_to_jsonl import TextToJsonl
 from ridge.utils.helpers import get_absolute_path, is_none_or_empty, timer
 from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.jsonl import dump_jsonl, compress_jsonl_data
-from ridge.utils.rawconfig import Entry
+from ridge.utils.rawconfig import Entry, TextContentConfig
 
 
 logger = logging.getLogger(__name__)
 
 
 class MarkdownToJsonl(TextToJsonl):
+    def __init__(self, config: TextContentConfig):
+        super().__init__(config)
+        self.config = config
+
     # Define Functions
     def process(self, previous_entries=None):
         # Extract required fields from config
