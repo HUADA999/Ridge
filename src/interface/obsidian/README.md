@@ -58,7 +58,7 @@ https://github.com/ridge-ai/ridge/assets/6413477/3e33d8ea-25bb-46c8-a3bf-c92f78d
 ![](https://github.com/ridge-ai/ridge/blob/master/src/interface/obsidian/docs/ridge_chat_on_obsidian_0.6.0.png?)
 
 ## Setup
-- *Make sure [python](https://realpython.com/installing-python/) (version 3.10 or lower) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
+- *Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
 - *Ensure you follow the ordering of the setup steps. Install the plugin after starting the ridge backend. This allows the plugin to configure the ridge backend*
 
 ### 1. Setup Backend
