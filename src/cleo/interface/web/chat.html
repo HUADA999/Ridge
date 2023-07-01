@@ -119,8 +119,12 @@
                 <!-- Banner linking to https://ridge.dev -->
                 <div class="ridge-banner-container">
                     <a class="ridge-banner" href="https://ridge.dev" target="_blank">
-                        Check out what else we're building
+                        <p id="ridge-banner" class="ridge-banner">
+                            Enroll in Ridge cloud to get your own Github assistant
+                        </p>
                     </a>
+                    <input type="text" id="ridge-banner-email" placeholder="email" class="ridge-banner-email"></input>
+                    <button id="ridge-banner-submit" class="ridge-banner-button">Submit</button>
                 </div>
             {% endif %}
             {% if demo %}
@@ -304,6 +308,9 @@
                 margin: 4px;
                 grid-template-columns: auto;
             }
+            a.ridge-banner {
+                display: block;
+            }
         }
         @media only screen and (min-width: 600px) {
             body {
@@ -337,7 +344,67 @@
 
         a.ridge-banner {
             color: black;
+        }
+
+        a.ridge-logo {
+            text-align: center;
+        }
+
+        p.ridge-banner {
+            margin: 0;
+            padding: 10px;
+        }
+
+        button#ridge-banner-submit,
+        input#ridge-banner-email {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #475569;
+            background: #f9fafc;
+        }
+
+        button#ridge-banner-submit:hover,
+        input#ridge-banner-email:hover {
+            box-shadow: 0 0 11px #aaa;
+        }
+
+        p#ridge-banner {
+            display: inline;
+        }
+
+        a.ridge-banner {
+            color: black;
             text-decoration: none;
         }
     </style>
+    <script>
+        var ridgeBannerSubmit = document.getElementById("ridge-banner-submit");
+
+        ridgeBannerSubmit.addEventListener("click", function(event) {
+            event.preventDefault();
+            var email = document.getElementById("ridge-banner-email").value;
+            fetch("https://lantern.ridge.dev/beta/users/", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        email: email
+                    }),
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }).then(function(response) {
+                    return response.json();
+                }).then(function(data) {
+                    console.log(data);
+                    if (data.user != null) {
+                        document.getElementById("ridge-banner").innerHTML = "Thanks for signing up. We'll be in touch soon! 🚀";
+                        document.getElementById("ridge-banner-submit").remove();
+                    } else {
+                        document.getElementById("ridge-banner").innerHTML = "There was an error signing up. Please contact team@ridge.dev";
+                    }
+                }).catch(function(error) {
+                    console.log(error);
+                    document.getElementById("ridge-banner").innerHTML = "There was an error signing up. Please contact team@ridge.dev";
+                });
+            });
+    </script>
 </html>
