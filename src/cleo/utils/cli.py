@@ -34,6 +34,7 @@ def cli(args=None):
         help="Path to UNIX socket for server. Use to run server behind reverse proxy. Default: /tmp/uvicorn.sock",
     )
     parser.add_argument("--version", "-V", action="store_true", help="Print the installed Ridge version and exit")
+    parser.add_argument("--demo", action="store_true", default=False, help="Run Ridge in demo mode")
 
     args = parser.parse_args(args)
 
