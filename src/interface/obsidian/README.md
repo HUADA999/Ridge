@@ -1,6 +1,6 @@
 <img src="/src/ridge/interface/web/assets/icons/ridge-logo-sideways.svg" width="200" alt="Ridge Logo">Obsidian
 
-> Natural language search for your Obsidian notes using [Ridge](https://github.com/ridge-ai/ridge)
+> An AI personal assistant for your Digital Brain in Obsidian
 
 ## Table of Contents
 
