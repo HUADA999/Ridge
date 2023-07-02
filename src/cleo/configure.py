@@ -12,7 +12,6 @@ from fastapi.staticfiles import StaticFiles
 
 # Internal Packages
 from ridge.processor.conversation.gpt import summarize
-from ridge.processor.ledger.beancount_to_jsonl import BeancountToJsonl
 from ridge.processor.jsonl.jsonl_to_jsonl import JsonlToJsonl
 from ridge.processor.markdown.markdown_to_jsonl import MarkdownToJsonl
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
@@ -118,18 +117,6 @@ def configure_search(model: SearchModels, config: FullConfig, regenerate: bool, 
                 MarkdownToJsonl,
                 config.content_type.markdown,
                 search_config=config.search_type.asymmetric,
-                regenerate=regenerate,
-                filters=[DateFilter(), WordFilter(), FileFilter()],
-            )
-
-        # Initialize Ledger Search
-        if (t == state.SearchType.Ledger or t == None) and config.content_type.ledger and config.search_type.symmetric:
-            logger.info("💸 Setting up search for ledger")
-            # Extract Entries, Generate Ledger Embeddings
-            model.ledger_search = text_search.setup(
-                BeancountToJsonl,
-                config.content_type.ledger,
-                search_config=config.search_type.symmetric,
                 regenerate=regenerate,
                 filters=[DateFilter(), WordFilter(), FileFilter()],
             )
