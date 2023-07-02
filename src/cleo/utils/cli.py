@@ -10,9 +10,7 @@ from ridge.utils.yaml import parse_config_from_file
 
 def cli(args=None):
     # Setup Argument Parser for the Commandline Interface
-    parser = argparse.ArgumentParser(
-        description="Start Ridge; A Natural Language Search Engine for your personal Notes, Transactions and Photos"
-    )
+    parser = argparse.ArgumentParser(description="Start Ridge; An AI personal assistant for your Digital Brain")
     parser.add_argument(
         "--config-file", "-c", default="~/.ridge/ridge.yml", type=pathlib.Path, help="YAML file to configure Ridge"
     )
