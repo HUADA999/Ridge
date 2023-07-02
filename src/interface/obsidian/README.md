@@ -40,13 +40,16 @@ https://github.com/ridge-ai/ridge/assets/6413477/3e33d8ea-25bb-46c8-a3bf-c92f78d
 
 <details><summary>Description</summary>
 
-1. Install Ridge via `pip` and start Ridge backend in non-gui mode
+1. Install Ridge via `pip` and start Ridge backend
+    ```shell
+    python -m pip install ridge-assistant && ridge
+    ```
 2. Install Ridge plugin via Community Plugins settings pane on Obsidian app
-3. Check the new Ridge plugin settings
-4. Wait for Ridge backend to index markdown, PDF files in the current Vault
-5. Open Ridge plugin on Obsidian via Search button on Left Pane
-6. Search \"*Announce plugin to folks*\" in the [Obsidian Plugin docs](https://marcus.se.net/obsidian-plugin-docs/)
-7. Jump to the [search result](https://marcus.se.net/obsidian-plugin-docs/publishing/submit-your-plugin)
+    - Check the new Ridge plugin settings
+    - Wait for Ridge backend to index markdown, PDF files in the current Vault
+    - Open Ridge plugin on Obsidian via Search button on Left Pane
+    - Search \"*Announce plugin to folks*\" in the [Obsidian Plugin docs](https://marcus.se.net/obsidian-plugin-docs/)
+    - Jump to the [search result](https://marcus.se.net/obsidian-plugin-docs/publishing/submit-your-plugin)
 
 </details>
 
@@ -65,12 +68,12 @@ https://github.com/ridge-ai/ridge/assets/6413477/3e33d8ea-25bb-46c8-a3bf-c92f78d
 Open terminal/cmd and run below command to install and start the ridge backend
 - On Linux/MacOS
   ```shell
-  python -m pip install ridge-assistant && ridge --no-gui
+  python -m pip install ridge-assistant && ridge
   ```
 
 - On Windows
   ```shell
-  py -m pip install ridge-assistant && ridge --no-gui
+  py -m pip install ridge-assistant && ridge
   ```
 
 ### 2. Setup Plugin
@@ -96,7 +99,7 @@ See [Ridge Chat](https://github.com/ridge-ai/ridge/tree/master/#Ridge-Chat) for 
 ### Search
 Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Search* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
 
-*Note: Ensure the ridge server is running in the background before searching. Execute `ridge --no-gui` in your terminal if it is not already running*
+*Note: Ensure the ridge server is running in the background before searching. Execute `ridge` in your terminal if it is not already running*
 
 https://user-images.githubusercontent.com/6413477/218801155-cd67e8b4-a770-404a-8179-d6b61caa0f93.mp4
 
