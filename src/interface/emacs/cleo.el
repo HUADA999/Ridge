@@ -197,7 +197,7 @@ Use `which-key` if available, else display simple message in echo area"
   :type 'string
   :group 'ridge)
 
-(defcustom ridge-server-args '("--no-gui")
+(defcustom ridge-server-args '()
   "Arguments to pass to Ridge server on startup."
   :type '(repeat string)
   :group 'ridge)
