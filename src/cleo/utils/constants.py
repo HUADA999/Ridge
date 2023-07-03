@@ -22,12 +22,6 @@ default_config = {
             "compressed-jsonl": "~/.ridge/content/markdown/markdown.jsonl.gz",
             "embeddings-file": "~/.ridge/content/markdown/markdown_embeddings.pt",
         },
-        "ledger": {
-            "input-files": None,
-            "input-filter": None,
-            "compressed-jsonl": "~/.ridge/content/ledger/ledger.jsonl.gz",
-            "embeddings-file": "~/.ridge/content/ledger/ledger_embeddings.pt",
-        },
         "pdf": {
             "input-files": None,
             "input-filter": None,
@@ -40,12 +34,6 @@ default_config = {
             "embeddings-file": "~/.ridge/content/image/image_embeddings.pt",
             "batch-size": 50,
             "use-xmp-metadata": False,
-        },
-        "music": {
-            "input-files": None,
-            "input-filter": None,
-            "compressed-jsonl": "~/.ridge/content/music/music.jsonl.gz",
-            "embeddings-file": "~/.ridge/content/music/music_embeddings.pt",
         },
         "github": {
             "pat-token": None,

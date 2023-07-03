@@ -4,7 +4,7 @@
 
 ;; Author: Debanjum Singh Solanky <debanjum@gmail.com>
 ;; Description: An AI personal assistant for your digital brain
-;; Keywords: search, chat, org-mode, outlines, markdown, pdf, beancount, image
+;; Keywords: search, chat, org-mode, outlines, markdown, pdf, image
 ;; Version: 0.7.0
 ;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1"))
 ;; URL: https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs
@@ -29,8 +29,7 @@
 ;;; Commentary:
 
 ;; Create an AI personal assistant for your `org-mode', `markdown' notes,
-;; `beancount' transactions, PDFs and images. This package exposes
-;; two assistance modes, search and chat:
+;; PDFs and images. The assistant exposes 2 modes, search and chat:
 ;;
 ;; Chat provides faster answers, iterative discovery and assisted
 ;; creativity. It requires your OpenAI API key to access GPT models
@@ -93,10 +92,8 @@
   :group 'ridge
   :type '(choice (const "org")
                  (const "markdown")
-                 (const "ledger")
                  (const "image")
-                 (const "pdf")
-                 (const "music")))
+                 (const "pdf")))
 
 
 ;; --------------------------
@@ -120,9 +117,7 @@
 
 (declare-function org-element-property "org-mode" (PROPERTY ELEMENT))
 (declare-function org-element-type "org-mode" (ELEMENT))
-(declare-function beancount-mode "beancount" ())
 (declare-function markdown-mode "markdown-mode" ())
-(declare-function org-music-mode "org-music" ())
 (declare-function which-key--show-keymap "which-key" (KEYMAP-NAME KEYMAP &optional PRIOR-ARGS ALL
 NO-PAGING FILTER))
 
@@ -137,22 +132,16 @@ NO-PAGING FILTER))
        "C-x m  | markdown\n")
      (when (member 'org enabled-content-types)
        "C-x o  | org-mode\n")
-     (when (member 'ledger enabled-content-types)
-       "C-x l  | ledger\n")
      (when (member 'image enabled-content-types)
        "C-x i  | image\n")
      (when (member 'pdf enabled-content-types)
-       "C-x p  | pdf\n")
-     (when (member 'music enabled-content-types)
-       "C-x M  | music\n"))))
+       "C-x p  | pdf\n"))))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
 (defvar ridge--reference-count 0 "Track number of references currently in chat bufffer.")
 (defun ridge--search-markdown () "Set content-type to `markdown'." (interactive) (setq ridge--content-type "markdown"))
 (defun ridge--search-org () "Set content-type to `org-mode'." (interactive) (setq ridge--content-type "org"))
-(defun ridge--search-ledger () "Set content-type to `ledger'." (interactive) (setq ridge--content-type "ledger"))
 (defun ridge--search-images () "Set content-type to image." (interactive) (setq ridge--content-type "image"))
-(defun ridge--search-music () "Set content-type to music." (interactive) (setq ridge--content-type "music"))
 (defun ridge--search-pdf () "Set content-type to pdf." (interactive) (setq ridge--content-type "pdf"))
 (defun ridge--improve-rank () "Use cross-encoder to rerank search results." (interactive) (ridge--incremental-search t))
 (defun ridge--make-search-keymap (&optional existing-keymap)
@@ -164,14 +153,10 @@ NO-PAGING FILTER))
       (define-key kmap (kbd "C-x m") #'ridge--search-markdown))
     (when (member 'org enabled-content-types)
       (define-key kmap (kbd "C-x o") #'ridge--search-org))
-    (when (member 'ledger enabled-content-types)
-      (define-key kmap (kbd "C-x l") #'ridge--search-ledger))
     (when (member 'image enabled-content-types)
       (define-key kmap (kbd "C-x i") #'ridge--search-images))
     (when (member 'pdf enabled-content-types)
       (define-key kmap (kbd "C-x p") #'ridge--search-pdf))
-    (when (member 'music enabled-content-types)
-      (define-key kmap (kbd "C-x M") #'ridge--search-music))
     kmap))
 
 (defvar ridge--keymap nil "Track Ridge keymap in this variable.")
@@ -538,18 +523,6 @@ CONFIG is json obtained from Ridge config API."
     ;; remove leading (, ) or SPC from extracted entries string
     (replace-regexp-in-string "^[\(\) ]" "")))
 
-(defun ridge--extract-entries-as-ledger (json-response query)
-  "Convert JSON-RESPONSE, QUERY from API to ledger entries."
-  (thread-last json-response
-               ;; extract and render entries from API response
-               (mapcar (lambda (args) (format "%s\n\n" (cdr (assoc 'entry args)))))
-               ;; Set query as heading in rendered results buffer
-               (format ";; %s\n\n%s\n" query)
-               ;; remove leading (, ) or SPC from extracted entries string
-               (replace-regexp-in-string "^[\(\) ]" "")
-               ;; remove trailing (, ) or SPC from extracted entries string
-               (replace-regexp-in-string "[\(\) ]$" "")))
-
 (defun ridge--extract-entries-as-pdf (json-response query)
   "Convert QUERY, JSON-RESPONSE from API with PDF results to `org-mode' entries."
   (thread-last
@@ -621,8 +594,6 @@ CONFIG is json obtained from Ridge config API."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (file-extension (file-name-extension buffer-name)))
     (cond
-     ((and (member 'music enabled-content-types) (equal buffer-name "Music.org")) "music")
-     ((and (member 'ledger enabled-content-types) (or (equal file-extension "bean") (equal file-extension "beancount"))) "ledger")
      ((and (member 'org enabled-content-types) (equal file-extension "org")) "org")
      ((and (member 'org enabled-content-types) (equal file-extension "pdf")) "pdf")
      ((and (member 'markdown enabled-content-types) (or (equal file-extension "markdown") (equal file-extension "md"))) "markdown")
@@ -678,10 +649,9 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
           (json-response (json-parse-buffer :object-type 'alist)))
       (erase-buffer)
       (insert
-       (cond ((or (equal content-type "org") (equal content-type "music")) (ridge--extract-entries-as-org json-response query))
+       (cond ((equal content-type "org") (ridge--extract-entries-as-org json-response query))
              ((equal content-type "markdown") (ridge--extract-entries-as-markdown json-response query))
              ((equal content-type "pdf") (ridge--extract-entries-as-pdf json-response query))
-             ((equal content-type "ledger") (ridge--extract-entries-as-ledger json-response query))
              ((equal content-type "image") (ridge--extract-entries-as-images json-response query))
              (t (ridge--extract-entries json-response query))))
       (cond ((or (equal content-type "all")
@@ -696,9 +666,6 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
                    (org-set-startup-visibility)))
             ((equal content-type "markdown") (progn (markdown-mode)
                                                     (visual-line-mode)))
-            ((equal content-type "ledger") (beancount-mode))
-            ((equal content-type "music") (progn (org-mode)
-                                                (org-music-mode)))
             ((equal content-type "image") (progn (shr-render-region (point-min) (point-max))
                                                 (goto-char (point-min))))
             (t (fundamental-mode))))
@@ -920,7 +887,7 @@ RECEIVE-DATE is the message receive date."
   (remove-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
 
 (defun ridge-incremental ()
-  "Natural, Incremental Search for your personal notes, transactions and music."
+  "Natural, Incremental Search for your personal notes and documents."
   (interactive)
   (let* ((ridge-buffer-name (get-buffer-create ridge--search-buffer-name)))
     ;; switch to ridge results buffer
@@ -1014,7 +981,7 @@ Paragraph only starts at first text after blank line."
   ;; set content type to: last used > based on current buffer > default type
   :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
   ;; dynamically set choices to content types enabled on ridge backend
-  :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "ledger" "music" "image")))
+  :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
 
 (transient-define-suffix ridge--search-command (&optional args)
   (interactive (list (transient-args transient-current-command)))
@@ -1074,7 +1041,7 @@ Paragraph only starts at first text after blank line."
 
 ;;;###autoload
 (defun ridge ()
-  "Provide natural, search assistance for your notes, transactions and images."
+  "Provide natural, search assistance for your notes, documents and images."
   (interactive)
   (when ridge-auto-setup
     (ridge-setup t))
