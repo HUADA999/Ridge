@@ -1,6 +1,6 @@
 import { App, Modal, request, Setting } from 'obsidian';
 import { RidgeSetting } from 'src/settings';
-
+import fetch from "node-fetch";
 
 export class RidgeChatModal extends Modal {
     result: string;
@@ -34,13 +34,8 @@ export class RidgeChatModal extends Modal {
         // Create area for chat logs
         contentEl.createDiv({ attr: { id: "ridge-chat-body", class: "ridge-chat-body" } });
 
-        // Get conversation history from Ridge backend
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?client=obsidian`;
-        let response = await request(chatUrl);
-        let chatLogs = JSON.parse(response).response;
-        chatLogs.forEach((chatLog: any) => {
-            this.renderMessageWithReferences(chatLog.message, chatLog.by, chatLog.context, new Date(chatLog.created));
-        });
+        // Get chat history from Ridge backend
+        await this.getChatHistory();
 
         // Add chat input field
         contentEl.createEl("input",
@@ -104,11 +99,51 @@ export class RidgeChatModal extends Modal {
         return chat_message_el
     }
 
+    createRidgeResponseDiv(dt?: Date): HTMLDivElement {
+        let message_time = this.formatDate(dt ?? new Date());
+
+        // Append message to conversation history HTML element.
+        // The chat logs should display above the message input box to follow standard UI semantics
+        let chat_body_el = this.contentEl.getElementsByClassName("ridge-chat-body")[0];
+        let chat_message_el = chat_body_el.createDiv({
+            attr: {
+                "data-meta": `🏮 Ridge at ${message_time}`,
+                class: `ridge-chat-message ridge`
+            },
+        }).createDiv({
+            attr: {
+                class: `ridge-chat-message-text ridge`
+            },
+        })
+
+        // Scroll to bottom after inserting chat messages
+        this.modalEl.scrollTop = this.modalEl.scrollHeight;
+
+        return chat_message_el
+    }
+
+    renderIncrementalMessage(htmlElement: HTMLDivElement, additionalMessage: string) {
+        htmlElement.innerHTML += additionalMessage;
+        // Scroll to bottom of modal, till the send message input box
+        this.modalEl.scrollTop = this.modalEl.scrollHeight;
+    }
+
     formatDate(date: Date): string {
         // Format date in HH:MM, DD MMM YYYY format
         let time_string = date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false });
         let date_string = date.toLocaleString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' }).replace(/-/g, ' ');
         return `${time_string}, ${date_string}`;
+    }
+
+
+    async getChatHistory(): Promise<void> {
+        // Get chat history from Ridge backend
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat/init?client=obsidian`;
+        let response = await request(chatUrl);
+        let chatLogs = JSON.parse(response).response;
+        chatLogs.forEach((chatLog: any) => {
+            this.renderMessageWithReferences(chatLog.message, chatLog.by, chatLog.context, new Date(chatLog.created));
+        });
     }
 
     async getChatResponse(query: string | undefined | null): Promise<void> {
@@ -121,10 +156,30 @@ export class RidgeChatModal extends Modal {
         // Get chat response from Ridge backend
         let encodedQuery = encodeURIComponent(query);
         let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&client=obsidian`;
-        let response = await request(chatUrl);
-        let data = JSON.parse(response);
 
-        // Render Ridge response as chat message
-        this.renderMessage(data.response, "ridge");
+        let response = await fetch(chatUrl, {
+            method: "GET",
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Content-Type": "text/event-stream"
+            },
+        })
+        let responseElemeent = this.createRidgeResponseDiv();
+
+        try {
+            if (response.body == null) {
+                throw new Error("Response body is null");
+            }
+
+            for await (const chunk of response.body) {
+                const responseText = chunk.toString();
+                if (responseText.startsWith("### compiled references:")) {
+                    return;
+                }
+                this.renderIncrementalMessage(responseElemeent, responseText);
+            }
+        } catch (err) {
+            this.renderIncrementalMessage(responseElemeent, "Sorry, unable to get response from Ridge backend ❤️‍🩹. Contact developer for help at team@ridge.dev or <a href='https://discord.gg/BDgyabRM6e'>in Discord</a>")
+        }
     }
 }
