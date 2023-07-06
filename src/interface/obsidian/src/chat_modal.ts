@@ -156,6 +156,10 @@ export class RidgeChatModal extends Modal {
         // Get chat response from Ridge backend
         let encodedQuery = encodeURIComponent(query);
         let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&client=obsidian`;
+        let responseElement = this.createRidgeResponseDiv();
+
+        // Temporary status message to indicate that Ridge is thinking
+        this.renderIncrementalMessage(responseElement, "🤔");
 
         let response = await fetch(chatUrl, {
             method: "GET",
@@ -164,11 +168,14 @@ export class RidgeChatModal extends Modal {
                 "Content-Type": "text/event-stream"
             },
         })
-        let responseElemeent = this.createRidgeResponseDiv();
 
         try {
             if (response.body == null) {
                 throw new Error("Response body is null");
+            }
+            // Clear thinking status message
+            if (responseElement.innerHTML === "🤔") {
+                responseElement.innerHTML = "";
             }
 
             for await (const chunk of response.body) {
@@ -176,10 +183,10 @@ export class RidgeChatModal extends Modal {
                 if (responseText.startsWith("### compiled references:")) {
                     return;
                 }
-                this.renderIncrementalMessage(responseElemeent, responseText);
+                this.renderIncrementalMessage(responseElement, responseText);
             }
         } catch (err) {
-            this.renderIncrementalMessage(responseElemeent, "Sorry, unable to get response from Ridge backend ❤️‍🩹. Contact developer for help at team@ridge.dev or <a href='https://discord.gg/BDgyabRM6e'>in Discord</a>")
+            this.renderIncrementalMessage(responseElement, "Sorry, unable to get response from Ridge backend ❤️‍🩹. Contact developer for help at team@ridge.dev or <a href='https://discord.gg/BDgyabRM6e'>in Discord</a>")
         }
     }
 }
