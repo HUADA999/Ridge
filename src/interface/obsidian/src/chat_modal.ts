@@ -158,7 +158,7 @@ export class RidgeChatModal extends Modal {
 
         // Get chat response from Ridge backend
         let encodedQuery = encodeURIComponent(query);
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&client=obsidian`;
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&n=${this.setting.resultsCount}&client=obsidian`;
         let responseElement = this.createRidgeResponseDiv();
 
         // Temporary status message to indicate that Ridge is thinking
