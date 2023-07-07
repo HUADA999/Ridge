@@ -83,7 +83,7 @@
   :type 'integer)
 
 (defcustom ridge-results-count 5
-  "Number of results to get from Ridge API for each query."
+  "Number of results to show in search and use for chat responses."
   :group 'ridge
   :type 'integer)
 
@@ -766,7 +766,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   "Send QUERY to Ridge Chat API."
   (let* ((url-request-method "GET")
          (encoded-query (url-hexify-string query))
-         (query-url (format "%s/api/chat?q=%s&client=emacs" ridge-server-url encoded-query)))
+         (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url ridge-results-count encoded-query)))
     (with-temp-buffer
       (condition-case ex
           (progn
