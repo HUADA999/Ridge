@@ -138,7 +138,6 @@ export class RidgeChatModal extends Modal {
         return `${time_string}, ${date_string}`;
     }
 
-
     async getChatHistory(): Promise<void> {
         // Get chat history from Ridge backend
         let chatUrl = `${this.setting.ridgeUrl}/api/chat/init?client=obsidian`;
