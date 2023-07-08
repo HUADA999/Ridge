@@ -11,7 +11,7 @@ export interface RidgeSetting {
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
     resultsCount: 6,
-    ridgeUrl: 'http://localhost:8000',
+    ridgeUrl: 'http://127.0.0.1:8000',
     connectedToBackend: false,
     autoConfigure: true,
     openaiApiKey: '',
