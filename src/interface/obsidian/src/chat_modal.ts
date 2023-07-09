@@ -140,7 +140,7 @@ export class RidgeChatModal extends Modal {
 
     async getChatHistory(): Promise<void> {
         // Get chat history from Ridge backend
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat/init?client=obsidian`;
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat/history?client=obsidian`;
         let response = await request(chatUrl);
         let chatLogs = JSON.parse(response).response;
         chatLogs.forEach((chatLog: any) => {
@@ -157,7 +157,7 @@ export class RidgeChatModal extends Modal {
 
         // Get chat response from Ridge backend
         let encodedQuery = encodeURIComponent(query);
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&n=${this.setting.resultsCount}&client=obsidian`;
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&n=${this.setting.resultsCount}&client=obsidian&stream=true`;
         let responseElement = this.createRidgeResponseDiv();
 
         // Temporary status message to indicate that Ridge is thinking

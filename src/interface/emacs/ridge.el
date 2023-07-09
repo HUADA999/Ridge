@@ -688,7 +688,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
 
 (defun ridge--load-chat-history (buffer-name)
   "Load Ridge Chat conversation history into BUFFER-NAME."
-  (let ((json-response (cdr (assoc 'response (ridge--query-chat-api "")))))
+  (let ((json-response (cdr (assoc 'response (ridge--get-chat-history-api)))))
     (with-current-buffer (get-buffer-create buffer-name)
       (erase-buffer)
       (insert "* Ridge Chat\n")
@@ -766,7 +766,21 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   "Send QUERY to Ridge Chat API."
   (let* ((url-request-method "GET")
          (encoded-query (url-hexify-string query))
-         (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url ridge-results-count encoded-query)))
+         (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url encoded-query ridge-results-count)))
+    (with-temp-buffer
+      (condition-case ex
+          (progn
+            (url-insert-file-contents query-url)
+            (json-parse-buffer :object-type 'alist))
+        ('file-error (cond ((string-match "Internal server error" (nth 2 ex))
+                      (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
+                     (t (message "Chat exception: [%s]" ex))))))))
+
+
+(defun ridge--get-chat-history-api ()
+  "Send QUERY to Ridge Chat History API."
+  (let* ((url-request-method "GET")
+         (query-url (format "%s/api/chat/history?client=emacs" ridge-server-url)))
     (with-temp-buffer
       (condition-case ex
           (progn
