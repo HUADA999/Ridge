@@ -41,6 +41,11 @@ default_config = {
             "compressed-jsonl": "~/.ridge/content/github/github.jsonl.gz",
             "embeddings-file": "~/.ridge/content/github/github_embeddings.pt",
         },
+        "notion": {
+            "token": None,
+            "compressed-jsonl": "~/.ridge/content/notion/notion.jsonl.gz",
+            "embeddings-file": "~/.ridge/content/notion/notion_embeddings.pt",
+        },
     },
     "search-type": {
         "symmetric": {
