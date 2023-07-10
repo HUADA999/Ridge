@@ -51,8 +51,13 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                         "input-files": null,
                         "embeddings-file": `${ridgeDefaultMdIndexDirectory}/${indexName}.pt`,
                         "compressed-jsonl": `${ridgeDefaultMdIndexDirectory}/${indexName}.jsonl.gz`,
-                    },
-                    "pdf": {
+                    }
+                }
+
+                const hasPdfFiles = app.vault.getFiles().some(file => file.extension === 'pdf');
+
+                if (hasPdfFiles) {
+                    data["content-type"]["pdf"] = {
                         "input-filter": [pdfInVault],
                         "input-files": null,
                         "embeddings-file": `${ridgeDefaultPdfIndexDirectory}/${indexName}.pt`,
