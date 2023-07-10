@@ -181,19 +181,19 @@
                 </div>
             {% endif %}
             {% if demo %}
-                <a href="https://ridge.dev" target="_blank">
+                <a class="ridge-logo" href="https://ridge.dev" target="_blank">
                     <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
                 </a>
             {% else %}
-                <a href="https://lantern.ridge.dev" target="_blank">
+                <a class="ridge-logo" href="https://lantern.ridge.dev" target="_blank">
                     <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
                 </a>
             {% endif %}
             <nav class="ridge-nav">
-                <a class="ridge-nav-selected" href="/chat">Chat</a>
-                <a href="/">Search</a>
+                <a class="ridge-nav ridge-nav-selected" href="/chat">Chat</a>
+                <a class="ridge-nav" href="/">Search</a>
                 {% if not demo %}
-                    <a href="/config">Settings</a>
+                    <a class="ridge-nav" href="/config">Settings</a>
                 {% endif %}
             </nav>
         </div>
@@ -363,6 +363,18 @@
             }
             a.ridge-banner {
                 display: block;
+            }
+
+            div.ridge-header {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                padding: 0;
+                margin-bottom: 8px;
+                margin-top: 8px;
+            }
+
+            nav.ridge-nav {
+                grid-gap: 0px;
             }
         }
         @media only screen and (min-width: 600px) {

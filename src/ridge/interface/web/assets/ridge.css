@@ -41,17 +41,28 @@
 }
 .ridge-header {
     display: grid;
-    grid-auto-flow: row;
+    grid-auto-flow: column;
     gap: 20px;
     padding: 16px 0;
     margin: 0 0 16px 0;
 }
-.ridge-nav {
+
+nav.ridge-nav {
     display: grid;
     grid-auto-flow: column;
     grid-gap: 32px;
-    justify-self: center;
+    justify-self: right;
 }
+
+a.ridge-nav {
+    display: flex;
+    align-items: center;
+}
+
+a.ridge-logo {
+    justify-self: left;
+}
+
 .ridge-nav a {
     color: #333;
     text-decoration: none;
@@ -68,6 +79,6 @@
     background-color: var(--primary);
 }
 img.ridge-logo {
-    width: min(60vw, 150px);
+    width: min(60vw, 100px);
     justify-self: center;
 }
