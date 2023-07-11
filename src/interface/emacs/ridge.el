@@ -62,7 +62,7 @@
 ;; Ridge Static Configuration
 ;; -------------------------
 
-(defcustom ridge-server-url "http://localhost:8000"
+(defcustom ridge-server-url "http://localhost:42110"
   "Location of Ridge API server."
   :group 'ridge
   :type 'string)
