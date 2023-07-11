@@ -609,7 +609,7 @@ CONFIG is json obtained from Ridge config API."
   ;; POST provided config to ridge server
   (let ((url-request-method "POST")
         (url-request-extra-headers '(("Content-Type" . "application/json")))
-        (url-request-data (json-encode-alist config))
+        (url-request-data (encode-coding-string (json-encode-alist config) 'utf-8))
         (config-url (format "%s/api/config/data" ridge-server-url)))
     (with-current-buffer (url-retrieve-synchronously config-url)
       (buffer-string)))
