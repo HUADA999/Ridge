@@ -216,19 +216,21 @@
     </script>
 
     <body>
+        {% if demo %}
+            <!-- Banner linking to https://ridge.dev -->
+            <div class="ridge-banner-container">
+                <a class="ridge-banner" href="https://ridge.dev" target="_blank">
+                    <p id="ridge-banner" class="ridge-banner">
+                        Enroll in Ridge cloud to get your own assistant
+                    </p>
+                </a>
+                <input type="text" id="ridge-banner-email" placeholder="email" class="ridge-banner-email"></input>
+                <button id="ridge-banner-submit" class="ridge-banner-button">Submit</button>
+            </div>
+        {% endif %}
         <!--Add Header Logo and Nav Pane-->
         <div class="ridge-header">
             {% if demo %}
-                <!-- Banner linking to https://ridge.dev -->
-                <div class="ridge-banner-container">
-                    <a class="ridge-banner" href="https://ridge.dev" target="_blank">
-                        <p id="ridge-banner" class="ridge-banner">
-                            Enroll in Ridge cloud to get your own Github assistant
-                        </p>
-                    </a>
-                    <input type="text" id="ridge-banner-email" placeholder="email" class="ridge-banner-email"></input>
-                    <button id="ridge-banner-submit" class="ridge-banner-button">Submit</button>
-                </div>
                 <a class="ridge-logo" href="https://ridge.dev" target="_blank">
                     <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways.svg" alt="Ridge"></img>
                 </a>
@@ -447,17 +449,8 @@
             }
         }
 
-        a.ridge-banner {
-            color: black;
-        }
-
         a.ridge-logo {
             text-align: center;
-        }
-
-        p.ridge-banner {
-            margin: 0;
-            padding: 10px;
         }
 
         button#ridge-banner-submit,
@@ -473,13 +466,12 @@
             box-shadow: 0 0 11px #aaa;
         }
 
-        p#ridge-banner {
-            display: inline;
-        }
-
         @media only screen and (max-width: 600px) {
             a.ridge-banner {
                 display: block;
+            }
+            p.ridge-banner {
+                padding: 0;
             }
         }
 
