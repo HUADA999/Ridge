@@ -8,7 +8,7 @@ import requests
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry, NotionContentConfig
 from ridge.processor.text_to_jsonl import TextToJsonl
-from ridge.utils.jsonl import dump_jsonl, compress_jsonl_data
+from ridge.utils.jsonl import compress_jsonl_data
 from ridge.utils.rawconfig import Entry
 
 from enum import Enum
@@ -250,9 +250,6 @@ class NotionToJsonl(TextToJsonl):
             jsonl_data = TextToJsonl.convert_text_maps_to_jsonl(entries)
 
             # Compress JSONL formatted Data
-            if self.config.compressed_jsonl.suffix == ".gz":
-                compress_jsonl_data(jsonl_data, self.config.compressed_jsonl)
-            elif self.config.compressed_jsonl.suffix == ".jsonl":
-                dump_jsonl(jsonl_data, self.config.compressed_jsonl)
+            compress_jsonl_data(jsonl_data, self.config.compressed_jsonl)
 
         return entries_with_ids
