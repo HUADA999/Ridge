@@ -624,7 +624,7 @@ CONFIG is json obtained from Ridge config API."
       (buffer-string)))
   ;; Update index on ridge server after configuration update
   (let ((ridge--server-ready? nil))
-    (url-retrieve (format "%s/api/update?t=org&client=emacs" ridge-server-url) #'identity)))
+    (url-retrieve (format "%s/api/update?client=emacs" ridge-server-url) #'identity)))
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
@@ -1032,7 +1032,8 @@ Paragraph only starts at first text after blank line."
   (let* ((force-update (if (member "--force-update" args) "true" "false"))
          ;; set content type to: specified > last used > based on current buffer > default type
          (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-         (update-url (format "%s/api/update?t=%s&force=%s&client=emacs" ridge-server-url content-type force-update))
+         (type-query (if (equal content-type "all") "" (format "t=%s" content-type)))
+         (update-url (format "%s/api/update?%s&force=%s&client=emacs" ridge-server-url type-query force-update))
          (url-request-method "GET"))
     (progn
       (setq ridge--content-type content-type)
