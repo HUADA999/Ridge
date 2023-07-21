@@ -112,3 +112,18 @@ Follow the steps below to [release](https://github.com/debanjum/ridge/releases/)
 *[Interactive Visualization](https://mango-dune-07a8b7110.1.azurestaticapps.net/?repo=debanjum%2Fridge)*
 
 ![](./assets/ridge_codebase_visualization_0.2.1.png)
+
+## Visualize Ridge Obsidian Plugin Codebase
+
+![](./assets/ridge_obsidian_codebase_visualization_0.2.1.png)
+
+## Ridge Obsidian Plugin Implementation
+The plugin implements the following functionality to search your notes with Ridge:
+- [X] Open the Ridge search modal via left ribbon icon or the *Ridge: Search* command
+- [X] Render results as Markdown preview to improve readability
+- [X] Configure Ridge via the plugin setting tab on the settings page
+  - Set Obsidian Vault to Index with Ridge. Defaults to all markdown, PDF files in current Vault
+  - Set URL of Ridge backend
+  - Set Number of Search Results to show in Search Modal
+- [X] Allow reranking of result to improve search quality
+- [X] Allow Finding notes similar to current note being viewed

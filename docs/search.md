@@ -1,12 +1,14 @@
 ## Ridge Search
-- **Using Obsidian**
-  - Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or Search for *Ridge: Search* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
-- **Using Emacs**
-  - Run `M-x ridge <user-query>`
-- **Using Web**
+### Use
+- **From Web**
   - Open <http://localhost:42110/> in your web browser
-- **Using API**
-  - See the Ridge FastAPI [Swagger Docs](http://localhost:42110/docs), [ReDocs](http://localhost:42110/redocs)
+- **From Obsidian**
+  - Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or Search for *Ridge: Search* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
+- **From Emacs**
+  - Run `M-x ridge <user-query>`
+
+### Demo
+![](./assets/ridge_search_on_web.png ':size=400px')
 
 ### Query Filters
 
