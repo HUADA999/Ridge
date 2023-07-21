@@ -12,6 +12,10 @@
   - **Iterative discovery**: Iteratively explore and (re-)discover your notes
   - **Assisted creativity**: Smoothly weave across answers retrieval and content generation
 
+## Interface
+![](./assets/ridge_search_on_obsidian.png ':size=400px')
+![](./assets/ridge_chat_on_obsidian.png ':size=400px')
+
 
 ## Setup
 - *Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
@@ -104,12 +108,6 @@ To see other notes similar to the current one, run *Ridge: Find Similar Notes* f
     - Search \"*Announce plugin to folks*\" in the [Obsidian Plugin docs](https://marcus.se.net/obsidian-plugin-docs/)
     - Jump to the [search result](https://marcus.se.net/obsidian-plugin-docs/publishing/submit-your-plugin)
 
-## Interfaces
-### Search Modal
-![](./assets/ridge_on_obsidian_0.2.5.png)
-
-### Chat Modal
-![](./assets/ridge_chat_on_obsidian_0.6.0.png)
 
 ## Troubleshooting
   - Open the Ridge plugin settings pane, to configure Ridge
@@ -119,18 +117,3 @@ To see other notes similar to the current one, run *Ridge: Find Similar Notes* f
 ## Current Limitations
 - The plugin loads the index of only one vault at a time.<br/>
   So notes across multiple vaults **cannot** be searched at the same time
-
-## Visualize Codebase
-
-![](./assets/ridge_obsidian_codebase_visualization_0.2.1.png)
-
-## Implementation
-The plugin implements the following functionality to search your notes with Ridge:
-- [X] Open the Ridge search modal via left ribbon icon or the *Ridge: Search* command
-- [X] Render results as Markdown preview to improve readability
-- [X] Configure Ridge via the plugin setting tab on the settings page
-  - Set Obsidian Vault to Index with Ridge. Defaults to all markdown, PDF files in current Vault
-  - Set URL of Ridge backend
-  - Set Number of Search Results to show in Search Modal
-- [X] Allow reranking of result to improve search quality
-- [X] Allow Finding notes similar to current note being viewed
