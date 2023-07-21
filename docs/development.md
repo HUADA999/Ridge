@@ -40,8 +40,8 @@ git clone https://github.com/ridge-ai/ridge && cd ridge
 
 #### 2. Configure
 
-- **Required**: Update [docker-compose.yml](./docker-compose.yml) to mount your images, (org-mode or markdown) notes, PDFs and Github repositories
-- **Optional**: Edit application configuration in [ridge_docker.yml](./config/ridge_docker.yml)
+- **Required**: Update [docker-compose.yml](https://github.com/ridge-ai/ridge/blob/master/docker-compose.yml) to mount your images, (org-mode or markdown) notes, PDFs and Github repositories
+- **Optional**: Edit application configuration in [ridge_docker.yml](https://github.com/ridge-ai/ridge/blob/master/config/ridge_docker.yml)
 
 #### 3. Run
 
