@@ -10,7 +10,7 @@ from ridge.main import app
 from ridge.configure import configure_processor, configure_routes, configure_search_types
 from ridge.processor.markdown.markdown_to_jsonl import MarkdownToJsonl
 from ridge.search_type import image_search, text_search
-from ridge.utils.config import ImageContent, SearchModels, TextContent
+from ridge.utils.config import SearchModels
 from ridge.utils.helpers import resolve_absolute_path
 from ridge.utils.rawconfig import (
     ContentConfig,
