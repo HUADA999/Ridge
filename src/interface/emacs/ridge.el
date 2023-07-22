@@ -221,7 +221,7 @@ for example), set this to the full interpreter path."
   :type '(repeat string)
   :group 'ridge)
 
-(defcustom ridge-chat-model nil
+(defcustom ridge-chat-model "gpt-3.5-turbo"
   "Specify chat model to use for chat with ridge."
   :type 'string
   :group 'ridge)
