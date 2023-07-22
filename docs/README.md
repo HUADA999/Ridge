@@ -31,7 +31,7 @@ Ridge gives you lightning fast, offline search on your personal machine and give
   - **Multiple Interfaces**: Interact from your [Web Browser](https://docs.ridge.dev/#/web), [Emacs](https://docs.ridge.dev/#/emacs) or [Obsidian](https://docs.ridge.dev/#/obsidian)
 
 ## Install
-[Click here](./setup.md) for full setup instructions.
+[Click here](/setup) for full setup instructions.
 
 ## Supported data sources
 - markdown*
