@@ -16,4 +16,5 @@
 The Ridge web interface is the default interface. It comes packaged with the ridge server.
 
 ## Interface
-![](./assets/ridge_chat_web_interface.png?)
+![](./assets/ridge_search_on_web.png ':size=400px')
+![](./assets/ridge_chat_on_web.png ':size=400px')

@@ -49,7 +49,7 @@ Notes:
 - *Using Ridge Chat will result in query relevant notes being shared with OpenAI for ChatGPT to respond.*
 - *To use Ridge Chat, ensure you've set your [OpenAI API key](https://platform.openai.com/account/api-keys) in the Ridge plugin settings.*
 
-See [Ridge Chat](https://github.com/ridge-ai/ridge/tree/master/#Ridge-Chat) for more details
+See [Ridge Chat](/chat) for more details
 
 ### Search
 Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Search* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)

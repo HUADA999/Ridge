@@ -2,9 +2,9 @@
 These are the general setup instructions for Ridge.
 
 - Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine
-- Check the [Ridge.el Readme](https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs#Setup) to setup Ridge with Emacs<br />
+- Check the [Ridge Emacs docs](/emacs?id=setup) to setup Ridge with Emacs<br />
   Its simpler as it can skip the server *install*, *run* and *configure* step below.
-- Check the [Ridge Obsidian Readme](https://github.com/ridge-ai/ridge/tree/master/src/interface/obsidian#Setup) to setup Ridge with Obsidian<br />
+- Check the [Ridge Obsidian docs](/obsidian?id=_2-setup-plugin) to setup Ridge with Obsidian<br />
   Its simpler as it can skip the *configure* step below.
 
 ### 1. Install
@@ -37,17 +37,17 @@ Note: To start Ridge automatically in the background use [Task scheduler](https:
 2. Add your OpenAI API key to Chat Feature settings if you want to use Chat
 3. Click `Configure` and wait. The app will download ML models and index the content for search and (optionally) chat
 
-[configure demo](./assets/ridge_configure_on_web.mp4 ':include :type=mp4')
+![configure demo](https://user-images.githubusercontent.com/6413477/255307879-61247d3f-c69a-46ef-b058-9bc533cb5c72.mp4 ':include :type=mp4')
 
 ### 4. Install Interface Plugins (Optional)
 Ridge exposes a web interface to search, chat and configure by default.<br />
 The optional steps below allow using Ridge from within an existing application like Obsidian or Emacs.
 
 - **Ridge Obsidian**:<br />
-[Install](https://github.com/ridge-ai/ridge/tree/master/src/interface/obsidian#2-Setup-Plugin) the Ridge Obsidian plugin
+[Install](/obsidian?id=_2-setup-plugin) the Ridge Obsidian plugin
 
 - **Ridge Emacs**:<br />
-[Install](https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs#2-Install-Ridgeel) ridge.el
+[Install](/emacs?id=setup) ridge.el
 
 
 ## Upgrade
@@ -64,11 +64,11 @@ pip install --upgrade --pre ridge-assistant
 
 ### Upgrade Ridge on Emacs
 - Use your Emacs Package Manager to Upgrade
-- See [ridge.el readme](https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs#Upgrade) for details
+- See [ridge.el package setup](/emacs?id=setup) for details
 
 ### Upgrade Ridge on Obsidian
 - Upgrade via the Community plugins tab on the settings pane in the Obsidian app
-- See the [ridge plugin readme](https://github.com/ridge-ai/ridge/tree/master/src/interface/obsidian#2-Setup-Plugin) for details
+- See the [ridge plugin setup](/obsidian.md?id=_2-setup-plugin) for details
 
 ## Uninstall
 1. (Optional) Hit `Ctrl-C` in the terminal running the ridge server to stop it
