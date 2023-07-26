@@ -36,7 +36,7 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     let ridgeDefaultMdIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["markdown"]["embeddings-file"]);
     let ridgeDefaultPdfIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["pdf"]["embeddings-file"]);
     let ridgeDefaultChatDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["processor"]["conversation"]["conversation-logfile"]);
-    let ridgeDefaultChatModelName = defaultConfig["processor"]["conversation"]["model"];
+    let ridgeDefaultChatModelName = defaultConfig["processor"]["conversation"]["openai"]["chat-model"];
 
     // Get current config if ridge backend configured, else get default config from ridge backend
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
@@ -142,25 +142,35 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                 data["processor"] = {
                     "conversation": {
                         "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
-                        "model": ridgeDefaultChatModelName,
-                        "openai-api-key": setting.openaiApiKey,
-                    }
+                        "openai": {
+                            "chat-model": ridgeDefaultChatModelName,
+                            "api-key": setting.openaiApiKey,
+                        }
+                    },
                 }
             }
             // Else if ridge config has no conversation processor config
-            else if (!data["processor"]["conversation"]) {
-                data["processor"]["conversation"] = {
-                    "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
-                    "model": ridgeDefaultChatModelName,
-                    "openai-api-key": setting.openaiApiKey,
+            else if (!data["processor"]["conversation"] || !data["processor"]["conversation"]["openai"]) {
+                data["processor"] = {
+                    "conversation": {
+                        "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
+                        "openai": {
+                            "chat-model": ridgeDefaultChatModelName,
+                            "api-key": setting.openaiApiKey,
+                        }
+                    },
                 }
             }
             // Else if ridge is not configured with OpenAI API key from ridge plugin settings
-            else if (data["processor"]["conversation"]["openai-api-key"] !== setting.openaiApiKey) {
-                data["processor"]["conversation"] = {
-                    "conversation-logfile": data["processor"]["conversation"]["conversation-logfile"],
-                    "model": data["processor"]["conversation"]["model"],
-                    "openai-api-key": setting.openaiApiKey,
+            else if (data["processor"]["conversation"]["openai"]["api-key"] !== setting.openaiApiKey) {
+                data["processor"] = {
+                    "conversation": {
+                        "conversation-logfile": data["processor"]["conversation"]["conversation-logfile"],
+                        "openai": {
+                            "chat-model": data["processor"]["conversation"]["openai"]["chat-model"],
+                            "api-key": setting.openaiApiKey,
+                        }
+                    },
                 }
             }
 
