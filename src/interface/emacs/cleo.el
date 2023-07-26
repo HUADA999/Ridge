@@ -373,7 +373,7 @@ CONFIG is json obtained from Ridge config API."
              (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
          (default-index-dir (ridge--get-directory-from-config default-config '(content-type org embeddings-file)))
          (default-chat-dir (ridge--get-directory-from-config default-config '(processor conversation conversation-logfile)))
-         (chat-model (or ridge-chat-model (alist-get 'chat-model (alist-get 'conversation (alist-get 'processor default-config)))))
+         (chat-model (or ridge-chat-model (alist-get 'chat-model (alist-get 'openai (alist-get 'conversation (alist-get 'processor default-config))))))
          (default-model (alist-get 'model (alist-get 'conversation (alist-get 'processor default-config))))
          (config (or current-config default-config)))
 
@@ -423,15 +423,27 @@ CONFIG is json obtained from Ridge config API."
     ;; Configure processors
     (cond
      ((not ridge-openai-api-key)
-      (setq config (delq (assoc 'processor config) config)))
+      (let* ((processor (assoc 'processor config))
+             (conversation (assoc 'conversation processor))
+             (openai (assoc 'openai conversation)))
+        (when openai
+          ;; Unset the `openai' field in the ridge conversation processor config
+          (message "ridge.el: disable Ridge Chat using OpenAI as your OpenAI API key got removed from config")
+          (setcdr conversation (delq openai (cdr conversation)))
+          (setcdr processor (delq conversation (cdr processor)))
+          (setq config (delq processor config))
+          (push conversation (cdr processor))
+          (push processor config))))
 
      ((not current-config)
       (message "ridge.el: Chat not configured yet.")
       (setq config (delq (assoc 'processor config) config))
       (cl-pushnew `(processor . ((conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
-                                                  (chat-model . ,chat-model)
-                                                  (model . ,default-model)
-                                                  (openai-api-key . ,ridge-openai-api-key)))))
+                                                  (openai . (
+                                                              (chat-model . ,chat-model)
+                                                              (api-key . ,ridge-openai-api-key)
+                                                              ))
+                                                  ))))
                   config))
 
      ((not (alist-get 'conversation (alist-get 'processor config)))
@@ -440,21 +452,19 @@ CONFIG is json obtained from Ridge config API."
          (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
          (cl-pushnew `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
                                        (chat-model . ,chat-model)
-                                       (model . ,default-model)
                                        (openai-api-key . ,ridge-openai-api-key)))
                      new-processor-type)
         (setq config (delq (assoc 'processor config) config))
         (cl-pushnew `(processor . ,new-processor-type) config)))
 
      ;; Else if ridge is not configured with specified openai api key
-     ((not (and (equal (alist-get 'openai-api-key (alist-get 'conversation (alist-get 'processor config))) ridge-openai-api-key)
-                (equal (alist-get 'chat-model (alist-get 'conversation (alist-get 'processor config))) ridge-chat-model)))
+     ((not (and (equal (alist-get 'api-key (alist-get 'openai (alist-get 'conversation (alist-get 'processor config)))) ridge-openai-api-key)
+                (equal (alist-get 'chat-model (alist-get 'openai (alist-get 'conversation (alist-get 'processor config)))) ridge-chat-model)))
       (message "ridge.el: Chat configuration has gone stale.")
       (let* ((chat-directory (ridge--get-directory-from-config config '(processor conversation conversation-logfile)))
              (new-processor-type (alist-get 'processor config)))
         (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
         (cl-pushnew `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" chat-directory))
-                                      (model . ,default-model)
                                       (chat-model . ,ridge-chat-model)
                                       (openai-api-key . ,ridge-openai-api-key)))
                     new-processor-type)

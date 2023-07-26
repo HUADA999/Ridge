@@ -9,11 +9,11 @@ from langchain.schema import ChatMessage
 # Internal Packages
 from ridge.utils.constants import empty_escape_sequences
 from ridge.processor.conversation import prompts
-from ridge.processor.conversation.utils import (
+from ridge.processor.conversation.openai.utils import (
     chat_completion_with_backoff,
     completion_with_backoff,
-    generate_chatml_messages_with_context,
 )
+from ridge.processor.conversation.utils import generate_chatml_messages_with_context
 
 
 logger = logging.getLogger(__name__)
