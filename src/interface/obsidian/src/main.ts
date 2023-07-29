@@ -38,9 +38,9 @@ export default class Ridge extends Plugin {
             id: 'chat',
             name: 'Chat',
             checkCallback: (checking) => {
-                if (!checking && this.settings.connectedToBackend && !!this.settings.openaiApiKey)
+                if (!checking && this.settings.connectedToBackend && (!!this.settings.openaiApiKey || this.settings.enableOfflineChat))
                     new RidgeChatModal(this.app, this.settings).open();
-                return !!this.settings.openaiApiKey;
+                return !!this.settings.openaiApiKey || this.settings.enableOfflineChat;
             }
         });
 
