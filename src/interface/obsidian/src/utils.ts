@@ -9,6 +9,19 @@ export function getVaultAbsolutePath(vault: Vault): string {
     return '';
 }
 
+type OpenAIType = null | {
+    "chat-model": string;
+    "api-key": string;
+};
+
+interface ProcessorData {
+    conversation: {
+      "conversation-logfile": string;
+      openai: OpenAIType;
+      "enable-offline-chat": boolean;
+    };
+}
+
 export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting, notify: boolean = true) {
     let vaultPath = getVaultAbsolutePath(vault);
     let mdInVault = `${vaultPath}/**/*.md`;
@@ -132,47 +145,35 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                 }
             }
 
-            // If OpenAI API key not set in Ridge plugin settings
-            if (!setting.openaiApiKey) {
-                // Disable ridge processors, as not required
-                delete data["processor"];
+            let conversationLogFile = data?.["processor"]?.["conversation"]?.["conversation-logfile"] ?? `${ridgeDefaultChatDirectory}/conversation.json`;
+
+            let processorData: ProcessorData = {
+                "conversation": {
+                    "conversation-logfile": conversationLogFile,
+                    "openai": null,
+                    "enable-offline-chat": setting.enableOfflineChat,
+                }
             }
-            // Else if ridge backend not configured yet
-            else if (!ridge_already_configured || !data["processor"]) {
-                data["processor"] = {
+
+            // If the Open AI API Key was configured in the plugin settings
+            if (!!setting.openaiApiKey) {
+
+                let openAIChatModel = data?.["processor"]?.["conversation"]?.["openai"]?.["chat-model"] ?? ridgeDefaultChatModelName;
+
+                processorData = {
                     "conversation": {
-                        "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
+                        "conversation-logfile": conversationLogFile,
                         "openai": {
-                            "chat-model": ridgeDefaultChatModelName,
+                            "chat-model": openAIChatModel,
                             "api-key": setting.openaiApiKey,
-                        }
+                        },
+                        "enable-offline-chat": setting.enableOfflineChat,
                     },
                 }
             }
-            // Else if ridge config has no conversation processor config
-            else if (!data["processor"]["conversation"] || !data["processor"]["conversation"]["openai"]) {
-                data["processor"] = {
-                    "conversation": {
-                        "conversation-logfile": `${ridgeDefaultChatDirectory}/conversation.json`,
-                        "openai": {
-                            "chat-model": ridgeDefaultChatModelName,
-                            "api-key": setting.openaiApiKey,
-                        }
-                    },
-                }
-            }
-            // Else if ridge is not configured with OpenAI API key from ridge plugin settings
-            else if (data["processor"]["conversation"]["openai"]["api-key"] !== setting.openaiApiKey) {
-                data["processor"] = {
-                    "conversation": {
-                        "conversation-logfile": data["processor"]["conversation"]["conversation-logfile"],
-                        "openai": {
-                            "chat-model": data["processor"]["conversation"]["openai"]["chat-model"],
-                            "api-key": setting.openaiApiKey,
-                        }
-                    },
-                }
-            }
+
+            // Set ridge processor config to conversation processor config
+            data["processor"] = processorData;
 
             // Save updated config and refresh index on ridge backend
             updateRidgeBackend(setting.ridgeUrl, data);
