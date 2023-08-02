@@ -2,11 +2,12 @@ from ridge.utils.yaml import load_config_from_file, save_config_to_file
 
 
 def migrate_config_to_version(args):
+    schema_version = "0.9.0"
     raw_config = load_config_from_file(args.config_file)
 
     # Add version to ridge config schema
     if "version" not in raw_config:
-        raw_config["version"] = "0.9.0"
+        raw_config["version"] = schema_version
         save_config_to_file(raw_config, args.config_file)
 
         # regenerate ridge index on first start of this version
