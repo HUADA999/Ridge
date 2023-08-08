@@ -1,4 +1,4 @@
-<h1><img src="./assets/ridge-logo-sideways.svg" width="200" alt="Ridge Logo">Emacs</h1>
+<h1><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo">Emacs</h1>
 
 > An AI personal assistance for your digital brain
 
