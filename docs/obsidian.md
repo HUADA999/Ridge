@@ -1,4 +1,4 @@
-<h1><img src="./assets/ridge-logo-sideways.svg" width="200" alt="Ridge Logo">Obsidian</h1>
+<h1><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo">Obsidian</h1>
 
 > An AI personal assistant for your Digital Brain in Obsidian
 

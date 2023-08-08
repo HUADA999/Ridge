@@ -1,4 +1,4 @@
-<p align="center"><img src="./assets/ridge-logo-sideways.svg" width="200" alt="Ridge Logo"></p>
+<p align="center"><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo"></p>
 
 <div align="center">
 
