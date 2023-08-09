@@ -46,6 +46,12 @@ default_config = {
             "compressed-jsonl": "~/.ridge/content/notion/notion.jsonl.gz",
             "embeddings-file": "~/.ridge/content/notion/notion_embeddings.pt",
         },
+        "plaintext": {
+            "input-files": None,
+            "input-filter": None,
+            "compressed-jsonl": "~/.ridge/content/plaintext/plaintext.jsonl.gz",
+            "embeddings-file": "~/.ridge/content/plaintext/plaintext_embeddings.pt",
+        },
     },
     "search-type": {
         "symmetric": {
