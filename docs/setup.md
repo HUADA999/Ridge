@@ -24,7 +24,7 @@ For more detailed Windows installation and troubleshooting, see [Windows Install
 
 ### 2. Start
 
-Run the following command in your terminal to start the Ridge backend and open the Ridge native GUI
+Run the following command from your terminal to start the Ridge backend and open Ridge in your browser.
 
 ```shell
 ridge --gui
