@@ -27,11 +27,21 @@ Online chat requires internet to use ChatGPT but is faster, higher quality and l
 
 
 ### Use
-1. Open [/chat](http://localhost:42110/chat)
-2. Type your queries and see Ridge respond using your notes as reference
+1. Open Ridge Chat
+    - **On Web**: Open [/chat](http://localhost:42110/chat) in your web browser
+    - **On Obsidian**: Search for *Ridge: Chat* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
+    - **On Emacs**: Run `M-x ridge <user-query>`
+2. Enter your queries to chat with Ridge. Use [slash commands](#commands) and [query filters](./advanced.md#query-filters) to change what Ridge uses to respond
 
 ![](./assets/ridge_chat_on_web.png ':size=400px')
 
 #### Details
 1. Your query is used to retrieve the most relevant notes, if any, using Ridge search
 2. These notes, the last few messages and associated metadata is passed to the enabled chat model along with your query to generate a response
+
+#### Commands
+Slash commands allows you to change what Ridge uses to respond to your query
+- **/notes**: Limit chat to only respond using your notes, not just Ridge's general world knowledge as reference
+- **/general**: Limit chat to only respond using Ridge's general world knowledge, not using your notes as reference
+- **/default**: Allow chat to respond using your notes or it's general knowledge as reference. It's the default behavior when no slash command is used
+- **/help**: Use /help to get all available commands and general information about Ridge
