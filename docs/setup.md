@@ -27,7 +27,7 @@ For more detailed Windows installation and troubleshooting, see [Windows Install
 Run the following command from your terminal to start the Ridge backend and open Ridge in your browser.
 
 ```shell
-ridge --gui
+ridge
 ```
 
 Note: To start Ridge automatically in the background use [Task scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10) on Windows or [Cron](https://en.wikipedia.org/wiki/Cron) on Mac, Linux (e.g with `@reboot ridge`)
@@ -73,6 +73,9 @@ pip install --upgrade --pre ridge-assistant
 ## Uninstall
 1. (Optional) Hit `Ctrl-C` in the terminal running the ridge server to stop it
 2. Delete the ridge directory in your home folder (i.e `~/.ridge` on Linux, Mac or `C:\Users\<your-username>\.ridge` on Windows)
+5. You might want to `rm -rf` the following directories:
+- `~/.ridge`
+- `~/.cache/gpt4all`
 3. Uninstall the ridge server with `pip uninstall ridge-assistant`
 4. (Optional) Uninstall ridge.el or the ridge obsidian plugin in the standard way on Emacs, Obsidian
 

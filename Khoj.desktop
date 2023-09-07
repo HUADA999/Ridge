@@ -1,7 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Ridge
-Comment=An AI personal assistant for your Digital Brain
-Path=/opt
-Exec=/opt/Ridge
-Icon=Ridge
