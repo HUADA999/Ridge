@@ -8,6 +8,8 @@ These are the general setup instructions for Ridge.
   Its simpler as it can skip the *configure* step below.
 
 ### 1. Install
+
+#### 1.1 Local Setup
 Run the following command in your terminal to install the Ridge backend.
 
 - On Linux/MacOS
@@ -22,7 +24,7 @@ Run the following command in your terminal to install the Ridge backend.
 For more detailed Windows installation and troubleshooting, see [Windows Install](./windows_install.md).
 
 
-### 2. Start
+##### 1.1.1 Start
 
 Run the following command from your terminal to start the Ridge backend and open Ridge in your browser.
 
@@ -30,16 +32,27 @@ Run the following command from your terminal to start the Ridge backend and open
 ridge
 ```
 
+Ridge should now be running at http://localhost:42110. You can see the web UI in your browser.
+
 Note: To start Ridge automatically in the background use [Task scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10) on Windows or [Cron](https://en.wikipedia.org/wiki/Cron) on Mac, Linux (e.g with `@reboot ridge`)
 
-### 3. Configure
+#### 1.2 Docker Setup
+Use the sample docker-compose [in Github](https://github.com/ridge-ai/ridge/blob/master/docker-compose.yml) to run Ridge in Docker. To start the container, run the following command in the same directory as the docker-compose.yml file. You'll have to configure the mounted directories to match your local knowledge base.
+
+```shell
+docker-compose up
+```
+
+Ridge should now be running at http://localhost:42110. You can see the web UI in your browser.
+
+### 2. Configure
 1. Set `File`, `Folder` and hit `Save` in each Plugins you want to enable for Search on the Ridge config page
 2. Add your OpenAI API key to Chat Feature settings if you want to use Chat
 3. Click `Configure` and wait. The app will download ML models and index the content for search and (optionally) chat
 
 ![configure demo](https://user-images.githubusercontent.com/6413477/255307879-61247d3f-c69a-46ef-b058-9bc533cb5c72.mp4 ':include :type=mp4')
 
-### 4. Install Interface Plugins (Optional)
+### 3. Install Interface Plugins (Optional)
 Ridge exposes a web interface to search, chat and configure by default.<br />
 The optional steps below allow using Ridge from within an existing application like Obsidian or Emacs.
 
