@@ -55,6 +55,7 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
         .then(response => JSON.parse(response))
         .then(data => {
+            ridge_already_configured = data["content-type"] != null;
             // If ridge backend not configured yet
             if (!ridge_already_configured) {
                 // Create ridge content-type config with only markdown configured
