@@ -2,7 +2,7 @@
   "name": "Ridge",
   "homepage": ".",
   "productName": "Ridge",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Scaffolding for the desktop entrypoint to Ridge",
   "main": "main.js",
   "repository": "\"https://github.com/ridge-ai/ridge\"",
@@ -10,7 +10,7 @@
   "license": "MIT",
   "private": false,
   "devDependencies": {
-    "electron": "25.0.0"
+    "electron": "25.8.1"
   },
   "scripts": {
     "start": "yarn electron ."
