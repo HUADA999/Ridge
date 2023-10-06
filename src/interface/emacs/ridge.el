@@ -87,6 +87,12 @@
   :group 'ridge
   :type 'integer)
 
+(defcustom ridge-search-on-idle-time 0.3
+  "Idle time (in seconds) to wait before triggering search."
+  :group 'ridge
+  :type 'number)
+
+
 (defcustom ridge-default-content-type "org"
   "The default content type to perform search on."
   :group 'ridge
@@ -114,6 +120,9 @@
 
 (defvar ridge--content-type "org"
   "The type of content to perform search on.")
+
+(defvar ridge--search-on-idle-timer nil
+  "Idle timer to trigger incremental search.")
 
 (declare-function org-element-property "org-mode" (PROPERTY ELEMENT))
 (declare-function org-element-type "org-mode" (ELEMENT))
@@ -920,6 +929,9 @@ RECEIVE-DATE is the message receive date."
   (message "ridge.el: Teardown Incremental Search")
   ;; unset ridge minibuffer window
   (setq ridge--minibuffer-window nil)
+  (when (and ridge--search-on-idle-timer
+             (timerp ridge--search-on-idle-timer))
+    (cancel-timer ridge--search-on-idle-timer))
   ;; delete open connections to ridge server
   (ridge--delete-open-network-connections-to-server)
   ;; remove hooks for ridge incremental query and self
@@ -942,8 +954,10 @@ RECEIVE-DATE is the message receive date."
           ;; set current (mini-)buffer entered as ridge minibuffer
           ;; used to query ridge API only when user in ridge minibuffer
           (setq ridge--minibuffer-window (current-buffer))
-          (add-hook 'post-command-hook #'ridge--incremental-search) ; do ridge incremental search after every user action
-          (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search)) ; teardown ridge incremental search on minibuffer exit
+          ; do ridge incremental search after idle time
+          (setq ridge--search-on-idle-timer (run-with-idle-timer ridge-search-on-idle-time t #'ridge--incremental-search))
+          ; teardown ridge incremental search on minibuffer exit
+          (add-hook 'minibuffer-exit-hook #'ridge--teardown-incremental-search))
       (read-string ridge--query-prompt))))
 
 
