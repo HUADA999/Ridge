@@ -92,6 +92,10 @@
   :group 'ridge
   :type 'number)
 
+(defcustom ridge-server-api-key "secret"
+  "API Key to Ridge server."
+  :group 'ridge
+  :type 'string)
 
 (defcustom ridge-default-content-type "org"
   "The default content type to perform search on."
@@ -374,7 +378,7 @@ CONFIG is json obtained from Ridge config API."
           (string-join "/"))))
 
 (defun ridge--server-configure ()
-  "Configure the the Ridge server for search and chat."
+  "Configure the Ridge server for search and chat."
   (interactive)
   (let* ((org-directory-regexes (or (mapcar (lambda (dir) (format "%s/**/*.org" dir)) ridge-org-directories) json-null))
          (current-config
@@ -388,7 +392,6 @@ CONFIG is json obtained from Ridge config API."
          (default-index-dir (ridge--get-directory-from-config default-config '(content-type org embeddings-file)))
          (default-chat-dir (ridge--get-directory-from-config default-config '(processor conversation conversation-logfile)))
          (chat-model (or ridge-chat-model (alist-get 'chat-model (alist-get 'openai (alist-get 'conversation (alist-get 'processor default-config))))))
-         (default-model (alist-get 'model (alist-get 'conversation (alist-get 'processor default-config))))
          (enable-offline-chat (or ridge-chat-offline (alist-get 'enable-offline-chat (alist-get 'conversation (alist-get 'processor default-config)))))
          (config (or current-config default-config)))
 
@@ -516,6 +519,45 @@ CONFIG is json obtained from Ridge config API."
 
       ;; Configure server once it's ready
       (ridge--server-configure))))
+
+
+;; -------------------
+;; Ridge Index Content
+;; -------------------
+
+(defun ridge--server-index-files (&optional file-paths)
+  "Send files to the Ridge server to index for search and chat."
+  (interactive)
+  (let ((boundary (format "-------------------------%d" (random (expt 10 10))))
+        (files-to-index (or file-paths
+                            (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files))))
+
+    (let* ((url-request-method "POST")
+           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
+                                        ("x-api-key" . ,ridge-server-api-key)))
+           ;; add files to index as form data
+           (url-request-data (with-temp-buffer
+                               (set-buffer-multibyte t)
+                               (insert "\n")
+                               (dolist (file-to-index files-to-index)
+                                 (insert (format "--%s\r\n" boundary))
+                                 (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
+                                 (insert "Content-Type: text/org\r\n\r\n")
+                                 (insert (with-temp-buffer
+                                           (insert-file-contents-literally file-to-index)
+                                           (buffer-string)))
+                                 (insert "\r\n"))
+                               (insert (format "--%s--\r\n" boundary))
+                               (buffer-string))))
+      (with-current-buffer
+          (url-retrieve (format "%s/api/v1/indexer/batch" ridge-server-url)
+                        ;; render response from indexing API endpoint on server
+                        (lambda (status)
+                          (with-current-buffer (current-buffer)
+                            (goto-char url-http-end-of-headers)
+                            (message "ridge.el: status: %s. response: %s" status (string-trim (buffer-substring-no-properties (point) (point-max))))))
+                        nil t t)))))
+
 
 
 ;; -----------------------------------------------
