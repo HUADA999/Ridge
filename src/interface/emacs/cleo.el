@@ -389,6 +389,7 @@ CONFIG is json obtained from Ridge config API."
   "Configure the Ridge server for search and chat."
   (interactive)
   (let* ((org-directory-regexes (or (mapcar (lambda (dir) (format "%s/**/*.org" dir)) ridge-org-directories) json-null))
+         (url-request-method "GET")
          (current-config
           (with-temp-buffer
             (url-insert-file-contents (format "%s/api/config/data" ridge-server-url))
@@ -573,9 +574,9 @@ CONFIG is json obtained from Ridge config API."
       (run-with-timer 60 ridge-index-interval 'ridge--server-index-files))
 
 
-;; -----------------------------------------------
-;; Extract and Render Entries of each Content Type
-;; -----------------------------------------------
+;; -------------------------------------------
+;; Render Response from Ridge server for Emacs
+;; -------------------------------------------
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert JSON-RESPONSE, QUERY from API to markdown entries."
