@@ -97,6 +97,11 @@
   :group 'ridge
   :type 'string)
 
+(defcustom ridge-index-interval 3600
+  "Interval (in seconds) to wait before updating content index."
+  :group 'ridge
+  :type 'number)
+
 (defcustom ridge-default-content-type "org"
   "The default content type to perform search on."
   :group 'ridge
@@ -127,6 +132,9 @@
 
 (defvar ridge--search-on-idle-timer nil
   "Idle timer to trigger incremental search.")
+
+(defvar ridge--index-timer nil
+  "Timer to trigger content indexing.")
 
 (declare-function org-element-property "org-mode" (PROPERTY ELEMENT))
 (declare-function org-element-type "org-mode" (ELEMENT))
@@ -531,7 +539,6 @@ CONFIG is json obtained from Ridge config API."
   (let ((boundary (format "-------------------------%d" (random (expt 10 10))))
         (files-to-index (or file-paths
                             (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files))))
-
     (let* ((url-request-method "POST")
            (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
                                         ("x-api-key" . ,ridge-server-api-key)))
@@ -555,9 +562,15 @@ CONFIG is json obtained from Ridge config API."
                         (lambda (status)
                           (with-current-buffer (current-buffer)
                             (goto-char url-http-end-of-headers)
-                            (message "ridge.el: status: %s. response: %s" status (string-trim (buffer-substring-no-properties (point) (point-max))))))
+                            (message "ridge.el: Update Content Index. Status: %s. response: %s" status (string-trim (buffer-substring-no-properties (point) (point-max))))))
                         nil t t)))))
 
+;; Cancel any running indexing timer
+(when ridge--index-timer
+    (cancel-timer ridge--index-timer))
+;; Send files to index on server every `ridge-index-interval' seconds
+(setq ridge--index-timer
+      (run-with-timer 60 ridge-index-interval 'ridge--server-index-files))
 
 
 ;; -----------------------------------------------
