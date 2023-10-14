@@ -1092,17 +1092,20 @@ Paragraph only starts at first text after blank line."
 ;; Ridge Menu
 ;; ---------
 
-(transient-define-argument ridge--content-type-switch ()
-  :class 'transient-switches
-  :argument-format "--content-type=%s"
-  :argument-regexp ".+"
-  ;; set content type to: last used > based on current buffer > default type
-  :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
-  ;; dynamically set choices to content types enabled on ridge backend
-  :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
+(defun ridge--setup-and-show-menu ()
+  "Create Transient menu for ridge and show it."
+  ;; Create the Ridge Transient menu
+  (transient-define-argument ridge--content-type-switch ()
+    :class 'transient-switches
+    :argument-format "--content-type=%s"
+    :argument-regexp ".+"
+    ;; set content type to: last used > based on current buffer > default type
+    :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
+    ;; dynamically set choices to content types enabled on ridge backend
+    :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
 
-(transient-define-suffix ridge--search-command (&optional args)
-  (interactive (list (transient-args transient-current-command)))
+  (transient-define-suffix ridge--search-command (&optional args)
+    (interactive (list (transient-args transient-current-command)))
     (progn
       ;; set content type to: specified > last used > based on current buffer > default type
       (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
@@ -1111,9 +1114,9 @@ Paragraph only starts at first text after blank line."
       ;; trigger incremental search
       (call-interactively #'ridge-incremental)))
 
-(transient-define-suffix ridge--find-similar-command (&optional args)
-  "Find items similar to current item at point."
-  (interactive (list (transient-args transient-current-command)))
+  (transient-define-suffix ridge--find-similar-command (&optional args)
+    "Find items similar to current item at point."
+    (interactive (list (transient-args transient-current-command)))
     (progn
       ;; set content type to: specified > last used > based on current buffer > default type
       (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
@@ -1121,37 +1124,40 @@ Paragraph only starts at first text after blank line."
       (setq ridge-results-count (or (transient-arg-value "--results-count=" args) ridge-results-count))
       (ridge--find-similar ridge--content-type)))
 
-(transient-define-suffix ridge--update-command (&optional args)
-  "Call ridge API to update index of specified content type."
-  (interactive (list (transient-args transient-current-command)))
-  (let* ((force-update (if (member "--force-update" args) "true" "false"))
-         ;; set content type to: specified > last used > based on current buffer > default type
-         (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-         (type-query (if (equal content-type "all") "" (format "t=%s" content-type)))
-         (update-url (format "%s/api/update?%s&force=%s&client=emacs" ridge-server-url type-query force-update))
-         (url-request-method "GET"))
-    (progn
-      (setq ridge--content-type content-type)
-      (url-retrieve update-url (lambda (_) (message "ridge.el: %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
+  (transient-define-suffix ridge--update-command (&optional args)
+    "Call ridge API to update index of specified content type."
+    (interactive (list (transient-args transient-current-command)))
+    (let* ((force-update (if (member "--force-update" args) "true" "false"))
+           ;; set content type to: specified > last used > based on current buffer > default type
+           (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
+           (type-query (if (equal content-type "all") "" (format "t=%s" content-type)))
+           (update-url (format "%s/api/update?%s&force=%s&client=emacs" ridge-server-url type-query force-update))
+           (url-request-method "GET"))
+      (progn
+        (setq ridge--content-type content-type)
+        (url-retrieve update-url (lambda (_) (message "ridge.el: %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
 
-(transient-define-suffix ridge--chat-command (&optional _)
-  "Command to Chat with Ridge."
-  (interactive (list (transient-args transient-current-command)))
-  (ridge--chat))
+  (transient-define-suffix ridge--chat-command (&optional _)
+    "Command to Chat with Ridge."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--chat))
 
-(transient-define-prefix ridge--menu ()
-  "Create Ridge Menu to Configure and Execute Commands."
-  [["Configure Search"
-    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
-    ("t" "Content Type" ridge--content-type-switch)]
-   ["Configure Update"
-    ("-f" "Force Update" "--force-update")]]
-  [["Act"
-    ("c" "Chat" ridge--chat-command)
-    ("s" "Search" ridge--search-command)
-    ("f" "Find Similar" ridge--find-similar-command)
-    ("u" "Update" ridge--update-command)
-    ("q" "Quit" transient-quit-one)]])
+  (transient-define-prefix ridge--menu ()
+    "Create Ridge Menu to Configure and Execute Commands."
+    [["Configure Search"
+      ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
+      ("t" "Content Type" ridge--content-type-switch)]
+     ["Configure Update"
+      ("-f" "Force Update" "--force-update")]]
+    [["Act"
+      ("c" "Chat" ridge--chat-command)
+      ("s" "Search" ridge--search-command)
+      ("f" "Find Similar" ridge--find-similar-command)
+      ("u" "Update" ridge--update-command)
+      ("q" "Quit" transient-quit-one)]])
+
+  ;; Show the Ridge Transient menu
+  (ridge--menu))
 
 
 ;; ----------
@@ -1164,7 +1170,7 @@ Paragraph only starts at first text after blank line."
   (interactive)
   (when ridge-auto-setup
     (ridge-setup t))
-  (ridge--menu))
+  (ridge--setup-and-show-menu))
 
 (provide 'ridge)
 
