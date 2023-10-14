@@ -535,38 +535,46 @@ CONFIG is json obtained from Ridge config API."
 ;; -------------------
 
 (defun ridge--server-index-files (&optional file-paths)
-  "Send files to the Ridge server to index for search and chat."
+  "Send files at `FILE-PATHS' to the Ridge server to index for search and chat."
   (interactive)
   (let ((boundary (format "-------------------------%d" (random (expt 10 10))))
         (files-to-index (or file-paths
-                            (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files))))
-    (let* ((url-request-method "POST")
-           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
-                                        ("x-api-key" . ,ridge-server-api-key)))
-           ;; add files to index as form data
-           (url-request-data (with-temp-buffer
-                               (set-buffer-multibyte t)
-                               (insert "\n")
-                               (dolist (file-to-index files-to-index)
-                                 (insert (format "--%s\r\n" boundary))
-                                 (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
-                                 (insert "Content-Type: text/org\r\n\r\n")
-                                 (insert (with-temp-buffer
-                                           (insert-file-contents-literally file-to-index)
-                                           (buffer-string)))
-                                 (insert "\r\n"))
-                               (insert (format "--%s--\r\n" boundary))
-                               (buffer-string))))
+                            (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files)))
+        (inhibit-message t)
+        (message-log-max nil))
+    (let ((url-request-method "POST")
+          (url-request-data (ridge--render-files-as-request-body files-to-index boundary))
+          (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
+                                       ("x-api-key" . ,ridge-server-api-key))))
       (with-current-buffer
           (url-retrieve (format "%s/api/v1/indexer/batch" ridge-server-url)
                         ;; render response from indexing API endpoint on server
                         (lambda (status)
-                          (with-current-buffer (current-buffer)
-                            (goto-char url-http-end-of-headers)
-                            (message "ridge.el: Update Content Index. Status: %s. response: %s" status (string-trim (buffer-substring-no-properties (point) (point-max))))))
+                          (if (not status)
+                              (message "ridge.el: Updated Content Index")
+                            (with-current-buffer (current-buffer)
+                              (goto-char "\n\n")
+                              (message "ridge.el: Failed to update Content Index. Status: %s. Response: %s" status (string-trim (buffer-substring-no-properties (point) (point-max)))))))
                         nil t t)))))
 
-;; Cancel any running indexing timer
+(defun ridge--render-files-as-request-body (files-to-index boundary)
+  "Render `FILES-TO-INDEX' as multi-part form body using `BOUNDARY'.
+This is sent to Ridge server as a POST request."
+  (with-temp-buffer
+    (set-buffer-multibyte nil)
+    (insert "\n")
+    (dolist (file-to-index files-to-index)
+      (insert (format "--%s\r\n" boundary))
+      (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
+      (insert "Content-Type: text/org\r\n\r\n")
+      (insert (with-temp-buffer
+                (insert-file-contents-literally file-to-index)
+                (buffer-string)))
+      (insert "\r\n"))
+    (insert (format "--%s--\r\n" boundary))
+    (buffer-string)))
+
+;; Cancel any running indexing timer, first
 (when ridge--index-timer
     (cancel-timer ridge--index-timer))
 ;; Send files to index on server every `ridge-index-interval' seconds
