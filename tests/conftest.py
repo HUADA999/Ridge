@@ -4,14 +4,16 @@ from copy import deepcopy
 from fastapi.testclient import TestClient
 from pathlib import Path
 import pytest
+from fastapi.staticfiles import StaticFiles
 
 # Internal Packages
-from ridge.main import app
-from ridge.configure import configure_processor, configure_routes, configure_search_types
+from app.main import app
+from ridge.configure import configure_processor, configure_routes, configure_search_types, configure_middleware
 from ridge.processor.markdown.markdown_to_jsonl import MarkdownToJsonl
 from ridge.processor.plaintext.plaintext_to_jsonl import PlaintextToJsonl
 from ridge.search_type import image_search, text_search
 from ridge.utils.config import SearchModels
+from ridge.utils.constants import web_directory
 from ridge.utils.helpers import resolve_absolute_path
 from ridge.utils.rawconfig import (
     ContentConfig,
@@ -231,6 +233,8 @@ def chat_client(md_content_config: ContentConfig, search_config: SearchConfig, p
     state.processor_config = configure_processor(processor_config)
 
     configure_routes(app)
+    configure_middleware(app)
+    app.mount("/static", StaticFiles(directory=web_directory), name="static")
     return TestClient(app)
 
 
@@ -264,6 +268,8 @@ def client(content_config: ContentConfig, search_config: SearchConfig, processor
     state.processor_config = configure_processor(processor_config)
 
     configure_routes(app)
+    configure_middleware(app)
+    app.mount("/static", StaticFiles(directory=web_directory), name="static")
     return TestClient(app)
 
 
@@ -292,6 +298,8 @@ def client_offline_chat(
     state.processor_config = configure_processor(processor_config_offline_chat)
 
     configure_routes(app)
+    configure_middleware(app)
+    app.mount("/static", StaticFiles(directory=web_directory), name="static")
     return TestClient(app)
 
 

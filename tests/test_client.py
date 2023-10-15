@@ -8,7 +8,7 @@ from urllib.parse import quote
 from fastapi.testclient import TestClient
 
 # Internal Packages
-from ridge.main import app
+from app.main import app
 from ridge.configure import configure_routes, configure_search_types
 from ridge.utils import state
 from ridge.utils.state import search_models, content_index, config
