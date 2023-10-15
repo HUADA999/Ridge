@@ -9,6 +9,7 @@ from ridge.utils.yaml import parse_config_from_file
 from ridge.migrations.migrate_version import migrate_config_to_version
 from ridge.migrations.migrate_processor_config_openai import migrate_processor_conversation_schema
 from ridge.migrations.migrate_offline_model import migrate_offline_model
+from ridge.migrations.migrate_offline_chat_schema import migrate_offline_chat_schema
 
 
 def cli(args=None):
@@ -55,7 +56,12 @@ def cli(args=None):
 
 
 def run_migrations(args):
-    migrations = [migrate_config_to_version, migrate_processor_conversation_schema, migrate_offline_model]
+    migrations = [
+        migrate_config_to_version,
+        migrate_processor_conversation_schema,
+        migrate_offline_model,
+        migrate_offline_chat_schema,
+    ]
     for migration in migrations:
         args = migration(args)
     return args
