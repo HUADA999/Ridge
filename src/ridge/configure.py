@@ -5,10 +5,19 @@ import json
 from enum import Enum
 from typing import Optional
 import requests
+import os
 
 # External Packages
 import schedule
-from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.authentication import AuthenticationMiddleware
+
+from starlette.authentication import (
+    AuthCredentials,
+    AuthenticationBackend,
+    SimpleUser,
+    UnauthenticatedUser,
+)
 
 # Internal Packages
 from ridge.utils import constants, state
@@ -26,8 +35,32 @@ from ridge.routers.indexer import configure_content, load_content, configure_sea
 logger = logging.getLogger(__name__)
 
 
-def initialize_server(config: Optional[FullConfig], required=False):
-    if config is None and required:
+class AuthenticatedRidgeUser(SimpleUser):
+    def __init__(self, user):
+        self.object = user
+        super().__init__(user.email)
+
+
+class UserAuthenticationBackend(AuthenticationBackend):
+    def __init__(
+        self,
+    ):
+        from database.models import RidgeUser
+
+        self.ridgeuser_manager = RidgeUser.objects
+        super().__init__()
+
+    async def authenticate(self, request):
+        current_user = request.session.get("user")
+        if current_user and current_user.get("email"):
+            user = await self.ridgeuser_manager.filter(email=current_user.get("email")).afirst()
+            if user:
+                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
+        return AuthCredentials(), UnauthenticatedUser()
+
+
+def initialize_server(config: Optional[FullConfig]):
+    if config is None:
         logger.error(
             f"🚨 Exiting as Ridge is not configured.\nConfigure it via http://{state.host}:{state.port}/config or by editing {state.config_file}."
         )
@@ -99,12 +132,18 @@ def configure_routes(app):
     from ridge.routers.api_beta import api_beta
     from ridge.routers.web_client import web_client
     from ridge.routers.indexer import indexer
+    from ridge.routers.auth import auth_router
 
-    app.mount("/static", StaticFiles(directory=constants.web_directory), name="static")
     app.include_router(api, prefix="/api")
     app.include_router(api_beta, prefix="/api/beta")
     app.include_router(indexer, prefix="/v1/indexer")
     app.include_router(web_client)
+    app.include_router(auth_router, prefix="/auth")
+
+
+def configure_middleware(app):
+    app.add_middleware(AuthenticationMiddleware, backend=UserAuthenticationBackend())
+    app.add_middleware(SessionMiddleware, secret_key=os.environ.get("RIDGE_DJANGO_SECRET_KEY", "!secret"))
 
 
 if not state.demo:
