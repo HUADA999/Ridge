@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, request, Setting } from 'obsidian';
+import { App, Notice, PluginSettingTab, request, Setting, TFile } from 'obsidian';
 import Ridge from 'src/main';
 
 export interface RidgeSetting {
@@ -8,6 +8,7 @@ export interface RidgeSetting {
     ridgeUrl: string;
     connectedToBackend: boolean;
     autoConfigure: boolean;
+    lastSyncedFiles: TFile[];
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
@@ -17,6 +18,7 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     connectedToBackend: false,
     autoConfigure: true,
     openaiApiKey: '',
+    lastSyncedFiles: []
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
