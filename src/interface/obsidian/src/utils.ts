@@ -68,7 +68,7 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
     }
 
     // Call Ridge backend to update index with all markdown, pdf files
-    const response = await fetch(`${setting.ridgeUrl}/api/v1/index/update?regenerate=${regenerate}`, {
+    const response = await fetch(`${setting.ridgeUrl}/api/v1/index/update?force=${regenerate}&client=obsidian`, {
         method: 'POST',
         headers: {
             'x-api-key': 'secret',

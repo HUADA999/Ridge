@@ -537,12 +537,14 @@ CONFIG is json obtained from Ridge config API."
 ;; Ridge Index Content
 ;; -------------------
 
-(defun ridge--server-index-files (&optional file-paths)
-  "Send files at `FILE-PATHS' to the Ridge server to index for search and chat."
+(defun ridge--server-index-files (&optional force content-type file-paths)
+  "Send files at `FILE-PATHS' to the Ridge server to index for search and chat.
+`FORCE' re-indexes all files of `CONTENT-TYPE' even if they are already indexed."
   (interactive)
   (let ((boundary (format "-------------------------%d" (random (expt 10 10))))
         (files-to-index (or file-paths
                             (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files)))
+        (type-query (if (or (equal content-type "all") (not content-type)) "" (format "t=%s" content-type)))
         (inhibit-message t)
         (message-log-max nil))
     (let ((url-request-method "POST")
@@ -550,14 +552,18 @@ CONFIG is json obtained from Ridge config API."
           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
                                        ("x-api-key" . ,ridge-server-api-key))))
       (with-current-buffer
-          (url-retrieve (format "%s/api/v1/index/update" ridge-server-url)
+          (url-retrieve (format "%s/api/v1/index/update?%s&force=%s&client=emacs" ridge-server-url type-query (or force "false"))
                         ;; render response from indexing API endpoint on server
                         (lambda (status)
                           (if (not status)
-                              (message "ridge.el: Updated Content Index")
+                              (message "ridge.el: %scontent index %supdated" (if content-type (format "%s " content-type) "") (if force "force " ""))
                             (with-current-buffer (current-buffer)
                               (goto-char "\n\n")
-                              (message "ridge.el: Failed to update Content Index. Status: %s. Response: %s" status (string-trim (buffer-substring-no-properties (point) (point-max)))))))
+                              (message "ridge.el: Failed to %supdate %s content index. Status: %s. Response: %s"
+                                       (if force "force " "")
+                                       content-type
+                                       status
+                                       (string-trim (buffer-substring-no-properties (point) (point-max)))))))
                         nil t t)))
     (setq ridge--indexed-files files-to-index)))
 
@@ -1141,12 +1147,10 @@ Paragraph only starts at first text after blank line."
     (let* ((force-update (if (member "--force-update" args) "true" "false"))
            ;; set content type to: specified > last used > based on current buffer > default type
            (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-           (type-query (if (equal content-type "all") "" (format "t=%s" content-type)))
-           (update-url (format "%s/api/update?%s&force=%s&client=emacs" ridge-server-url type-query force-update))
            (url-request-method "GET"))
       (progn
         (setq ridge--content-type content-type)
-        (url-retrieve update-url (lambda (_) (message "ridge.el: %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
+        (ridge--server-index-files force-update content-type))))
 
   (transient-define-suffix ridge--chat-command (&optional _)
     "Command to Chat with Ridge."
