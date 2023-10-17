@@ -14,11 +14,18 @@ type OpenAIType = null | {
     "api-key": string;
 };
 
+type OfflineChatType = null | {
+    "chat-model": string;
+    "enable-offline-chat": boolean;
+};
+
 interface ProcessorData {
     conversation: {
       "conversation-logfile": string;
       openai: OpenAIType;
-      "enable-offline-chat": boolean;
+      "offline-chat": OfflineChatType;
+      "tokenizer": null | string;
+      "max-prompt-size": null | number;
     };
 }
 
@@ -106,7 +113,8 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     // Get default config fields from ridge backend
     let defaultConfig = await request(`${ridgeConfigUrl}/default`).then(response => JSON.parse(response));
     let ridgeDefaultChatDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["processor"]["conversation"]["conversation-logfile"]);
-    let ridgeDefaultChatModelName = defaultConfig["processor"]["conversation"]["openai"]["chat-model"];
+    let ridgeDefaultOpenAIChatModelName = defaultConfig["processor"]["conversation"]["openai"]["chat-model"];
+    let ridgeDefaultOfflineChatModelName = defaultConfig["processor"]["conversation"]["offline-chat"]["chat-model"];
 
     // Get current config if ridge backend configured, else get default config from ridge backend
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
@@ -117,13 +125,18 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                 "conversation": {
                     "conversation-logfile": conversationLogFile,
                     "openai": null,
-                    "enable-offline-chat": setting.enableOfflineChat,
+                    "offline-chat": {
+                        "chat-model": ridgeDefaultOfflineChatModelName,
+                        "enable-offline-chat": setting.enableOfflineChat,
+                    },
+                    "tokenizer": null,
+                    "max-prompt-size": null,
                 }
             }
 
             // If the Open AI API Key was configured in the plugin settings
             if (!!setting.openaiApiKey) {
-                let openAIChatModel = data?.["processor"]?.["conversation"]?.["openai"]?.["chat-model"] ?? ridgeDefaultChatModelName;
+                let openAIChatModel = data?.["processor"]?.["conversation"]?.["openai"]?.["chat-model"] ?? ridgeDefaultOpenAIChatModelName;
                 processorData = {
                     "conversation": {
                         "conversation-logfile": conversationLogFile,
@@ -131,7 +144,12 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
                             "chat-model": openAIChatModel,
                             "api-key": setting.openaiApiKey,
                         },
-                        "enable-offline-chat": setting.enableOfflineChat,
+                        "offline-chat": {
+                            "chat-model": ridgeDefaultOfflineChatModelName,
+                            "enable-offline-chat": setting.enableOfflineChat,
+                        },
+                        "tokenizer": null,
+                        "max-prompt-size": null,
                     },
                 }
             }
