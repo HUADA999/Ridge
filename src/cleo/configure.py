@@ -19,7 +19,7 @@ from ridge.utils.config import (
 )
 from ridge.utils.helpers import resolve_absolute_path, merge_dicts
 from ridge.utils.fs_syncer import collect_files
-from ridge.utils.rawconfig import FullConfig, ProcessorConfig, ConversationProcessorConfig
+from ridge.utils.rawconfig import FullConfig, OfflineChatProcessorConfig, ProcessorConfig, ConversationProcessorConfig
 from ridge.routers.indexer import configure_content, load_content, configure_search
 
 
@@ -168,9 +168,7 @@ def configure_conversation_processor(
             conversation_config=ConversationProcessorConfig(
                 conversation_logfile=conversation_logfile,
                 openai=(conversation_config.openai if (conversation_config is not None) else None),
-                enable_offline_chat=(
-                    conversation_config.enable_offline_chat if (conversation_config is not None) else False
-                ),
+                offline_chat=conversation_config.offline_chat if conversation_config else OfflineChatProcessorConfig(),
             )
         )
     else:
