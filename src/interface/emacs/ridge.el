@@ -550,7 +550,7 @@ CONFIG is json obtained from Ridge config API."
           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
                                        ("x-api-key" . ,ridge-server-api-key))))
       (with-current-buffer
-          (url-retrieve (format "%s/api/v1/indexer/batch" ridge-server-url)
+          (url-retrieve (format "%s/api/v1/index/update" ridge-server-url)
                         ;; render response from indexing API endpoint on server
                         (lambda (status)
                           (if (not status)
