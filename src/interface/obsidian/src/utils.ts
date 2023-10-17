@@ -1,4 +1,4 @@
-import { FileSystemAdapter, Notice, RequestUrlParam, request, Vault, Modal } from 'obsidian';
+import { FileSystemAdapter, Notice, RequestUrlParam, request, Vault, Modal, TFile } from 'obsidian';
 import { RidgeSetting } from 'src/settings'
 
 export function getVaultAbsolutePath(vault: Vault): string {
@@ -22,10 +22,70 @@ interface ProcessorData {
     };
 }
 
+function fileExtensionToMimeType (extension: string): string {
+    switch (extension) {
+        case 'pdf':
+            return 'application/pdf';
+        case 'png':
+            return 'image/png';
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'md':
+        case 'markdown':
+            return 'text/markdown';
+        case 'org':
+            return 'text/org';
+        default:
+            return 'text/plain';
+    }
+}
+
+export async function updateContentIndex(vault: Vault, setting: RidgeSetting, lastSyncedFiles: TFile[], regenerate: boolean = false): Promise<TFile[]> {
+    // Get all markdown, pdf files in the vault
+    console.log(`Ridge: Updating Ridge content index...`)
+    const files = vault.getFiles().filter(file => file.extension === 'md' || file.extension === 'pdf');
+    const binaryFileTypes = ['pdf', 'png', 'jpg', 'jpeg']
+    let countOfFilesToIndex = 0;
+    let countOfFilesToDelete = 0;
+
+    // Add all files to index as multipart form data
+    const formData = new FormData();
+    for (const file of files) {
+        countOfFilesToIndex++;
+        const encoding = binaryFileTypes.includes(file.extension) ? "binary" : "utf8";
+        const mimeType = fileExtensionToMimeType(file.extension) + (encoding === "utf8" ? "; charset=UTF-8" : "");
+        const fileContent = await vault.read(file);
+        formData.append('files', new Blob([fileContent], { type: mimeType }), file.path);
+    }
+
+    // Add any previously synced files to be deleted to multipart form data
+    for (const lastSyncedFile of lastSyncedFiles) {
+        if (!files.includes(lastSyncedFile)) {
+            countOfFilesToDelete++;
+            formData.append('files', new Blob([]), lastSyncedFile.path);
+        }
+    }
+
+    // Call Ridge backend to update index with all markdown, pdf files
+    const response = await fetch(`${setting.ridgeUrl}/api/v1/index/update?force=${regenerate}&client=obsidian`, {
+        method: 'POST',
+        headers: {
+            'x-api-key': 'secret',
+        },
+        body: formData,
+    });
+
+    if (!response.ok) {
+        new Notice(`❗️Failed to update Ridge content index. Ensure Ridge server connected or raise issue on Ridge Discord/Github\nError: ${response.statusText}`);
+    } else {
+        console.log(`✅ Refreshed Ridge content index. Updated: ${countOfFilesToIndex} files, Deleted: ${countOfFilesToDelete} files.`);
+    }
+
+    return files;
+}
+
 export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting, notify: boolean = true) {
-    let vaultPath = getVaultAbsolutePath(vault);
-    let mdInVault = `${vaultPath}/**/*.md`;
-    let pdfInVault = `${vaultPath}/**/*.pdf`;
     let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
 
     // Check if ridge backend is configured, note if cannot connect to backend
@@ -43,11 +103,8 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     if (!setting.connectedToBackend) return;
 
     // Set index name from the path of the current vault
-    let indexName = vaultPath.replace(/\//g, '_').replace(/\\/g, '_').replace(/ /g, '_').replace(/:/g, '_');
     // Get default config fields from ridge backend
     let defaultConfig = await request(`${ridgeConfigUrl}/default`).then(response => JSON.parse(response));
-    let ridgeDefaultMdIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["markdown"]["embeddings-file"]);
-    let ridgeDefaultPdfIndexDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["content-type"]["pdf"]["embeddings-file"]);
     let ridgeDefaultChatDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["processor"]["conversation"]["conversation-logfile"]);
     let ridgeDefaultChatModelName = defaultConfig["processor"]["conversation"]["openai"]["chat-model"];
 
@@ -55,99 +112,7 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
     await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
         .then(response => JSON.parse(response))
         .then(data => {
-            ridge_already_configured = data["content-type"] != null;
-            // If ridge backend not configured yet
-            if (!ridge_already_configured) {
-                // Create ridge content-type config with only markdown configured
-                data["content-type"] = {
-                    "markdown": {
-                        "input-filter": [mdInVault],
-                        "input-files": null,
-                        "embeddings-file": `${ridgeDefaultMdIndexDirectory}/${indexName}.pt`,
-                        "compressed-jsonl": `${ridgeDefaultMdIndexDirectory}/${indexName}.jsonl.gz`,
-                    }
-                }
-
-                const hasPdfFiles = app.vault.getFiles().some(file => file.extension === 'pdf');
-
-                if (hasPdfFiles) {
-                    data["content-type"]["pdf"] = {
-                        "input-filter": [pdfInVault],
-                        "input-files": null,
-                        "embeddings-file": `${ridgeDefaultPdfIndexDirectory}/${indexName}.pt`,
-                        "compressed-jsonl": `${ridgeDefaultPdfIndexDirectory}/${indexName}.jsonl.gz`,
-                    }
-                }
-            }
-            // Else if ridge config has no markdown content config
-            else if (!data["content-type"]["markdown"]) {
-                // Add markdown config to ridge content-type config
-                // Set markdown config to index markdown files in configured obsidian vault
-                data["content-type"]["markdown"] = {
-                    "input-filter": [mdInVault],
-                    "input-files": null,
-                    "embeddings-file": `${ridgeDefaultMdIndexDirectory}/${indexName}.pt`,
-                    "compressed-jsonl": `${ridgeDefaultMdIndexDirectory}/${indexName}.jsonl.gz`,
-                }
-            }
-            // Else if ridge is not configured to index markdown files in configured obsidian vault
-            else if (
-                data["content-type"]["markdown"]["input-files"] != null ||
-                data["content-type"]["markdown"]["input-filter"] == null ||
-                data["content-type"]["markdown"]["input-filter"].length != 1 ||
-                data["content-type"]["markdown"]["input-filter"][0] !== mdInVault) {
-                    // Update markdown config in ridge content-type config
-                    // Set markdown config to only index markdown files in configured obsidian vault
-                    let ridgeMdIndexDirectory = getIndexDirectoryFromBackendConfig(data["content-type"]["markdown"]["embeddings-file"]);
-                    data["content-type"]["markdown"] = {
-                        "input-filter": [mdInVault],
-                        "input-files": null,
-                        "embeddings-file": `${ridgeMdIndexDirectory}/${indexName}.pt`,
-                        "compressed-jsonl": `${ridgeMdIndexDirectory}/${indexName}.jsonl.gz`,
-                    }
-            }
-
-            if (ridge_already_configured && !data["content-type"]["pdf"]) {
-                const hasPdfFiles = app.vault.getFiles().some(file => file.extension === 'pdf');
-
-                if (hasPdfFiles) {
-                    data["content-type"]["pdf"] = {
-                        "input-filter": [pdfInVault],
-                        "input-files": null,
-                        "embeddings-file": `${ridgeDefaultPdfIndexDirectory}/${indexName}.pt`,
-                        "compressed-jsonl": `${ridgeDefaultPdfIndexDirectory}/${indexName}.jsonl.gz`,
-                    }
-                } else {
-                    data["content-type"]["pdf"] = null;
-                }
-            }
-            // Else if ridge is not configured to index pdf files in configured obsidian vault
-            else if (ridge_already_configured &&
-                (
-                    data["content-type"]["pdf"]["input-files"] != null ||
-                    data["content-type"]["pdf"]["input-filter"] == null ||
-                    data["content-type"]["pdf"]["input-filter"].length != 1 ||
-                    data["content-type"]["pdf"]["input-filter"][0] !== pdfInVault)) {
-
-                let hasPdfFiles = app.vault.getFiles().some(file => file.extension === 'pdf');
-
-                if (hasPdfFiles) {
-                    // Update pdf config in ridge content-type config
-                    // Set pdf config to only index pdf files in configured obsidian vault
-                    let ridgePdfIndexDirectory = getIndexDirectoryFromBackendConfig(data["content-type"]["pdf"]["embeddings-file"]);
-                    data["content-type"]["pdf"] = {
-                        "input-filter": [pdfInVault],
-                        "input-files": null,
-                        "embeddings-file": `${ridgePdfIndexDirectory}/${indexName}.pt`,
-                        "compressed-jsonl": `${ridgePdfIndexDirectory}/${indexName}.jsonl.gz`,
-                    }
-                } else {
-                    data["content-type"]["pdf"] = null;
-                }
-            }
-
             let conversationLogFile = data?.["processor"]?.["conversation"]?.["conversation-logfile"] ?? `${ridgeDefaultChatDirectory}/conversation.json`;
-
             let processorData: ProcessorData = {
                 "conversation": {
                     "conversation-logfile": conversationLogFile,
@@ -158,9 +123,7 @@ export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting,
 
             // If the Open AI API Key was configured in the plugin settings
             if (!!setting.openaiApiKey) {
-
                 let openAIChatModel = data?.["processor"]?.["conversation"]?.["openai"]?.["chat-model"] ?? ridgeDefaultChatModelName;
-
                 processorData = {
                     "conversation": {
                         "conversation-logfile": conversationLogFile,
