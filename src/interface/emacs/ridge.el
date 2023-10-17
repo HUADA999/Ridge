@@ -93,6 +93,15 @@
   :group 'ridge
   :type 'number)
 
+(defcustom ridge-server-api-key "secret"
+  "API Key to Ridge server."
+  :group 'ridge
+  :type 'string)
+
+(defcustom ridge-index-interval 3600
+  "Interval (in seconds) to wait before updating content index."
+  :group 'ridge
+  :type 'number)
 
 (defcustom ridge-default-content-type "org"
   "The default content type to perform search on."
@@ -124,6 +133,12 @@
 
 (defvar ridge--search-on-idle-timer nil
   "Idle timer to trigger incremental search.")
+
+(defvar ridge--index-timer nil
+  "Timer to trigger content indexing.")
+
+(defvar ridge--indexed-files '()
+  "Files that were indexed in previous content indexing run.")
 
 (declare-function org-element-property "org-mode" (PROPERTY ELEMENT))
 (declare-function org-element-type "org-mode" (ELEMENT))
@@ -375,9 +390,10 @@ CONFIG is json obtained from Ridge config API."
           (string-join "/"))))
 
 (defun ridge--server-configure ()
-  "Configure the the Ridge server for search and chat."
+  "Configure the Ridge server for search and chat."
   (interactive)
   (let* ((org-directory-regexes (or (mapcar (lambda (dir) (format "%s/**/*.org" dir)) ridge-org-directories) json-null))
+         (url-request-method "GET")
          (current-config
           (with-temp-buffer
             (url-insert-file-contents (format "%s/api/config/data" ridge-server-url))
@@ -389,7 +405,6 @@ CONFIG is json obtained from Ridge config API."
          (default-index-dir (ridge--get-directory-from-config default-config '(content-type org embeddings-file)))
          (default-chat-dir (ridge--get-directory-from-config default-config '(processor conversation conversation-logfile)))
          (chat-model (or ridge-chat-model (alist-get 'chat-model (alist-get 'openai (alist-get 'conversation (alist-get 'processor default-config))))))
-         (default-model (alist-get 'model (alist-get 'conversation (alist-get 'processor default-config))))
          (enable-offline-chat (or ridge-chat-offline (alist-get 'enable-offline-chat (alist-get 'conversation (alist-get 'processor default-config)))))
          (config (or current-config default-config)))
 
@@ -519,9 +534,75 @@ CONFIG is json obtained from Ridge config API."
       (ridge--server-configure))))
 
 
-;; -----------------------------------------------
-;; Extract and Render Entries of each Content Type
-;; -----------------------------------------------
+;; -------------------
+;; Ridge Index Content
+;; -------------------
+
+(defun ridge--server-index-files (&optional force content-type file-paths)
+  "Send files at `FILE-PATHS' to the Ridge server to index for search and chat.
+`FORCE' re-indexes all files of `CONTENT-TYPE' even if they are already indexed."
+  (interactive)
+  (let ((boundary (format "-------------------------%d" (random (expt 10 10))))
+        (files-to-index (or file-paths
+                            (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files)))
+        (type-query (if (or (equal content-type "all") (not content-type)) "" (format "t=%s" content-type)))
+        (inhibit-message t)
+        (message-log-max nil))
+    (let ((url-request-method "POST")
+          (url-request-data (ridge--render-files-as-request-body files-to-index ridge--indexed-files boundary))
+          (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
+                                       ("x-api-key" . ,ridge-server-api-key))))
+      (with-current-buffer
+          (url-retrieve (format "%s/api/v1/index/update?%s&force=%s&client=emacs" ridge-server-url type-query (or force "false"))
+                        ;; render response from indexing API endpoint on server
+                        (lambda (status)
+                          (if (not status)
+                              (message "ridge.el: %scontent index %supdated" (if content-type (format "%s " content-type) "") (if force "force " ""))
+                            (with-current-buffer (current-buffer)
+                              (goto-char "\n\n")
+                              (message "ridge.el: Failed to %supdate %s content index. Status: %s. Response: %s"
+                                       (if force "force " "")
+                                       content-type
+                                       status
+                                       (string-trim (buffer-substring-no-properties (point) (point-max)))))))
+                        nil t t)))
+    (setq ridge--indexed-files files-to-index)))
+
+(defun ridge--render-files-as-request-body (files-to-index previously-indexed-files boundary)
+  "Render `FILES-TO-INDEX', `PREVIOUSLY-INDEXED-FILES' as multi-part form body.
+Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request."
+  (with-temp-buffer
+    (set-buffer-multibyte nil)
+    (insert "\n")
+    (dolist (file-to-index files-to-index)
+      (insert (format "--%s\r\n" boundary))
+      (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
+      (insert "Content-Type: text/org\r\n\r\n")
+      (insert (with-temp-buffer
+                (insert-file-contents-literally file-to-index)
+                (buffer-string)))
+      (insert "\r\n"))
+    (dolist (file-to-index previously-indexed-files)
+      (when (not (member file-to-index files-to-index))
+        (insert (format "--%s\r\n" boundary))
+        (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
+        (insert "Content-Type: text/org\r\n\r\n")
+        (insert "")
+        (insert "\r\n")))
+    (insert (format "--%s--\r\n" boundary))
+    (buffer-string)))
+
+;; Cancel any running indexing timer, first
+(when ridge--index-timer
+    (cancel-timer ridge--index-timer))
+;; Send files to index on server every `ridge-index-interval' seconds
+(setq ridge--index-timer
+      (run-with-timer 60 ridge-index-interval 'ridge--server-index-files))
+
+
+;; -------------------------------------------
+;; Render Response from Ridge server for Emacs
+;; -------------------------------------------
 
 (defun ridge--extract-entries-as-markdown (json-response query)
   "Convert JSON-RESPONSE, QUERY from API to markdown entries."
@@ -1029,17 +1110,20 @@ Paragraph only starts at first text after blank line."
 ;; Ridge Menu
 ;; ---------
 
-(transient-define-argument ridge--content-type-switch ()
-  :class 'transient-switches
-  :argument-format "--content-type=%s"
-  :argument-regexp ".+"
-  ;; set content type to: last used > based on current buffer > default type
-  :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
-  ;; dynamically set choices to content types enabled on ridge backend
-  :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
+(defun ridge--setup-and-show-menu ()
+  "Create Transient menu for ridge and show it."
+  ;; Create the Ridge Transient menu
+  (transient-define-argument ridge--content-type-switch ()
+    :class 'transient-switches
+    :argument-format "--content-type=%s"
+    :argument-regexp ".+"
+    ;; set content type to: last used > based on current buffer > default type
+    :init-value (lambda (obj) (oset obj value (format "--content-type=%s" (or ridge--content-type (ridge--buffer-name-to-content-type (buffer-name))))))
+    ;; dynamically set choices to content types enabled on ridge backend
+    :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
 
-(transient-define-suffix ridge--search-command (&optional args)
-  (interactive (list (transient-args transient-current-command)))
+  (transient-define-suffix ridge--search-command (&optional args)
+    (interactive (list (transient-args transient-current-command)))
     (progn
       ;; set content type to: specified > last used > based on current buffer > default type
       (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
@@ -1048,9 +1132,9 @@ Paragraph only starts at first text after blank line."
       ;; trigger incremental search
       (call-interactively #'ridge-incremental)))
 
-(transient-define-suffix ridge--find-similar-command (&optional args)
-  "Find items similar to current item at point."
-  (interactive (list (transient-args transient-current-command)))
+  (transient-define-suffix ridge--find-similar-command (&optional args)
+    "Find items similar to current item at point."
+    (interactive (list (transient-args transient-current-command)))
     (progn
       ;; set content type to: specified > last used > based on current buffer > default type
       (setq ridge--content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
@@ -1058,37 +1142,38 @@ Paragraph only starts at first text after blank line."
       (setq ridge-results-count (or (transient-arg-value "--results-count=" args) ridge-results-count))
       (ridge--find-similar ridge--content-type)))
 
-(transient-define-suffix ridge--update-command (&optional args)
-  "Call ridge API to update index of specified content type."
-  (interactive (list (transient-args transient-current-command)))
-  (let* ((force-update (if (member "--force-update" args) "true" "false"))
-         ;; set content type to: specified > last used > based on current buffer > default type
-         (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
-         (type-query (if (equal content-type "all") "" (format "t=%s" content-type)))
-         (update-url (format "%s/api/update?%s&force=%s&client=emacs" ridge-server-url type-query force-update))
-         (url-request-method "GET"))
-    (progn
-      (setq ridge--content-type content-type)
-      (url-retrieve update-url (lambda (_) (message "ridge.el: %s index %supdated!" content-type (if (member "--force-update" args) "force " "")))))))
+  (transient-define-suffix ridge--update-command (&optional args)
+    "Call ridge API to update index of specified content type."
+    (interactive (list (transient-args transient-current-command)))
+    (let* ((force-update (if (member "--force-update" args) "true" "false"))
+           ;; set content type to: specified > last used > based on current buffer > default type
+           (content-type (or (transient-arg-value "--content-type=" args) (ridge--buffer-name-to-content-type (buffer-name))))
+           (url-request-method "GET"))
+      (progn
+        (setq ridge--content-type content-type)
+        (ridge--server-index-files force-update content-type))))
 
-(transient-define-suffix ridge--chat-command (&optional _)
-  "Command to Chat with Ridge."
-  (interactive (list (transient-args transient-current-command)))
-  (ridge--chat))
+  (transient-define-suffix ridge--chat-command (&optional _)
+    "Command to Chat with Ridge."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--chat))
 
-(transient-define-prefix ridge--menu ()
-  "Create Ridge Menu to Configure and Execute Commands."
-  [["Configure Search"
-    ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
-    ("t" "Content Type" ridge--content-type-switch)]
-   ["Configure Update"
-    ("-f" "Force Update" "--force-update")]]
-  [["Act"
-    ("c" "Chat" ridge--chat-command)
-    ("s" "Search" ridge--search-command)
-    ("f" "Find Similar" ridge--find-similar-command)
-    ("u" "Update" ridge--update-command)
-    ("q" "Quit" transient-quit-one)]])
+  (transient-define-prefix ridge--menu ()
+    "Create Ridge Menu to Configure and Execute Commands."
+    [["Configure Search"
+      ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
+      ("t" "Content Type" ridge--content-type-switch)]
+     ["Configure Update"
+      ("-f" "Force Update" "--force-update")]]
+    [["Act"
+      ("c" "Chat" ridge--chat-command)
+      ("s" "Search" ridge--search-command)
+      ("f" "Find Similar" ridge--find-similar-command)
+      ("u" "Update" ridge--update-command)
+      ("q" "Quit" transient-quit-one)]])
+
+  ;; Show the Ridge Transient menu
+  (ridge--menu))
 
 
 ;; ----------
@@ -1101,7 +1186,7 @@ Paragraph only starts at first text after blank line."
   (interactive)
   (when ridge-auto-setup
     (ridge-setup t))
-  (ridge--menu))
+  (ridge--setup-and-show-menu))
 
 (provide 'ridge)
 
