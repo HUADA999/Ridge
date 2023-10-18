@@ -178,12 +178,8 @@ export async function updateRidgeBackend(ridgeUrl: string, ridgeConfig: Object) 
         method: 'POST',
         contentType: 'application/json',
     };
-
     // Save ridgeConfig on ridge backend at ridgeConfigUrl
-    await request(requestContent)
-        // Refresh ridge search index after updating config
-        .then(_ => request(`${ridgeUrl}/api/update?t=markdown`))
-        .then(_ => request(`${ridgeUrl}/api/update?t=pdf`));
+    request(requestContent);
 }
 
 function getIndexDirectoryFromBackendConfig(filepath: string) {
