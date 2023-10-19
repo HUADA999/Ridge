@@ -46,7 +46,7 @@ Indexes your org-agenda files, by default.
   (use-package ridge
     :ensure t
     :pin melpa-stable
-    :bind ("C-c s" . 'ridge)
+    :bind ("C-c s" . 'ridge))
 ```
 
 - Note: Install `ridge.el` from MELPA (instead of MELPA Stable) if you installed the pre-release version of ridge
