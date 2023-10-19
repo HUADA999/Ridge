@@ -206,6 +206,64 @@ Rule everything\n")
       "Rule everything"))
     ))
 
+
+;; -------------------------------------
+;; Test Helpers to Index Content
+;; -------------------------------------
+
+(ert-deftest ridge-tests--render-files-to-add-request-body ()
+  "Test files are formatted into a multi-part http request body"
+  (let ((upgrade-file (make-temp-file "upgrade" nil ".org" "# Become God\n## Upgrade\n\nPenance to Immortality\n\n"))
+        (act-file (make-temp-file "act" nil ".org" "## Act\n\nRule everything\n\n")))
+    (unwind-protect
+        (progn
+          (should
+           (equal
+            (ridge--render-files-as-request-body (list upgrade-file act-file) '() "ridge")
+            (format
+            "\n--ridge\r\n\
+Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
+Content-Type: text/org\r\n\r\n\
+# Become God\n\
+## Upgrade\n\n\
+Penance to Immortality\n\n\r
+--ridge\r\n\
+Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
+Content-Type: text/org\r\n\r\n\
+## Act\n\n\
+Rule everything\n\n\r\n\
+--ridge--\r\n" upgrade-file act-file))))
+      (delete-file upgrade-file)
+      (delete-file act-file))))
+
+(ert-deftest ridge-tests--render-files-to-add-delete-in-request-body ()
+  "Test files are formatted into a multi-part http request body"
+  (let ((upgrade-file (make-temp-file "upgrade" nil ".org" "# Become God\n## Upgrade\n\nPenance to Immortality\n\n"))
+        (act-file (make-temp-file "act" nil ".org" "## Act\n\nRule everything\n\n")))
+    (unwind-protect
+        (progn
+          (should
+           (equal
+            (ridge--render-files-as-request-body (list upgrade-file act-file) (list upgrade-file act-file "/tmp/deleted-file.org") "ridge")
+            (format
+            "\n--ridge\r\n\
+Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
+Content-Type: text/org\r\n\r\n\
+# Become God\n\
+## Upgrade\n\n\
+Penance to Immortality\n\n\r
+--ridge\r\n\
+Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
+Content-Type: text/org\r\n\r\n\
+## Act\n\n\
+Rule everything\n\n\r
+--ridge\r\n\
+Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
+Content-Type: text/org\r\n\r\n\
+\r
+--ridge--\r\n" upgrade-file act-file "/tmp/deleted-file.org"))))
+      (delete-file upgrade-file)
+      (delete-file act-file))))
 
 (provide 'ridge-tests)
 
