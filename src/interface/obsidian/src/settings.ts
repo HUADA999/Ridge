@@ -1,5 +1,6 @@
-import { App, Notice, PluginSettingTab, request, Setting } from 'obsidian';
+import { App, Notice, PluginSettingTab, Setting, TFile } from 'obsidian';
 import Ridge from 'src/main';
+import { updateContentIndex } from './utils';
 
 export interface RidgeSetting {
     enableOfflineChat: boolean;
@@ -8,6 +9,7 @@ export interface RidgeSetting {
     ridgeUrl: string;
     connectedToBackend: boolean;
     autoConfigure: boolean;
+    lastSyncedFiles: TFile[];
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
@@ -17,6 +19,7 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     connectedToBackend: false,
     autoConfigure: true,
     openaiApiKey: '',
+    lastSyncedFiles: []
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
@@ -118,8 +121,9 @@ export class RidgeSettingTab extends PluginSettingTab {
                     }, 300);
                     this.plugin.registerInterval(progress_indicator);
 
-                    await request(`${this.plugin.settings.ridgeUrl}/api/update?t=markdown&force=true&client=obsidian`);
-                    await request(`${this.plugin.settings.ridgeUrl}/api/update?t=pdf&force=true&client=obsidian`);
+                    this.plugin.settings.lastSyncedFiles = await updateContentIndex(
+                        this.app.vault, this.plugin.settings, this.plugin.settings.lastSyncedFiles, true
+                    );
                     new Notice('✅ Updated Ridge index.');
 
                     // Reset button once index is updated
