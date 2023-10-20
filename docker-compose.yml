@@ -25,9 +25,11 @@ services:
       - ./tests/data/embeddings/:/root/.ridge/content/
       - ./tests/data/models/:/root/.ridge/search/
       - ridge_config:/root/.ridge/
+      - sentence_tranformer_models:/root/.cache/torch/sentence_transformers
     # Use 0.0.0.0 to explicitly set the host ip for the service on the container. https://pythonspeed.com/articles/docker-connection-refused/
     command: --host="0.0.0.0" --port=42110 -vv
 
 
 volumes:
   ridge_config:
+  sentence_tranformer_models:
