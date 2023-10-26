@@ -21,7 +21,7 @@ todesktop.json
 ridge_assistant.egg-info
 /config/ridge*.yml
 .pytest_cache
-ridge.log
+*.log
 static
 
 # Obsidian plugin artifacts

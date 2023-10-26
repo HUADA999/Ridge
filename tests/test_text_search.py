@@ -17,7 +17,6 @@ from ridge.utils.fs_syncer import collect_files, get_org_files
 from database.models import LocalOrgConfig, RidgeUser, Embeddings, GithubConfig
 
 logger = logging.getLogger(__name__)
-from ridge.utils.rawconfig import ContentConfig, SearchConfig
 
 
 # Test

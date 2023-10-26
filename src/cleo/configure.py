@@ -103,6 +103,9 @@ def configure_server(
     user: RidgeUser = None,
 ):
     # Update Config
+    if config == None:
+        logger.info(f"🚨 Ridge is not configured.\nInitializing it with a default config.")
+        config = FullConfig()
     state.config = config
 
     # Initialize Search Models from Config and initialize content
