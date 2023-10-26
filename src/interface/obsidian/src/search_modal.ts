@@ -90,10 +90,11 @@ export class RidgeSearchModal extends SuggestModal<SearchResult> {
         // Query Ridge backend for search results
         let encodedQuery = encodeURIComponent(query);
         let searchUrl = `${this.setting.ridgeUrl}/api/search?q=${encodedQuery}&n=${this.setting.resultsCount}&r=${this.rerank}&client=obsidian`;
+        let headers = { 'Authorization': `Bearer ${this.setting.ridgeApiKey}` }
 
         // Get search results for markdown and pdf files
-        let mdResponse = await request(`${searchUrl}&t=markdown`);
-        let pdfResponse = await request(`${searchUrl}&t=pdf`);
+        let mdResponse = await request({ url: `${searchUrl}&t=markdown`, headers: headers });
+        let pdfResponse = await request({ url: `${searchUrl}&t=pdf`, headers: headers });
 
         // Parse search results
         let mdData = JSON.parse(mdResponse)

@@ -89,6 +89,8 @@
 
             // Generate backend API URL to execute query
             let url = `${hostURL}/api/chat?q=${encodeURIComponent(query)}&n=${resultsCount}&client=web&stream=true`;
+            const ridgeToken = await window.tokenAPI.getToken();
+            const headers = { 'Authorization': `Bearer ${ridgeToken}` };
 
             let chat_body = document.getElementById("chat-body");
             let new_response = document.createElement("div");
@@ -113,7 +115,7 @@
             chatInput.classList.remove("option-enabled");
 
             // Call specified Ridge API which returns a streamed response of type text/plain
-            fetch(url)
+            fetch(url, { headers })
                 .then(response => {
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
@@ -217,7 +219,10 @@
 
         async function loadChat() {
             const hostURL = await window.hostURLAPI.getURL();
-            fetch(`${hostURL}/api/chat/history?client=web`)
+            const ridgeToken = await window.tokenAPI.getToken();
+            const headers = { 'Authorization': `Bearer ${ridgeToken}` };
+
+            fetch(`${hostURL}/api/chat/history?client=web`, { headers })
                 .then(response => response.json())
                 .then(data => {
                     if (data.detail) {
@@ -243,7 +248,7 @@
                     return;
                 });
 
-            fetch(`${hostURL}/api/chat/options`)
+            fetch(`${hostURL}/api/chat/options`, { headers })
                 .then(response => response.json())
                 .then(data => {
                     // Render chat options, if any
@@ -272,9 +277,9 @@
                 <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
             </a>
             <nav class="ridge-nav">
-                <a class="ridge-nav ridge-nav-selected" href="./chat.html">Chat</a>
-                <a class="ridge-nav" href="./index.html">Search</a>
-                <a class="ridge-nav" href="./config.html">⚙️</a>
+                <a class="ridge-nav ridge-nav-selected" href="./chat.html">💬 Chat</a>
+                <a class="ridge-nav" href="./index.html">🔎 Search</a>
+                <a class="ridge-nav" href="./config.html">⚙️ Settings</a>
             </nav>
         </div>
 

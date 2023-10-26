@@ -1,4 +1,4 @@
-import { FileSystemAdapter, Notice, RequestUrlParam, request, Vault, Modal, TFile } from 'obsidian';
+import { FileSystemAdapter, Notice, Vault, Modal, TFile } from 'obsidian';
 import { RidgeSetting } from 'src/settings'
 
 export function getVaultAbsolutePath(vault: Vault): string {
@@ -7,26 +7,6 @@ export function getVaultAbsolutePath(vault: Vault): string {
         return adaptor.getBasePath();
     }
     return '';
-}
-
-type OpenAIType = null | {
-    "chat-model": string;
-    "api-key": string;
-};
-
-type OfflineChatType = null | {
-    "chat-model": string;
-    "enable-offline-chat": boolean;
-};
-
-interface ProcessorData {
-    conversation: {
-      "conversation-logfile": string;
-      openai: OpenAIType;
-      "offline-chat": OfflineChatType;
-      "tokenizer": null | string;
-      "max-prompt-size": null | number;
-    };
 }
 
 function fileExtensionToMimeType (extension: string): string {
@@ -78,7 +58,7 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
     const response = await fetch(`${setting.ridgeUrl}/api/v1/index/update?force=${regenerate}&client=obsidian`, {
         method: 'POST',
         headers: {
-            'x-api-key': 'secret',
+            'Authorization': `Bearer ${setting.ridgeApiKey}`,
         },
         body: formData,
     });
@@ -90,100 +70,6 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
     }
 
     return files;
-}
-
-export async function configureRidgeBackend(vault: Vault, setting: RidgeSetting, notify: boolean = true) {
-    let ridgeConfigUrl = `${setting.ridgeUrl}/api/config/data`;
-
-    // Check if ridge backend is configured, note if cannot connect to backend
-    let ridge_already_configured = await request(ridgeConfigUrl)
-        .then(response => {
-            setting.connectedToBackend = true;
-            return response !== "null"
-        })
-        .catch(error => {
-            setting.connectedToBackend = false;
-            if (notify)
-                new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
-        })
-    // Short-circuit configuring ridge if unable to connect to ridge backend
-    if (!setting.connectedToBackend) return;
-
-    // Set index name from the path of the current vault
-    // Get default config fields from ridge backend
-    let defaultConfig = await request(`${ridgeConfigUrl}/default`).then(response => JSON.parse(response));
-    let ridgeDefaultChatDirectory = getIndexDirectoryFromBackendConfig(defaultConfig["processor"]["conversation"]["conversation-logfile"]);
-    let ridgeDefaultOpenAIChatModelName = defaultConfig["processor"]["conversation"]["openai"]["chat-model"];
-    let ridgeDefaultOfflineChatModelName = defaultConfig["processor"]["conversation"]["offline-chat"]["chat-model"];
-
-    // Get current config if ridge backend configured, else get default config from ridge backend
-    await request(ridge_already_configured ? ridgeConfigUrl : `${ridgeConfigUrl}/default`)
-        .then(response => JSON.parse(response))
-        .then(data => {
-            let conversationLogFile = data?.["processor"]?.["conversation"]?.["conversation-logfile"] ?? `${ridgeDefaultChatDirectory}/conversation.json`;
-            let processorData: ProcessorData = {
-                "conversation": {
-                    "conversation-logfile": conversationLogFile,
-                    "openai": null,
-                    "offline-chat": {
-                        "chat-model": ridgeDefaultOfflineChatModelName,
-                        "enable-offline-chat": setting.enableOfflineChat,
-                    },
-                    "tokenizer": null,
-                    "max-prompt-size": null,
-                }
-            }
-
-            // If the Open AI API Key was configured in the plugin settings
-            if (!!setting.openaiApiKey) {
-                let openAIChatModel = data?.["processor"]?.["conversation"]?.["openai"]?.["chat-model"] ?? ridgeDefaultOpenAIChatModelName;
-                processorData = {
-                    "conversation": {
-                        "conversation-logfile": conversationLogFile,
-                        "openai": {
-                            "chat-model": openAIChatModel,
-                            "api-key": setting.openaiApiKey,
-                        },
-                        "offline-chat": {
-                            "chat-model": ridgeDefaultOfflineChatModelName,
-                            "enable-offline-chat": setting.enableOfflineChat,
-                        },
-                        "tokenizer": null,
-                        "max-prompt-size": null,
-                    },
-                }
-            }
-
-            // Set ridge processor config to conversation processor config
-            data["processor"] = processorData;
-
-            // Save updated config and refresh index on ridge backend
-            updateRidgeBackend(setting.ridgeUrl, data);
-            if (!ridge_already_configured)
-                console.log(`Ridge: Created ridge backend config:\n${JSON.stringify(data)}`)
-            else
-                console.log(`Ridge: Updated ridge backend config:\n${JSON.stringify(data)}`)
-        })
-        .catch(error => {
-            if (notify)
-                new Notice(`❗️Failed to configure Ridge backend. Contact developer on Github.\n\nError: ${error}`);
-        })
-}
-
-export async function updateRidgeBackend(ridgeUrl: string, ridgeConfig: Object) {
-    // POST ridgeConfig to ridgeConfigUrl
-    let requestContent: RequestUrlParam = {
-        url: `${ridgeUrl}/api/config/data`,
-        body: JSON.stringify(ridgeConfig),
-        method: 'POST',
-        contentType: 'application/json',
-    };
-    // Save ridgeConfig on ridge backend at ridgeConfigUrl
-    request(requestContent);
-}
-
-function getIndexDirectoryFromBackendConfig(filepath: string) {
-    return filepath.split("/").slice(0, -1).join("/");
 }
 
 export async function createNote(name: string, newLeaf = false): Promise<void> {
