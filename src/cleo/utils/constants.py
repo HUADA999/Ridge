@@ -5,6 +5,7 @@ web_directory = app_root_directory / "ridge/interface/web/"
 empty_escape_sequences = "\n|\r|\t| "
 app_env_filepath = "~/.ridge/env"
 telemetry_server = "https://ridge.beta.haletic.com/v1/telemetry"
+content_directory = "~/.ridge/content/"
 
 empty_config = {
     "content-type": {
