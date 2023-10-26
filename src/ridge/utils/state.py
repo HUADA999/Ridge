@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Internal Packages
 from ridge.utils import config as utils_config
-from ridge.utils.config import ContentIndex, SearchModels, ProcessorConfigModel
+from ridge.utils.config import ContentIndex, SearchModels, GPT4AllProcessorModel
 from ridge.utils.helpers import LRU
 from ridge.utils.rawconfig import FullConfig
 from ridge.processor.embeddings import EmbeddingsModel, CrossEncoderModel
@@ -21,7 +21,7 @@ search_models = SearchModels()
 embeddings_model = EmbeddingsModel()
 cross_encoder_model = CrossEncoderModel()
 content_index = ContentIndex()
-processor_config = ProcessorConfigModel()
+gpt4all_processor_config: GPT4AllProcessorModel = None
 config_file: Path = None
 verbose: int = 0
 host: str = None

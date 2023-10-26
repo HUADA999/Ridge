@@ -13,12 +13,11 @@ from ridge.search_type import text_search
 from ridge.utils.rawconfig import ContentConfig, SearchConfig
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
 from ridge.processor.github.github_to_jsonl import GithubToJsonl
-from ridge.utils.config import SearchModels
-from ridge.utils.fs_syncer import get_org_files, collect_files
+from ridge.utils.fs_syncer import collect_files, get_org_files
 from database.models import LocalOrgConfig, RidgeUser, Embeddings, GithubConfig
 
 logger = logging.getLogger(__name__)
-from ridge.utils.rawconfig import ContentConfig, SearchConfig, TextContentConfig
+from ridge.utils.rawconfig import ContentConfig, SearchConfig
 
 
 # Test
