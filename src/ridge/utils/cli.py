@@ -3,6 +3,9 @@ import argparse
 import pathlib
 from importlib.metadata import version
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Internal Packages
 from ridge.utils.helpers import resolve_absolute_path
@@ -17,7 +20,7 @@ def cli(args=None):
     # Setup Argument Parser for the Commandline Interface
     parser = argparse.ArgumentParser(description="Start Ridge; An AI personal assistant for your Digital Brain")
     parser.add_argument(
-        "--config-file", "-c", default="~/.ridge/ridge.yml", type=pathlib.Path, help="YAML file to configure Ridge"
+        "--config-file", default="~/.ridge/ridge.yml", type=pathlib.Path, help="YAML file to configure Ridge"
     )
     parser.add_argument(
         "--regenerate",
@@ -42,7 +45,9 @@ def cli(args=None):
         help="Run Ridge in anonymous mode. This does not require any login for connecting users.",
     )
 
-    args = parser.parse_args(args)
+    args, remaining_args = parser.parse_known_args(args)
+
+    logger.debug(f"Ignoring unknown commandline args: {remaining_args}")
 
     args.version_no = version("ridge-assistant")
     if args.version:
