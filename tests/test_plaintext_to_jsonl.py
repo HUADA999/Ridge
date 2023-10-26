@@ -7,6 +7,7 @@ from pathlib import Path
 from ridge.utils.fs_syncer import get_plaintext_files
 from ridge.utils.rawconfig import TextContentConfig
 from ridge.processor.plaintext.plaintext_to_jsonl import PlaintextToJsonl
+from database.models import LocalPlaintextConfig, RidgeUser
 
 
 def test_plaintext_file(tmp_path):
@@ -91,11 +92,12 @@ def test_get_plaintext_files(tmp_path):
     assert set(extracted_plaintext_files.keys()) == set(expected_files)
 
 
-def test_parse_html_plaintext_file(content_config):
+def test_parse_html_plaintext_file(content_config, default_user: RidgeUser):
     "Ensure HTML files are parsed correctly"
     # Arrange
     # Setup input-files, input-filters
-    extracted_plaintext_files = get_plaintext_files(content_config.plaintext)
+    config = LocalPlaintextConfig.objects.filter(user=default_user).first()
+    extracted_plaintext_files = get_plaintext_files(config=config)
 
     # Act
     maps = PlaintextToJsonl.convert_plaintext_entries_to_maps(extracted_plaintext_files)

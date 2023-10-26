@@ -4,22 +4,23 @@ from pathlib import Path
 from typing import List, Tuple
 
 # Internal Packages
-from ridge.processor.text_to_jsonl import TextToJsonl
+from ridge.processor.text_to_jsonl import TextEmbeddings
 from ridge.utils.helpers import timer
-from ridge.utils.jsonl import compress_jsonl_data
-from ridge.utils.rawconfig import Entry
+from ridge.utils.rawconfig import Entry, TextContentConfig
+from database.models import Embeddings, RidgeUser, LocalPlaintextConfig
 
 
 logger = logging.getLogger(__name__)
 
 
-class PlaintextToJsonl(TextToJsonl):
+class PlaintextToJsonl(TextEmbeddings):
+    def __init__(self):
+        super().__init__()
+
     # Define Functions
     def process(
-        self, previous_entries: List[Entry] = [], files: dict[str, str] = None, full_corpus: bool = True
-    ) -> List[Tuple[int, Entry]]:
-        output_file = self.config.compressed_jsonl
-
+        self, files: dict[str, str] = None, full_corpus: bool = True, user: RidgeUser = None, regenerate: bool = False
+    ) -> Tuple[int, int]:
         if not full_corpus:
             deletion_file_names = set([file for file in files if files[file] == ""])
             files_to_process = set(files) - deletion_file_names
@@ -37,19 +38,17 @@ class PlaintextToJsonl(TextToJsonl):
 
         # Identify, mark and merge any new entries with previous entries
         with timer("Identify new or updated entries", logger):
-            entries_with_ids = TextToJsonl.mark_entries_for_update(
-                current_entries, previous_entries, key="compiled", logger=logger, deletion_filenames=deletion_file_names
+            num_new_embeddings, num_deleted_embeddings = self.update_embeddings(
+                current_entries,
+                Embeddings.EmbeddingsType.PLAINTEXT,
+                key="compiled",
+                logger=logger,
+                deletion_filenames=deletion_file_names,
+                user=user,
+                regenerate=regenerate,
             )
 
-        with timer("Write entries to JSONL file", logger):
-            # Process Each Entry from All Notes Files
-            entries = list(map(lambda entry: entry[1], entries_with_ids))
-            plaintext_data = PlaintextToJsonl.convert_entries_to_jsonl(entries)
-
-            # Compress JSONL formatted Data
-            compress_jsonl_data(plaintext_data, output_file)
-
-        return entries_with_ids
+        return num_new_embeddings, num_deleted_embeddings
 
     @staticmethod
     def convert_plaintext_entries_to_maps(entry_to_file_map: dict) -> List[Entry]:
