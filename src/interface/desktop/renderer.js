@@ -181,6 +181,17 @@ urlInput.addEventListener('blur', async () => {
     urlInput.value = url;
 });
 
+const ridgeKeyInput = document.getElementById('ridge-access-key');
+(async function() {
+    const token = await window.tokenAPI.getToken();
+    ridgeKeyInput.value = token;
+})();
+
+ridgeKeyInput.addEventListener('blur', async () => {
+    const token = await window.tokenAPI.setToken(ridgeKeyInput.value.trim());
+    ridgeKeyInput.value = token;
+});
+
 const syncButton = document.getElementById('sync-data');
 const syncForceToggle = document.getElementById('sync-force');
 syncButton.addEventListener('click', async () => {

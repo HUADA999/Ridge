@@ -1,8 +1,8 @@
-import { Notice, Plugin, TFile } from 'obsidian';
+import { Notice, Plugin } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
 import { RidgeChatModal } from 'src/chat_modal'
-import { configureRidgeBackend, updateContentIndex } from './utils';
+import { updateContentIndex } from './utils';
 
 
 export default class Ridge extends Plugin {
@@ -39,9 +39,9 @@ export default class Ridge extends Plugin {
             id: 'chat',
             name: 'Chat',
             checkCallback: (checking) => {
-                if (!checking && this.settings.connectedToBackend && (!!this.settings.openaiApiKey || this.settings.enableOfflineChat))
+                if (!checking && this.settings.connectedToBackend)
                     new RidgeChatModal(this.app, this.settings).open();
-                return !!this.settings.openaiApiKey || this.settings.enableOfflineChat;
+                return this.settings.connectedToBackend;
             }
         });
 
@@ -69,17 +69,9 @@ export default class Ridge extends Plugin {
     async loadSettings() {
         // Load ridge obsidian plugin settings
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-
-        if (this.settings.autoConfigure) {
-            // Load, configure ridge server settings
-            await configureRidgeBackend(this.app.vault, this.settings);
-        }
     }
 
     async saveSettings() {
-        if (this.settings.autoConfigure) {
-            await configureRidgeBackend(this.app.vault, this.settings, false);
-        }
         this.saveData(this.settings);
     }
 

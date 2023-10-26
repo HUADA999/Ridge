@@ -4,9 +4,9 @@ from typing import Optional, Union, Dict
 import asyncio
 
 # External Packages
-from fastapi import APIRouter, HTTPException, Header, Request, Response, UploadFile
+from fastapi import APIRouter, Header, Request, Response, UploadFile
 from pydantic import BaseModel
-from ridge.routers.helpers import update_telemetry_state
+from starlette.authentication import requires
 
 # Internal Packages
 from ridge.utils import state, constants
@@ -17,6 +17,7 @@ from ridge.processor.github.github_to_jsonl import GithubToJsonl
 from ridge.processor.notion.notion_to_jsonl import NotionToJsonl
 from ridge.processor.plaintext.plaintext_to_jsonl import PlaintextToJsonl
 from ridge.search_type import text_search, image_search
+from ridge.routers.helpers import update_telemetry_state
 from ridge.utils.yaml import save_config_to_file_updated_state
 from ridge.utils.config import SearchModels
 from ridge.utils.helpers import LRU, get_file_type
@@ -57,10 +58,10 @@ class IndexerInput(BaseModel):
 
 
 @indexer.post("/update")
+@requires(["authenticated"])
 async def update(
     request: Request,
     files: list[UploadFile],
-    x_api_key: str = Header(None),
     force: bool = False,
     t: Optional[Union[state.SearchType, str]] = None,
     client: Optional[str] = None,
@@ -68,9 +69,7 @@ async def update(
     referer: Optional[str] = Header(None),
     host: Optional[str] = Header(None),
 ):
-    user = request.user.object if request.user.is_authenticated else None
-    if x_api_key != "secret":
-        raise HTTPException(status_code=401, detail="Invalid API Key")
+    user = request.user.object
     try:
         logger.info(f"📬 Updating content index via API call by {client} client")
         org_files: Dict[str, str] = {}

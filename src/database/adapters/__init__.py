@@ -1,3 +1,4 @@
+import secrets
 from typing import Type, TypeVar, List
 from datetime import date
 
@@ -16,6 +17,7 @@ from fastapi import HTTPException
 from database.models import (
     RidgeUser,
     GoogleUser,
+    RidgeApiUser,
     NotionConfig,
     GithubConfig,
     Embeddings,
@@ -25,6 +27,7 @@ from database.models import (
     OpenAIProcessorConversationConfig,
     OfflineChatProcessorConversationConfig,
 )
+from ridge.utils.helpers import generate_random_name
 from ridge.utils.rawconfig import (
     ConversationProcessorConfig as UserConversationProcessorConfig,
 )
@@ -50,6 +53,25 @@ async def set_notion_config(token: str, user: RidgeUser):
         notion_config.token = token
         await notion_config.asave()
     return notion_config
+
+
+async def create_ridge_token(user: RidgeUser, name=None):
+    "Create Ridge API key for user"
+    token = f"kk-{secrets.token_urlsafe(32)}"
+    name = name or f"{generate_random_name().title()}'s Secret Key"
+    api_config = await RidgeApiUser.objects.acreate(token=token, user=user, name=name)
+    await api_config.asave()
+    return api_config
+
+
+def get_ridge_tokens(user: RidgeUser):
+    "Get all Ridge API keys for user"
+    return list(RidgeApiUser.objects.filter(user=user))
+
+
+async def delete_ridge_token(user: RidgeUser, token: str):
+    "Delete Ridge API Key for user"
+    await RidgeApiUser.objects.filter(token=token, user=user).adelete()
 
 
 async def get_or_create_user(token: dict) -> RidgeUser:
