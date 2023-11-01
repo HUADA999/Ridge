@@ -13,7 +13,7 @@ app = FastAPI()
 
 # Internal Packages
 from ridge.configure import configure_routes, configure_search_types, configure_middleware
-from ridge.processor.plaintext.plaintext_to_jsonl import PlaintextToJsonl
+from ridge.processor.plaintext.plaintext_to_entries import PlaintextToEntries
 from ridge.search_type import image_search, text_search
 from ridge.utils.config import SearchModels
 from ridge.utils.constants import web_directory
@@ -26,7 +26,7 @@ from ridge.utils.rawconfig import (
 )
 from ridge.utils import state, fs_syncer
 from ridge.routers.indexer import configure_content
-from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
+from ridge.processor.org_mode.org_to_entries import OrgToEntries
 from database.models import (
     RidgeApiUser,
     LocalOrgConfig,
@@ -134,7 +134,7 @@ def content_config(tmp_path_factory, search_models: SearchModels, default_user: 
         user=default_user,
     )
 
-    text_search.setup(OrgToJsonl, get_sample_data("org"), regenerate=False, user=default_user)
+    text_search.setup(OrgToEntries, get_sample_data("org"), regenerate=False, user=default_user)
 
     if os.getenv("GITHUB_PAT_TOKEN"):
         GithubConfig.objects.create(
@@ -242,7 +242,7 @@ def client(
     # These lines help us Mock the Search models for these search types
     state.search_models.image_search = image_search.initialize_model(search_config.image)
     text_search.setup(
-        OrgToJsonl,
+        OrgToEntries,
         get_sample_data("org"),
         regenerate=False,
         user=api_user.user,
@@ -251,7 +251,7 @@ def client(
         content_config.image, state.search_models.image_search, regenerate=False
     )
     text_search.setup(
-        PlaintextToJsonl,
+        PlaintextToEntries,
         get_sample_data("plaintext"),
         regenerate=False,
         user=api_user.user,
