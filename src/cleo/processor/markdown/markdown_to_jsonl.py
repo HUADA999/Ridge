@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Tuple, List
 
 # Internal Packages
-from ridge.processor.text_to_jsonl import TextEmbeddings
+from ridge.processor.text_to_jsonl import TextEntries
 from ridge.utils.helpers import timer
 from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.rawconfig import Entry
@@ -16,7 +16,7 @@ from database.models import Entry as DbEntry, RidgeUser
 logger = logging.getLogger(__name__)
 
 
-class MarkdownToJsonl(TextEmbeddings):
+class MarkdownToJsonl(TextEntries):
     def __init__(self):
         super().__init__()
 

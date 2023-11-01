@@ -18,7 +18,7 @@ from ridge.utils.models import BaseEncoder
 from ridge.utils.state import SearchType
 from ridge.utils.rawconfig import SearchResponse, Entry
 from ridge.utils.jsonl import load_jsonl
-from ridge.processor.text_to_jsonl import TextEmbeddings
+from ridge.processor.text_to_jsonl import TextEntries
 from database.adapters import EntryAdapters
 from database.models import RidgeUser, Entry as DbEntry
 
@@ -188,7 +188,7 @@ def rerank_and_sort_results(hits, query):
 
 
 def setup(
-    text_to_jsonl: Type[TextEmbeddings],
+    text_to_jsonl: Type[TextEntries],
     files: dict[str, str],
     regenerate: bool,
     full_corpus: bool = True,

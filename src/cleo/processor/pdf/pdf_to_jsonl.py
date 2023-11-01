@@ -8,7 +8,7 @@ import base64
 from langchain.document_loaders import PyMuPDFLoader
 
 # Internal Packages
-from ridge.processor.text_to_jsonl import TextEmbeddings
+from ridge.processor.text_to_jsonl import TextEntries
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
 from database.models import Entry as DbEntry, RidgeUser
@@ -17,7 +17,7 @@ from database.models import Entry as DbEntry, RidgeUser
 logger = logging.getLogger(__name__)
 
 
-class PdfToJsonl(TextEmbeddings):
+class PdfToJsonl(TextEntries):
     def __init__(self):
         super().__init__()
 

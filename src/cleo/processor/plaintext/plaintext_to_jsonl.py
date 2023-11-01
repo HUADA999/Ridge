@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 
 # Internal Packages
-from ridge.processor.text_to_jsonl import TextEmbeddings
+from ridge.processor.text_to_jsonl import TextEntries
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
 from database.models import Entry as DbEntry, RidgeUser
@@ -15,7 +15,7 @@ from database.models import Entry as DbEntry, RidgeUser
 logger = logging.getLogger(__name__)
 
 
-class PlaintextToJsonl(TextEmbeddings):
+class PlaintextToJsonl(TextEntries):
     def __init__(self):
         super().__init__()
 

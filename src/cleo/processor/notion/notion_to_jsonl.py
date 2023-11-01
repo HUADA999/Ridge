@@ -8,7 +8,7 @@ import requests
 # Internal Packages
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry, NotionContentConfig
-from ridge.processor.text_to_jsonl import TextEmbeddings
+from ridge.processor.text_to_jsonl import TextEntries
 from ridge.utils.rawconfig import Entry
 from database.models import Entry as DbEntry, RidgeUser, NotionConfig
 
@@ -50,7 +50,7 @@ class NotionBlockType(Enum):
     CALLOUT = "callout"
 
 
-class NotionToJsonl(TextEmbeddings):
+class NotionToJsonl(TextEntries):
     def __init__(self, config: NotionConfig):
         super().__init__(config)
         self.config = NotionContentConfig(
