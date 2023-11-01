@@ -17,7 +17,7 @@ from ridge.search_type import text_search, image_search
 from ridge.utils.rawconfig import ContentConfig, SearchConfig
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
 from database.models import RidgeUser
-from database.adapters import EmbeddingsAdapters
+from database.adapters import EntryAdapters
 
 
 # Test
@@ -178,7 +178,7 @@ def test_get_configured_types_via_api(client, sample_org_data):
     # Act
     text_search.setup(OrgToJsonl, sample_org_data, regenerate=False)
 
-    enabled_types = EmbeddingsAdapters.get_unique_file_types(user=None).all().values_list("file_type", flat=True)
+    enabled_types = EntryAdapters.get_unique_file_types(user=None).all().values_list("file_type", flat=True)
 
     # Assert
     assert list(enabled_types) == ["org"]

@@ -13,8 +13,7 @@ from ridge.utils.rawconfig import Entry, GithubContentConfig, GithubRepoConfig
 from ridge.processor.markdown.markdown_to_jsonl import MarkdownToJsonl
 from ridge.processor.org_mode.org_to_jsonl import OrgToJsonl
 from ridge.processor.text_to_jsonl import TextEmbeddings
-from ridge.utils.rawconfig import Entry
-from database.models import Embeddings, GithubConfig, RidgeUser
+from database.models import Entry as DbEntry, GithubConfig, RidgeUser
 
 
 logger = logging.getLogger(__name__)
@@ -103,7 +102,7 @@ class GithubToJsonl(TextEmbeddings):
         # Identify, mark and merge any new entries with previous entries
         with timer("Identify new or updated entries", logger):
             num_new_embeddings, num_deleted_embeddings = self.update_embeddings(
-                current_entries, Embeddings.EmbeddingsType.GITHUB, key="compiled", logger=logger, user=user
+                current_entries, DbEntry.EntryType.GITHUB, key="compiled", logger=logger, user=user
             )
 
         return num_new_embeddings, num_deleted_embeddings

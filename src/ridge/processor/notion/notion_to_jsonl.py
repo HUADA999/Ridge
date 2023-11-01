@@ -10,7 +10,7 @@ from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry, NotionContentConfig
 from ridge.processor.text_to_jsonl import TextEmbeddings
 from ridge.utils.rawconfig import Entry
-from database.models import Embeddings, RidgeUser, NotionConfig
+from database.models import Entry as DbEntry, RidgeUser, NotionConfig
 
 from enum import Enum
 
@@ -250,7 +250,7 @@ class NotionToJsonl(TextEmbeddings):
         # Identify, mark and merge any new entries with previous entries
         with timer("Identify new or updated entries", logger):
             num_new_embeddings, num_deleted_embeddings = self.update_embeddings(
-                current_entries, Embeddings.EmbeddingsType.NOTION, key="compiled", logger=logger, user=user
+                current_entries, DbEntry.EntryType.NOTION, key="compiled", logger=logger, user=user
             )
 
         return num_new_embeddings, num_deleted_embeddings
