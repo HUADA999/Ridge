@@ -1,9 +1,16 @@
 import secrets
 from typing import Type, TypeVar, List
 from datetime import date
+import secrets
+from typing import Type, TypeVar, List
+from datetime import date
 
 from django.db import models
 from django.contrib.sessions.backends.db import SessionStore
+from pgvector.django import CosineDistance
+from django.db.models.manager import BaseManager
+from django.db.models import Q
+from torch import Tensor
 from pgvector.django import CosineDistance
 from django.db.models.manager import BaseManager
 from django.db.models import Q
@@ -58,7 +65,7 @@ async def set_notion_config(token: str, user: RidgeUser):
 async def create_ridge_token(user: RidgeUser, name=None):
     "Create Ridge API key for user"
     token = f"kk-{secrets.token_urlsafe(32)}"
-    name = name or f"{generate_random_name().title()}'s Secret Key"
+    name = name or f"{generate_random_name().title()}"
     api_config = await RidgeApiUser.objects.acreate(token=token, user=user, name=name)
     await api_config.asave()
     return api_config
@@ -123,15 +130,11 @@ def get_all_users() -> BaseManager[RidgeUser]:
 
 def get_user_github_config(user: RidgeUser):
     config = GithubConfig.objects.filter(user=user).prefetch_related("githubrepoconfig").first()
-    if not config:
-        return None
     return config
 
 
 def get_user_notion_config(user: RidgeUser):
     config = NotionConfig.objects.filter(user=user).first()
-    if not config:
-        return None
     return config
 
 
@@ -240,13 +243,10 @@ class ConversationAdapters:
     @staticmethod
     def get_enabled_conversation_settings(user: RidgeUser):
         openai_config = ConversationAdapters.get_openai_conversation_config(user)
-        offline_chat_config = ConversationAdapters.get_offline_chat_conversation_config(user)
 
         return {
             "openai": True if openai_config is not None else False,
-            "offline_chat": True
-            if (offline_chat_config is not None and offline_chat_config.enable_offline_chat)
-            else False,
+            "offline_chat": ConversationAdapters.has_offline_chat(user),
         }
 
     @staticmethod
@@ -264,7 +264,11 @@ class ConversationAdapters:
         OfflineChatProcessorConversationConfig.objects.filter(user=user).delete()
 
     @staticmethod
-    async def has_offline_chat(user: RidgeUser):
+    def has_offline_chat(user: RidgeUser):
+        return OfflineChatProcessorConversationConfig.objects.filter(user=user, enable_offline_chat=True).exists()
+
+    @staticmethod
+    async def ahas_offline_chat(user: RidgeUser):
         return await OfflineChatProcessorConversationConfig.objects.filter(
             user=user, enable_offline_chat=True
         ).aexists()
