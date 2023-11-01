@@ -31,7 +31,7 @@ def perform_chat_checks(user: RidgeUser):
 
 
 async def is_ready_to_chat(user: RidgeUser):
-    has_offline_config = await ConversationAdapters.has_offline_chat(user=user)
+    has_offline_config = await ConversationAdapters.ahas_offline_chat(user=user)
     has_openai_config = await ConversationAdapters.has_openai_chat(user=user)
 
     if has_offline_config:
