@@ -10,6 +10,7 @@
     </head>
     <script type="text/javascript" src="/static/assets/org.min.js"></script>
     <script type="text/javascript" src="/static/assets/markdown-it.min.js"></script>
+    <script type="text/javascript" src="/static/assets/ridge.js"></script>
 
     <script>
         function render_image(item) {
@@ -296,7 +297,15 @@
                 <a class="ridge-nav" href="/chat">💬 Chat</a>
                 <a class="ridge-nav ridge-nav-selected" href="/">🔎 Search</a>
                 {% if not demo %}
-                    <a class="ridge-nav" href="/config">⚙️ Settings</a>
+                    <!-- Dropdown Menu -->
+                    <div id="ridge-nav-menu-container" class="ridge-nav dropdown">
+                        <img class="circle" src="{{ user_photo }}" alt="{{ username }}" onclick="toggleMenu()">
+                        <div id="ridge-nav-menu" class="ridge-nav-dropdown-content">
+                            <div class="ridge-nav-username"> {{ username }} </div>
+                            <a class="ridge-nav" href="/config">⚙️ Settings</a>
+                            <a class="ridge-nav" href="/auth/logout">🔑 Logout</a>
+                        </div>
+                    </div>
                 {% endif %}
             </nav>
         </div>
