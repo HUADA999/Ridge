@@ -8,6 +8,7 @@
         <link rel="manifest" href="/static/ridge_chat.webmanifest">
         <link rel="stylesheet" href="/static/assets/ridge.css">
     </head>
+    <script type="text/javascript" src="/static/assets/ridge.js"></script>
     <script>
         let chatOptions = [];
         function copyProgrammaticOutput(event) {
@@ -284,7 +285,14 @@
                 <a class="ridge-nav ridge-nav-selected" href="/chat">💬 Chat</a>
                 <a class="ridge-nav" href="/">🔎 Search</a>
                 {% if not demo %}
-                    <a class="ridge-nav" href="/config">⚙️ Settings</a>
+                    <!-- Dropdown Menu -->
+                    <div id="ridge-nav-menu-container" class="ridge-nav dropdown">
+                        <img class="circle" src="{{ user_photo }}" alt="{{ username }}" onclick="toggleMenu()">
+                        <div id="ridge-nav-menu" class="ridge-nav-dropdown-content">
+                            <div class="ridge-nav-username"> {{ username }} </div>
+                            <a class="ridge-nav ridge-nav-selected" href="/config">⚙️ Settings</a>
+                            <a class="ridge-nav" href="/auth/logout">🔑 Logout</a>
+                        </div>
                 {% endif %}
             </nav>
         </div>
