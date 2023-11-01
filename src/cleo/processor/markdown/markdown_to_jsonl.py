@@ -10,7 +10,7 @@ from ridge.processor.text_to_jsonl import TextEmbeddings
 from ridge.utils.helpers import timer
 from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.rawconfig import Entry
-from database.models import Embeddings, RidgeUser
+from database.models import Entry as DbEntry, RidgeUser
 
 
 logger = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class MarkdownToJsonl(TextEmbeddings):
         with timer("Identify new or updated entries", logger):
             num_new_embeddings, num_deleted_embeddings = self.update_embeddings(
                 current_entries,
-                Embeddings.EmbeddingsType.MARKDOWN,
+                DbEntry.EntryType.MARKDOWN,
                 "compiled",
                 logger,
                 deletion_file_names,
