@@ -282,33 +282,10 @@
                 <button id="ridge-banner-submit" class="ridge-banner-button">Submit</button>
             </div>
         {% endif %}
+
         <!--Add Header Logo and Nav Pane-->
-        <div class="ridge-header">
-            {% if demo %}
-                <a class="ridge-logo" href="https://ridge.dev" target="_blank">
-                    <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
-                </a>
-            {% else %}
-                <a class="ridge-logo" href="/">
-                    <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
-                </a>
-            {% endif %}
-            <nav class="ridge-nav">
-                <a class="ridge-nav" href="/chat">💬 Chat</a>
-                <a class="ridge-nav ridge-nav-selected" href="/">🔎 Search</a>
-                {% if not demo %}
-                    <!-- Dropdown Menu -->
-                    <div id="ridge-nav-menu-container" class="ridge-nav dropdown">
-                        <img class="circle" src="{{ user_photo }}" alt="{{ username }}" onclick="toggleMenu()">
-                        <div id="ridge-nav-menu" class="ridge-nav-dropdown-content">
-                            <div class="ridge-nav-username"> {{ username }} </div>
-                            <a class="ridge-nav" href="/config">⚙️ Settings</a>
-                            <a class="ridge-nav" href="/auth/logout">🔑 Logout</a>
-                        </div>
-                    </div>
-                {% endif %}
-            </nav>
-        </div>
+        {% import 'utils.html' as utils %}
+        {{ utils.heading_pane(user_photo, username) }}
 
         <!--Add Text Box To Enter Query, Trigger Incremental Search OnChange -->
         <input type="text" id="query" class="option" onkeyup=incrementalSearch(event) autofocus="autofocus" placeholder="Search your knowledge base using natural language">
