@@ -5,17 +5,17 @@ from typing import Iterable, List, Tuple
 
 # Internal Packages
 from ridge.processor.org_mode import orgnode
-from ridge.processor.text_to_jsonl import TextEmbeddings
+from ridge.processor.text_to_entries import TextToEntries
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
 from ridge.utils import state
-from database.models import Embeddings, RidgeUser
+from database.models import Entry as DbEntry, RidgeUser
 
 
 logger = logging.getLogger(__name__)
 
 
-class OrgToJsonl(TextEmbeddings):
+class OrgToEntries(TextToEntries):
     def __init__(self):
         super().__init__()
 
@@ -47,7 +47,7 @@ class OrgToJsonl(TextEmbeddings):
         with timer("Identify new or updated entries", logger):
             num_new_embeddings, num_deleted_embeddings = self.update_embeddings(
                 current_entries,
-                Embeddings.EmbeddingsType.ORG,
+                DbEntry.EntryType.ORG,
                 "compiled",
                 logger,
                 deletion_file_names,
