@@ -55,12 +55,17 @@
     font-family: roboto, karma, segoe ui, sans-serif;
     font-weight: 300;
 }
+
+.ridge-footer,
 .ridge-header {
     display: grid;
     grid-auto-flow: column;
     gap: 20px;
     padding: 16px 0;
     margin: 0 0 16px 0;
+}
+.ridge-footer {
+    margin: 16px 0 0 0;
 }
 
 nav.ridge-nav {
