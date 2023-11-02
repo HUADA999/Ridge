@@ -3,6 +3,15 @@ from django.contrib.auth.admin import UserAdmin
 
 # Register your models here.
 
-from database.models import RidgeUser
+from database.models import (
+    RidgeUser,
+    ChatModelOptions,
+    OpenAIProcessorConversationConfig,
+    OfflineChatProcessorConversationConfig,
+)
 
 admin.site.register(RidgeUser, UserAdmin)
+
+admin.site.register(ChatModelOptions)
+admin.site.register(OpenAIProcessorConversationConfig)
+admin.site.register(OfflineChatProcessorConversationConfig)
