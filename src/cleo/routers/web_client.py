@@ -10,7 +10,6 @@ from fastapi.templating import Jinja2Templates
 from starlette.authentication import requires
 from ridge.utils.rawconfig import (
     TextContentConfig,
-    FullConfig,
     GithubContentConfig,
     GithubRepoConfig,
     NotionContentConfig,
