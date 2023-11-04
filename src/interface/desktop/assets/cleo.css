@@ -92,8 +92,9 @@ a.ridge-logo {
 }
 .ridge-nav a:hover {
     background-color: var(--primary-hover);
+    color: var(--main-text-color);
 }
-.ridge-nav-selected {
+a.ridge-nav-selected {
     background-color: var(--primary);
 }
 img.ridge-logo {
