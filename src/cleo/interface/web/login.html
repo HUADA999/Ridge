@@ -10,18 +10,6 @@
     </head>
 
     <body>
-        {% if demo %}
-            <!-- Banner linking to https://ridge.dev -->
-            <div class="ridge-banner-container">
-                <a class="ridge-banner" href="https://ridge.dev" target="_blank">
-                    <p id="ridge-banner" class="ridge-banner">
-                        Enroll in Ridge cloud to get your own assistant
-                    </p>
-                </a>
-                <input type="text" id="ridge-banner-email" placeholder="email" class="ridge-banner-email"></input>
-                <button id="ridge-banner-submit" class="ridge-banner-button">Submit</button>
-            </div>
-        {% endif %}
         <div class="ridge-header"></div>
 
         <!-- Login Modal -->
@@ -106,19 +94,6 @@
             justify-self: center;
         }
 
-        button#ridge-banner-submit,
-        input#ridge-banner-email {
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #475569;
-            background: #f9fafc;
-        }
-
-        button#ridge-banner-submit:hover,
-        input#ridge-banner-email:hover {
-            box-shadow: 0 0 11px #aaa;
-        }
-
         div#login-modal {
             display: grid;
             grid-template-columns: 1fr;
@@ -143,12 +118,6 @@
         }
 
         @media only screen and (max-width: 700px) {
-            a.ridge-banner {
-                display: block;
-            }
-            p.ridge-banner {
-                padding: 0;
-            }
             div#login-modal {
                 margin-left: 10%;
                 margin-right: 10%;
@@ -156,34 +125,5 @@
         }
 
     </style>
-    <script>
-        var ridgeBannerSubmit = document.getElementById("ridge-banner-submit");
-        ridgeBannerSubmit?.addEventListener("click", function(event) {
-            event.preventDefault();
-            var email = document.getElementById("ridge-banner-email").value;
-            fetch("https://app.ridge.dev/beta/users/", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        email: email
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then(function(response) {
-                    return response.json();
-                }).then(function(data) {
-                    console.log(data);
-                    if (data.user != null) {
-                        document.getElementById("ridge-banner").innerHTML = "Thanks for signing up. We'll be in touch soon! 🚀";
-                        document.getElementById("ridge-banner-submit").remove();
-                    } else {
-                        document.getElementById("ridge-banner").innerHTML = "There was an error signing up. Please contact team@ridge.dev";
-                    }
-                }).catch(function(error) {
-                    console.log(error);
-                    document.getElementById("ridge-banner").innerHTML = "There was an error signing up. Please contact team@ridge.dev";
-                });
-            });
-    </script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
 </html>
