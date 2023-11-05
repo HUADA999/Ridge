@@ -362,35 +362,6 @@
             gap: 4px;
         }
     </style>
-    <script>
-        var ridgeBannerSubmit = document.getElementById("ridge-banner-submit");
-        ridgeBannerSubmit?.addEventListener("click", function(event) {
-            event.preventDefault();
-            var email = document.getElementById("ridge-banner-email").value;
-            fetch("https://app.ridge.dev/beta/users/", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        email: email
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                }).then(function(response) {
-                    return response.json();
-                }).then(function(data) {
-                    console.log(data);
-                    if (data.user != null) {
-                        document.getElementById("ridge-banner").innerHTML = "Thanks for signing up. We'll be in touch soon! 🚀";
-                        document.getElementById("ridge-banner-submit").remove();
-                    } else {
-                        document.getElementById("ridge-banner").innerHTML = "There was an error signing up. Please contact team@ridge.dev";
-                    }
-                }).catch(function(error) {
-                    console.log(error);
-                    document.getElementById("ridge-banner").innerHTML = "There was an error signing up. Please contact team@ridge.dev";
-                });
-            });
-    </script>
     <script src="./renderer.js"></script>
 
 </html>
