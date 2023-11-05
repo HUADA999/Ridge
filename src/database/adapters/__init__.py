@@ -1,4 +1,3 @@
-import secrets
 from typing import Type, TypeVar, List
 from datetime import date
 import secrets
@@ -36,9 +35,6 @@ from database.models import (
     OfflineChatProcessorConversationConfig,
 )
 from ridge.utils.helpers import generate_random_name
-from ridge.utils.rawconfig import (
-    ConversationProcessorConfig as UserConversationProcessorConfig,
-)
 from ridge.search_filter.word_filter import WordFilter
 from ridge.search_filter.file_filter import FileFilter
 from ridge.search_filter.date_filter import DateFilter
