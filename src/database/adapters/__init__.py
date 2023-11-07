@@ -1,5 +1,5 @@
 from typing import Type, TypeVar, List
-from datetime import date
+from datetime import date, datetime, timedelta
 import secrets
 from typing import Type, TypeVar, List
 from datetime import date
@@ -101,6 +101,27 @@ async def create_google_user(token: dict) -> RidgeUser:
     )
 
     return user
+
+
+async def set_user_subscribed(email: str, type="standard") -> RidgeUser:
+    user = await RidgeUser.objects.filter(email=email).afirst()
+    if user:
+        user.subscription_type = type
+        start_date = user.subscription_renewal_date or datetime.now()
+        user.subscription_renewal_date = start_date + timedelta(days=30)
+        await user.asave()
+        return user
+    else:
+        return None
+
+
+def is_user_subscribed(email: str, type="standard") -> bool:
+    user = RidgeUser.objects.filter(email=email, subscription_type=type).first()
+    if user and user.subscription_renewal_date:
+        is_subscribed = user.subscription_renewal_date > date.today()
+        return is_subscribed
+    else:
+        return False
 
 
 async def get_user_by_token(token: dict) -> RidgeUser:
