@@ -317,6 +317,19 @@ async function syncData (regenerate = false) {
     }
 }
 
+async function deleteAllFiles () {
+    try {
+        store.set('files', []);
+        store.set('folders', []);
+        pushDataToRidge(true);
+        const date = new Date();
+        console.log('Pushing data to Ridge at: ', date);
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+
 let firstRun = true;
 let win = null;
 const createWindow = (tab = 'chat.html') => {
@@ -397,6 +410,7 @@ app.whenReady().then(() => {
     ipcMain.handle('syncData', (event, regenerate) => {
         syncData(regenerate);
     });
+    ipcMain.handle('deleteAllFiles', deleteAllFiles);
 
     createWindow()
 
