@@ -2,7 +2,7 @@ from typing import Type, TypeVar, List
 from datetime import date, datetime, timedelta
 import secrets
 from typing import Type, TypeVar, List
-from datetime import date
+from datetime import date, timezone
 
 from django.db import models
 from django.contrib.sessions.backends.db import SessionStore
@@ -116,12 +116,9 @@ async def set_user_subscribed(email: str, type="standard") -> RidgeUser:
 
 
 def is_user_subscribed(email: str, type="standard") -> bool:
-    user = RidgeUser.objects.filter(email=email, subscription_type=type).first()
-    if user and user.subscription_renewal_date:
-        is_subscribed = user.subscription_renewal_date > date.today()
-        return is_subscribed
-    else:
-        return False
+    return RidgeUser.objects.filter(
+        email=email, subscription_type=type, subscription_renewal_date__gte=datetime.now(tz=timezone.utc)
+    ).exists()
 
 
 async def get_user_by_token(token: dict) -> RidgeUser:
