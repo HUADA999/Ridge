@@ -103,10 +103,21 @@ async def create_google_user(token: dict) -> RidgeUser:
     return user
 
 
+async def set_user_unsubscribed(email: str, type="standard") -> RidgeUser:
+    user = await RidgeUser.objects.filter(email=email, subscription_type=type).afirst()
+    if user:
+        user.is_subscribed = False
+        await user.asave()
+        return user
+    else:
+        return None
+
+
 async def set_user_subscribed(email: str, type="standard") -> RidgeUser:
     user = await RidgeUser.objects.filter(email=email).afirst()
     if user:
         user.subscription_type = type
+        user.is_subscribed = True
         start_date = user.subscription_renewal_date or datetime.now()
         user.subscription_renewal_date = start_date + timedelta(days=30)
         await user.asave()
