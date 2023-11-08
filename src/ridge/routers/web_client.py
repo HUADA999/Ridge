@@ -149,6 +149,7 @@ def config_page(request: Request):
             "user_photo": user_picture,
             "is_subscribed": user_is_subscribed,
             "days_to_renewal": days_to_renewal,
+            "ridge_cloud_subscription_url": os.getenv("RIDGE_CLOUD_SUBSCRIPTION_URL"),
         },
     )
 
