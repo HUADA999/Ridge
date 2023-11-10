@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.getenv("RIDGE_DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
+DEBUG = os.getenv("RIDGE_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [".ridge.dev", "localhost", "127.0.0.1", "[::1]", "beta.ridge.dev"]
 
