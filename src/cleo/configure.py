@@ -28,7 +28,7 @@ from ridge.utils.config import (
 from ridge.utils.fs_syncer import collect_files
 from ridge.utils.rawconfig import FullConfig
 from ridge.routers.indexer import configure_content, load_content, configure_search
-from database.models import RidgeUser
+from database.models import RidgeUser, Subscription
 from database.adapters import get_all_users
 
 
@@ -54,27 +54,40 @@ class UserAuthenticationBackend(AuthenticationBackend):
 
     def _initialize_default_user(self):
         if not self.ridgeuser_manager.filter(username="default").exists():
-            self.ridgeuser_manager.create_user(
+            default_user = self.ridgeuser_manager.create_user(
                 username="default",
                 email="default@example.com",
                 password="default",
+            )
+            Subscription.objects.create(
+                user=default_user,
+                type="trial",
             )
 
     async def authenticate(self, request: HTTPConnection):
         current_user = request.session.get("user")
         if current_user and current_user.get("email"):
-            user = await self.ridgeuser_manager.filter(email=current_user.get("email")).afirst()
+            user = (
+                await self.ridgeuser_manager.filter(email=current_user.get("email"))
+                .prefetch_related("subscription")
+                .afirst()
+            )
             if user:
                 return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
         if len(request.headers.get("Authorization", "").split("Bearer ")) == 2:
             # Get bearer token from header
             bearer_token = request.headers["Authorization"].split("Bearer ")[1]
             # Get user owning token
-            user_with_token = await self.ridgeapiuser_manager.filter(token=bearer_token).select_related("user").afirst()
+            user_with_token = (
+                await self.ridgeapiuser_manager.filter(token=bearer_token)
+                .select_related("user")
+                .prefetch_related("user__subscription")
+                .afirst()
+            )
             if user_with_token:
                 return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
         if state.anonymous_mode:
-            user = await self.ridgeuser_manager.filter(username="default").afirst()
+            user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
                 return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
 

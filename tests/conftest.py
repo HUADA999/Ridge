@@ -43,6 +43,7 @@ from tests.helpers import (
     OpenAIProcessorConversationConfigFactory,
     OfflineChatProcessorConversationConfigFactory,
     UserConversationProcessorConfigFactory,
+    SubscriptionFactory,
 )
 
 
@@ -69,7 +70,9 @@ def search_config() -> SearchConfig:
 @pytest.mark.django_db
 @pytest.fixture
 def default_user():
-    return UserFactory()
+    user = UserFactory()
+    SubscriptionFactory(user=user)
+    return user
 
 
 @pytest.mark.django_db
@@ -78,11 +81,13 @@ def default_user2():
     if RidgeUser.objects.filter(username="default").exists():
         return RidgeUser.objects.get(username="default")
 
-    return RidgeUser.objects.create(
+    user = RidgeUser.objects.create(
         username="default",
         email="default@example.com",
         password="default",
     )
+    SubscriptionFactory(user=user)
+    return user
 
 
 @pytest.mark.django_db
@@ -94,11 +99,13 @@ def default_user3():
     if RidgeUser.objects.filter(username="default3").exists():
         return RidgeUser.objects.get(username="default3")
 
-    return RidgeUser.objects.create(
+    user = RidgeUser.objects.create(
         username="default3",
         email="default3@example.com",
         password="default3",
     )
+    SubscriptionFactory(user=user)
+    return user
 
 
 @pytest.mark.django_db
