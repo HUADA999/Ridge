@@ -56,6 +56,7 @@ locale.setlocale(locale.LC_ALL, "")
 from ridge.configure import configure_routes, initialize_server, configure_middleware
 from ridge.utils import state
 from ridge.utils.cli import cli
+from ridge.utils.initialization import initialization
 
 # Setup Logger
 rich_handler = RichHandler(rich_tracebacks=True)
@@ -74,14 +75,18 @@ def run(should_start_server=True):
     args = cli(state.cli_args)
     set_state(args)
 
-    # Create app directory, if it doesn't exist
-    state.config_file.parent.mkdir(parents=True, exist_ok=True)
+    logger.info(f"🚒 Initializing Ridge v{state.ridge_version}")
 
     # Set Logging Level
     if args.verbose == 0:
         logger.setLevel(logging.INFO)
     elif args.verbose >= 1:
         logger.setLevel(logging.DEBUG)
+
+    initialization()
+
+    # Create app directory, if it doesn't exist
+    state.config_file.parent.mkdir(parents=True, exist_ok=True)
 
     # Set Log File
     fh = logging.FileHandler(state.config_file.parent / "ridge.log", encoding="utf-8")
