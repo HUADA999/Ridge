@@ -80,7 +80,7 @@ async def get_or_create_user(token: dict) -> RidgeUser:
 
 
 async def create_user_by_token(token: dict) -> RidgeUser:
-    user = await RidgeUser.objects.filter(email=token.get("email")).aupdate_or_create(
+    user, _ = await RidgeUser.objects.filter(email=token.get("email")).aupdate_or_create(
         defaults={"username": token.get("email"), "email": token.get("email")}
     )
     await user.asave()
