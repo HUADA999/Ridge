@@ -1,4 +1,4 @@
-import { Notice, Plugin } from 'obsidian';
+import { Notice, Plugin, request } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
 import { RidgeChatModal } from 'src/chat_modal'
@@ -69,6 +69,25 @@ export default class Ridge extends Plugin {
     async loadSettings() {
         // Load ridge obsidian plugin settings
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+        // Check if ridge backend is configured, note if cannot connect to backend
+        let headers = { "Authorization": `Bearer ${this.settings.ridgeApiKey}` };
+
+        if (this.settings.ridgeUrl === "https://app.ridge.dev") {
+            if (this.settings.ridgeApiKey === "") {
+                new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev to get an API key.`);
+                return;
+            }
+
+            await request({ url: this.settings.ridgeUrl ,method: "GET", headers: headers })
+                .then(response => {
+                    this.settings.connectedToBackend = true;
+                })
+                .catch(error => {
+                    this.settings.connectedToBackend = false;
+                    new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
+                });
+        }
     }
 
     async saveSettings() {
