@@ -6,15 +6,15 @@ import logging
 import uuid
 from tqdm import tqdm
 from typing import Callable, List, Tuple, Set, Any
+from ridge.utils import state
 from ridge.utils.helpers import is_none_or_empty, timer, batcher
 
 
 # Internal Packages
 from ridge.utils.rawconfig import Entry
-from ridge.processor.embeddings import EmbeddingsModel
 from ridge.search_filter.date_filter import DateFilter
 from database.models import RidgeUser, Entry as DbEntry, EntryDates
-from database.adapters import EntryAdapters, get_or_create_search_model
+from database.adapters import EntryAdapters
 
 
 logger = logging.getLogger(__name__)
@@ -22,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 class TextToEntries(ABC):
     def __init__(self, config: Any = None):
-        bi_encoder_name = get_or_create_search_model().bi_encoder
-        self.embeddings_model = EmbeddingsModel(bi_encoder_name)
+        self.embeddings_model = state.embeddings_model
         self.config = config
         self.date_filter = DateFilter()
 
