@@ -93,7 +93,7 @@
   :group 'ridge
   :type 'number)
 
-(defcustom ridge-server-api-key "secret"
+(defcustom ridge-api-key nil
   "API Key to Ridge server."
   :group 'ridge
   :type 'string)
@@ -246,26 +246,6 @@ for example), set this to the full interpreter path."
   :type '(repeat string)
   :group 'ridge)
 
-(defcustom ridge-chat-model "gpt-3.5-turbo"
-  "Specify chat model to use for chat with ridge."
-  :type 'string
-  :group 'ridge)
-
-(defcustom ridge-openai-api-key nil
-  "OpenAI API key used to configure chat on ridge server."
-  :type 'string
-  :group 'ridge)
-
-(defcustom ridge-chat-offline nil
-  "Use offline model to chat with ridge."
-  :type 'boolean
-  :group 'ridge)
-
-(defcustom ridge-offline-chat-model nil
-  "Specify chat model to use for offline chat with ridge."
-  :type 'string
-  :group 'ridge)
-
 (defcustom ridge-auto-setup t
   "Automate install, configure and start of ridge server.
 Auto invokes setup steps on calling main entrypoint."
@@ -319,8 +299,7 @@ Auto invokes setup steps on calling main entrypoint."
            :filter (lambda (process msg)
                      (cond ((string-match (format "Uvicorn running on %s" ridge-server-url) msg)
                             (progn
-                              (setq ridge--server-ready? t)
-                              (ridge--server-configure)))
+                              (setq ridge--server-ready? t)))
                            ((string-match "Batches:  " msg)
                             (when (string-match "\\([0-9]+\\.[0-9]+\\|\\([0-9]+\\)\\)%?" msg)
                               (message "ridge.el: %s updating index %s"
@@ -383,106 +362,13 @@ Auto invokes setup steps on calling main entrypoint."
   (when (not (ridge--server-started?))
     (ridge--server-start)))
 
-(defun ridge--get-directory-from-config (config keys &optional level)
-  "Extract directory under specified KEYS in CONFIG and trim it to LEVEL.
-CONFIG is json obtained from Ridge config API."
-  (let ((item config))
-    (dolist (key keys)
-      (setq item (cdr (assoc key item))))
-      (-> item
-          (split-string "/")
-          (butlast (or level nil))
-          (string-join "/"))))
-
-(defun ridge--server-configure ()
-  "Configure the Ridge server for search and chat."
-  (interactive)
-  (let* ((url-request-method "GET")
-         (current-config
-          (with-temp-buffer
-            (url-insert-file-contents (format "%s/api/config/data" ridge-server-url))
-            (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
-         (default-config
-           (with-temp-buffer
-             (url-insert-file-contents (format "%s/api/config/data/default" ridge-server-url))
-             (ignore-error json-end-of-file (json-parse-buffer :object-type 'alist :array-type 'list :null-object json-null :false-object json-false))))
-         (default-chat-dir (ridge--get-directory-from-config default-config '(processor conversation conversation-logfile)))
-         (chat-model (or ridge-chat-model (alist-get 'chat-model (alist-get 'openai (alist-get 'conversation (alist-get 'processor default-config))))))
-         (enable-offline-chat (or ridge-chat-offline (alist-get 'enable-offline-chat (alist-get 'offline-chat (alist-get 'conversation (alist-get 'processor default-config))))))
-         (offline-chat-model (or ridge-offline-chat-model (alist-get 'chat-model (alist-get 'offline-chat (alist-get 'conversation (alist-get 'processor default-config))))))
-         (config (or current-config default-config)))
-
-    ;; Configure processors
-    (cond
-     ((not ridge-openai-api-key)
-      (let* ((processor (assoc 'processor config))
-             (conversation (assoc 'conversation processor))
-             (openai (assoc 'openai conversation)))
-        (when openai
-          ;; Unset the `openai' field in the ridge conversation processor config
-          (message "ridge.el: Disable Chat using OpenAI as your OpenAI API key got removed from config")
-          (setcdr conversation (delq openai (cdr conversation)))
-          (push conversation (cdr processor))
-          (push processor config))))
-
-     ;; If ridge backend isn't configured yet
-     ((not current-config)
-      (message "ridge.el: Ridge not configured yet.")
-      (setq config (delq (assoc 'processor config) config))
-      (cl-pushnew `(processor . ((conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
-                                                  (offline-chat . ((enable-offline-chat . ,enable-offline-chat)
-                                                                   (chat-model . ,offline-chat-model)))
-                                                  (openai . ((chat-model . ,chat-model)
-                                                             (api-key . ,ridge-openai-api-key)))))))
-                  config))
-
-     ;; Else if chat isn't configured in ridge backend
-     ((not (alist-get 'conversation (alist-get 'processor config)))
-      (message "ridge.el: Chat not configured yet.")
-       (let ((new-processor-type (alist-get 'processor config)))
-         (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
-         (cl-pushnew `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" default-chat-dir))
-                                       (offline-chat . ((enable-offline-chat . ,enable-offline-chat)
-                                                        (chat-model . ,offline-chat-model)))
-                                       (openai . ((chat-model . ,chat-model)
-                                                  (api-key . ,ridge-openai-api-key)))))
-                     new-processor-type)
-        (setq config (delq (assoc 'processor config) config))
-        (cl-pushnew `(processor . ,new-processor-type) config)))
-
-     ;; Else if chat configuration in ridge backend has gone stale
-     ((not (and (equal (alist-get 'api-key (alist-get 'openai (alist-get 'conversation (alist-get 'processor config)))) ridge-openai-api-key)
-                (equal (alist-get 'chat-model (alist-get 'openai (alist-get 'conversation (alist-get 'processor config)))) ridge-chat-model)
-                (equal (alist-get 'enable-offline-chat (alist-get 'offline-chat (alist-get 'conversation (alist-get 'processor config)))) enable-offline-chat)
-                (equal (alist-get 'chat-model (alist-get 'offline-chat (alist-get 'conversation (alist-get 'processor config)))) offline-chat-model)))
-      (message "ridge.el: Chat configuration has gone stale.")
-      (let* ((chat-directory (ridge--get-directory-from-config config '(processor conversation conversation-logfile)))
-             (new-processor-type (alist-get 'processor config)))
-        (setq new-processor-type (delq (assoc 'conversation new-processor-type) new-processor-type))
-        (cl-pushnew `(conversation . ((conversation-logfile . ,(format "%s/conversation.json" chat-directory))
-                                      (offline-chat . ((enable-offline-chat . ,enable-offline-chat)
-                                                       (chat-model . ,offline-chat-model)))
-                                      (openai . ((chat-model . ,ridge-chat-model)
-                                                 (api-key . ,ridge-openai-api-key)))))
-                    new-processor-type)
-        (setq config (delq (assoc 'processor config) config))
-        (cl-pushnew `(processor . ,new-processor-type) config))))
-
-      ;; Update server with latest configuration, if required
-      (cond ((not current-config)
-            (ridge--post-new-config config)
-            (message "ridge.el: ⚙️ Generated new ridge server configuration."))
-           ((not (equal config current-config))
-            (ridge--post-new-config config)
-            (message "ridge.el: ⚙️ Updated ridge server configuration.")))))
-
 (defun ridge-setup (&optional interact)
-  "Install, start and configure Ridge server. Get permission if INTERACT is non-nil."
+  "Install and start Ridge server. Get permission if INTERACT is non-nil."
   (interactive "p")
   ;; Setup ridge server if not running
   (let* ((not-started (not (ridge--server-started?)))
          (permitted (if (and not-started interact)
-                        (y-or-n-p "Could not connect to Ridge server. Should I install, start and configure it for you?")
+                        (y-or-n-p "Could not connect to Ridge server. Should I install, start it for you?")
                       t)))
     ;; If user permits setup of ridge server from ridge.el
     (when permitted
@@ -491,12 +377,9 @@ CONFIG is json obtained from Ridge config API."
         (ridge--server-setup))
 
       ;; Wait until server is ready
-      ;; As server can be started but not ready to use/configure
+      ;; As server can be started but not ready to use
       (while (not ridge--server-ready?)
-        (sit-for 0.5))
-
-      ;; Configure server once it's ready
-      (ridge--server-configure))))
+        (sit-for 0.5)))))
 
 
 ;; -------------------
@@ -516,7 +399,7 @@ CONFIG is json obtained from Ridge config API."
     (let ((url-request-method "POST")
           (url-request-data (ridge--render-files-as-request-body files-to-index ridge--indexed-files boundary))
           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
-                                       ("x-api-key" . ,ridge-server-api-key))))
+                                       ("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
       (with-current-buffer
           (url-retrieve (format "%s/api/v1/index/update?%s&force=%s&client=emacs" ridge-server-url type-query (or force "false"))
                         ;; render response from indexing API endpoint on server
@@ -690,19 +573,22 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
   "Configure ridge server with provided CONFIG."
   ;; POST provided config to ridge server
   (let ((url-request-method "POST")
-        (url-request-extra-headers '(("Content-Type" . "application/json")))
+        (url-request-extra-headers `(("Content-Type" . "application/json")
+                                     ("Authorization" . ,(format "Bearer %s" ridge-api-key))))
         (url-request-data (encode-coding-string (json-encode-alist config) 'utf-8))
         (config-url (format "%s/api/config/data" ridge-server-url)))
     (with-current-buffer (url-retrieve-synchronously config-url)
       (buffer-string)))
   ;; Update index on ridge server after configuration update
-  (let ((ridge--server-ready? nil))
+  (let ((ridge--server-ready? nil)
+        (url-request-extra-headers `(("Authorization" . ,(format "\"Bearer %s\"" ridge-api-key)))))
     (url-retrieve (format "%s/api/update?client=emacs" ridge-server-url) #'identity)))
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
   (let ((config-url (format "%s/api/config/types" ridge-server-url))
-        (url-request-method "GET"))
+        (url-request-method "GET")
+        (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
     (with-temp-buffer
       (url-insert-file-contents config-url)
       (thread-last
@@ -722,7 +608,8 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; get json response from api
   (with-current-buffer buffer-name
     (let ((inhibit-read-only t)
-          (url-request-method "GET"))
+          (url-request-method "GET")
+          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
       (erase-buffer)
       (url-insert-file-contents query-url)))
   ;; render json response into formatted entries
@@ -848,6 +735,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   "Send QUERY to Ridge Chat API."
   (let* ((url-request-method "GET")
          (encoded-query (url-hexify-string query))
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
          (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url encoded-query ridge-results-count)))
     (with-temp-buffer
       (condition-case ex
@@ -862,6 +750,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
 (defun ridge--get-chat-history-api ()
   "Send QUERY to Ridge Chat History API."
   (let* ((url-request-method "GET")
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
          (query-url (format "%s/api/chat/history?client=emacs" ridge-server-url)))
     (with-temp-buffer
       (condition-case ex
