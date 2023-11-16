@@ -75,11 +75,11 @@ async def delete_ridge_token(user: RidgeUser, token: str):
 async def get_or_create_user(token: dict) -> RidgeUser:
     user = await get_user_by_token(token)
     if not user:
-        user = await create_user_by_token(token)
+        user = await create_user_by_google_token(token)
     return user
 
 
-async def create_user_by_token(token: dict) -> RidgeUser:
+async def create_user_by_google_token(token: dict) -> RidgeUser:
     user, _ = await RidgeUser.objects.filter(email=token.get("email")).aupdate_or_create(
         defaults={"username": token.get("email"), "email": token.get("email")}
     )
