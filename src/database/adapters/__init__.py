@@ -375,6 +375,10 @@ class EntryAdapters:
         return Entry.objects.filter(user=user).exists()
 
     @staticmethod
+    async def auser_has_entries(user: RidgeUser):
+        return await Entry.objects.filter(user=user).aexists()
+
+    @staticmethod
     async def adelete_entry_by_file(user: RidgeUser, file_path: str):
         return await Entry.objects.filter(user=user, file_path=file_path).adelete()
 
