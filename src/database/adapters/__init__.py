@@ -57,9 +57,7 @@ async def create_ridge_token(user: RidgeUser, name=None):
     "Create Ridge API key for user"
     token = f"kk-{secrets.token_urlsafe(32)}"
     name = name or f"{generate_random_name().title()}"
-    api_config = await RidgeApiUser.objects.acreate(token=token, user=user, name=name)
-    await api_config.asave()
-    return api_config
+    return await RidgeApiUser.objects.acreate(token=token, user=user, name=name)
 
 
 def get_ridge_tokens(user: RidgeUser):
