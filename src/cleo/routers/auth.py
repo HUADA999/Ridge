@@ -16,7 +16,7 @@ from google.auth.transport import requests as google_requests
 
 # Internal Packages
 from database.adapters import get_ridge_tokens, get_or_create_user, create_ridge_token, delete_ridge_token
-from database.models import RidgeApiUser
+from ridge.routers.helpers import update_telemetry_state
 from ridge.utils import state
 
 
@@ -99,6 +99,16 @@ async def auth(request: Request):
     ridge_user = await get_or_create_user(idinfo)
     if ridge_user:
         request.session["user"] = dict(idinfo)
+
+        if not ridge_user.last_login:
+            update_telemetry_state(
+                request=request,
+                telemetry_type="api",
+                api="create_user",
+                metadata={"user_id": str(ridge_user.uuid)},
+            )
+            logger.log(logging.INFO, f"New User Created: {ridge_user.uuid}")
+            RedirectResponse(url="/?status=welcome")
 
     return RedirectResponse(url="/")
 

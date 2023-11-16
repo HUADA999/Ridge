@@ -6,6 +6,7 @@ empty_escape_sequences = "\n|\r|\t| "
 app_env_filepath = "~/.ridge/env"
 telemetry_server = "https://ridge.beta.haletic.com/v1/telemetry"
 content_directory = "~/.ridge/content/"
+default_offline_chat_model = "mistral-7b-instruct-v0.1.Q4_0.gguf"
 
 empty_config = {
     "search-type": {
