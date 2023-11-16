@@ -196,8 +196,8 @@ docker-compose up --build
 1. (Optional) Hit `Ctrl-C` in the terminal running the ridge server to stop it
 2. Delete the ridge directory in your home folder (i.e `~/.ridge` on Linux, Mac or `C:\Users\<your-username>\.ridge` on Windows)
 5. You might want to `rm -rf` the following directories:
-- `~/.ridge`
-- `~/.cache/gpt4all`
+    - `~/.ridge`
+    - `~/.cache/gpt4all`
 3. Uninstall the ridge server with `pip uninstall ridge-assistant`
 4. (Optional) Uninstall ridge.el or the ridge obsidian plugin in the standard way on Emacs, Obsidian
 
