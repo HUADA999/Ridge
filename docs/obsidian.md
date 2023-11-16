@@ -18,24 +18,15 @@
 
 
 ## Setup
-- *Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
 - *Ensure you follow the ordering of the setup steps. Install the plugin after starting the ridge backend. This allows the plugin to configure the ridge backend*
 
 ### 1. Setup Backend
-Open terminal/cmd and run below command to install and start the ridge backend
-- On Linux/MacOS
-  ```shell
-  python -m pip install ridge-assistant && ridge
-  ```
-
-- On Windows
-  ```shell
-  py -m pip install ridge-assistant && ridge
-  ```
+Follow the instructions in [the setup page](./setup.md?id=_1-install)
 
 ### 2. Setup Plugin
   1. Open [Ridge](https://obsidian.md/plugins?id=ridge) from the *Community plugins* tab in Obsidian settings panel
   2. Click *Install*, then *Enable* on the Ridge plugin page in Obsidian
+  3. Get an API key from the Ridge web settings page. Use this key to configure the Ridge plugin in Obsidian.
   3. [Optional] To enable Ridge Chat, set your [OpenAI API key](https://platform.openai.com/account/api-keys) in the Ridge plugin settings
 
 See [official Obsidian plugin docs](https://help.obsidian.md/Extending+Obsidian/Community+plugins) for details

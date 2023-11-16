@@ -3,41 +3,15 @@ These are the general setup instructions for Ridge.
 
 - Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine
 - Check the [Ridge Emacs docs](/emacs?id=setup) to setup Ridge with Emacs<br />
-  Its simpler as it can skip the server *install*, *run* and *configure* step below.
+  It's simpler as it can skip the server *install*, *run* and *configure* step below.
 - Check the [Ridge Obsidian docs](/obsidian?id=_2-setup-plugin) to setup Ridge with Obsidian<br />
   Its simpler as it can skip the *configure* step below.
 
-### 1. Install
+For Installation, you can either use Docker or install Ridge locally.
 
-#### 1.1 Local Server Setup
-Run the following command in your terminal to install the Ridge backend.
+### 1. Installation (Docker)
 
-- On Linux/MacOS
-  ```shell
-  python -m pip install ridge-assistant
-  ```
-
-- On Windows
-  ```shell
-  py -m pip install ridge-assistant
-  ```
-For more detailed Windows installation and troubleshooting, see [Windows Install](./windows_install.md).
-
-
-##### 1.1.1 Local Server Start
-
-Run the following command from your terminal to start the Ridge backend and open Ridge in your browser.
-
-```shell
-ridge
-```
-
-Ridge should now be running at http://localhost:42110. You can see the web UI in your browser.
-
-Note: To start Ridge automatically in the background use [Task scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10) on Windows or [Cron](https://en.wikipedia.org/wiki/Cron) on Mac, Linux (e.g with `@reboot ridge`)
-
-#### 1.2 Local Docker Setup
-Use the sample docker-compose [in Github](https://github.com/ridge-ai/ridge/blob/master/docker-compose.yml) to run Ridge in Docker. To start the container, run the following command in the same directory as the docker-compose.yml file. You'll have to configure the mounted directories to match your local knowledge base.
+Use the sample docker-compose [in Github](https://github.com/ridge-ai/ridge/blob/master/docker-compose.yml) to run Ridge in Docker. Start by configuring all the environment variables to your choosing. Your admin account will automatically be created based on the admin credentials in that file, so pay attention to those. To start the container, run the following command in the same directory as the docker-compose.yml file. This will automatically setup the database and run the Ridge server.
 
 ```shell
 docker-compose up
@@ -45,27 +19,131 @@ docker-compose up
 
 Ridge should now be running at http://localhost:42110. You can see the web UI in your browser.
 
-#### 1.3 Download the desktop client [Optional]
+### 1. Installation (Local)
 
-You can use our desktop executables to select file paths and folders to index. You can simply select the folders or files, and they'll be automatically uploaded to the server. Once you specify a file or file path, you don't need to update the configuration again; it will grab any data diffs dynamically over time. This part is currently optional, but may make setup and configuration slightly easier. It removes the need for setting up custom file paths for your Ridge data configurations.
+#### Prerequisites
 
-**To download the desktop client, go to https://download.ridge.dev** and the correct executable for your OS will automatically start downloading. Once downloaded, you can configure your folders for indexing using the settings tab. To set your chat configuration, you'll have to use the web interface for the Ridge server you setup in the previous step.
+##### Install Postgres (with PgVector)
 
-### 1.4 Use (deprecated) desktop builds
+Ridge uses the `pgvector` package to store embeddings of your index in a Postgres database. In order to use this, you need to have Postgres installed.
 
-Before `v0.12.0``, we had self-contained desktop builds that included both the server and the client. These were difficult to maintain, but are still available as part of earlier releases. To find setup instructions, see here:
+<!-- tabs:start -->
 
-- [Desktop Installation](desktop_installation.md)
-- [Windows Installation](windows_install.md)
+#### **MacOS**
 
-### 2. Configure
-1. Set `File`, `Folder` and hit `Save` in each Plugins you want to enable for Search on the Ridge config page
-2. Add your OpenAI API key to Chat Feature settings if you want to use Chat
-3. Click `Configure` and wait. The app will download ML models and index the content for search and (optionally) chat
+Install [Postgres.app](https://postgresapp.com/). This comes pre-installed with `pgvector` and relevant dependencies.
 
-![configure demo](https://user-images.githubusercontent.com/6413477/255307879-61247d3f-c69a-46ef-b058-9bc533cb5c72.mp4 ':include :type=mp4')
+#### **Windows**
 
-### 3. Install Interface Plugins (Optional)
+Use the [recommended installer](https://www.postgresql.org/download/windows/)
+
+#### **Linux**
+From [official instructions](https://wiki.postgresql.org/wiki/Apt)
+
+```bash
+sudo apt install -y postgresql-common
+sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+sudo apt install postgres-16 postgresql-16-pgvector
+```
+
+##### **From Source**
+1. Follow instructions to [Install Postgres](https://www.postgresql.org/download/)
+2. Follow instructions to [Install PgVector](https://github.com/pgvector/pgvector#installation) in case you need to manually install it. Reproduced instructions below for convenience.
+
+```bash
+cd /tmp
+git clone --branch v0.5.1 https://github.com/pgvector/pgvector.git
+cd pgvector
+make
+make install # may need sudo
+```
+
+<!-- tabs:end -->
+
+
+##### Create the Ridge database
+
+Make sure to update your environment variables to match your Postgres configuration if you're using a different name. The default values should work for most people.
+
+<!-- tabs:start -->
+
+#### **MacOS**
+```bash
+createdb ridge -U postgres
+```
+
+#### **Windows**
+```bash
+createdb ridge -U postgres
+```
+
+#### **Linux**
+```bash
+sudo -u postgres createdb ridge
+```
+
+<!-- tabs:end -->
+
+#### Install package
+
+##### Local Server Setup
+- *Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
+
+Run the following command in your terminal to install the Ridge backend.
+
+<!-- tabs:start -->
+
+#### **MacOS**
+
+```shell
+python -m pip install ridge-assistant
+```
+
+#### **Windows**
+
+```shell
+py -m pip install ridge-assistant
+```
+For more detailed Windows installation and troubleshooting, see [Windows Install](./windows_install.md).
+
+#### **Linux**
+
+```shell
+python -m pip install ridge-assistant
+```
+
+<!-- tabs:end -->
+
+##### Local Server Start
+
+Run the following command from your terminal to start the Ridge backend and open Ridge in your browser.
+
+```shell
+ridge --anonymous-mode
+```
+`--anonymous-mode` allows you to run the server without setting up Google credentials for login. This allows you to use any of the clients without a login wall. If you want to use Google login, you can skip this flag, but you will have to add your Google developer credentials.
+
+On the first run, you will be prompted to input credentials for your admin account and do some basic configuration for your chat model settings. Once created, you can go to http://localhost:42110/server/admin and login with the credentials you just created.
+
+Ridge should now be running at http://localhost:42110. You can see the web UI in your browser.
+
+Note: To start Ridge automatically in the background use [Task scheduler](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10) on Windows or [Cron](https://en.wikipedia.org/wiki/Cron) on Mac, Linux (e.g with `@reboot ridge`)
+
+
+### 2. Download the desktop client
+
+You can use our desktop executables to select file paths and folders to index. You can simply select the folders or files, and they'll be automatically uploaded to the server. Once you specify a file or file path, you don't need to update the configuration again; it will grab any data diffs dynamically over time.
+
+**To download the latest desktop client, go to https://download.ridge.dev** and the correct executable for your OS will automatically start downloading. Once downloaded, you can configure your folders for indexing using the settings tab. To set your chat configuration, you'll have to use the web interface for the Ridge server you setup in the previous step.
+
+To use the desktop client, you need to go to your Ridge server's settings page (http://localhost:42110/config) and copy the API key. Then, paste it into the desktop client's settings page. Once you've done that, you can select files and folders to index.
+
+### 3. Configure
+1. Go to http://localhost:42110/server/admin and login with your admin credentials. Go to the ChatModelOptions if you want to add additional models for chat.
+1. Select files and folders to index [using the desktop client](./setup.md?id=_2-download-the-desktop-client). When you click 'Save', the files will be sent to your server for indexing.
+    - Select Notion workspaces and Github repositories to index using the web interface.
+
+### 4. Install Client Plugins (Optional)
 Ridge exposes a web interface to search, chat and configure by default.<br />
 The optional steps below allow using Ridge from within an existing application like Obsidian or Emacs.
 
@@ -75,9 +153,17 @@ The optional steps below allow using Ridge from within an existing application l
 - **Ridge Emacs**:<br />
 [Install](/emacs?id=setup) ridge.el
 
+### 5. Use Ridge 🚀
+
+You can head to http://localhost:42110 to use the web interface. You can also use the desktop client to search and chat.
 
 ## Upgrade
 ### Upgrade Ridge Server
+
+<!-- tabs:start -->
+
+#### **Local Setup**
+
 ```shell
 pip install --upgrade ridge-assistant
 ```
@@ -87,6 +173,16 @@ pip install --upgrade ridge-assistant
 # Maps to the latest commit on the master branch
 pip install --upgrade --pre ridge-assistant
 ```
+
+#### **Docker**
+From the same directory where you have your `docker-compose` file, this will fetch the latest build and upgrade your server.
+
+```shell
+docker-compose up --build
+```
+
+<!-- tabs:end -->
+
 
 ### Upgrade Ridge on Emacs
 - Use your Emacs Package Manager to Upgrade
