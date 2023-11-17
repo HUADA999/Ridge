@@ -10,12 +10,12 @@ from starlette.authentication import requires
 
 # Internal Packages
 from ridge.utils import state, constants
-from ridge.processor.markdown.markdown_to_entries import MarkdownToEntries
-from ridge.processor.org_mode.org_to_entries import OrgToEntries
-from ridge.processor.pdf.pdf_to_entries import PdfToEntries
-from ridge.processor.github.github_to_entries import GithubToEntries
-from ridge.processor.notion.notion_to_entries import NotionToEntries
-from ridge.processor.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.data_sources.markdown.markdown_to_entries import MarkdownToEntries
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.data_sources.pdf.pdf_to_entries import PdfToEntries
+from ridge.processor.data_sources.github.github_to_entries import GithubToEntries
+from ridge.processor.data_sources.notion.notion_to_entries import NotionToEntries
+from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
 from ridge.search_type import text_search, image_search
 from ridge.routers.helpers import update_telemetry_state
 from ridge.utils.yaml import save_config_to_file_updated_state

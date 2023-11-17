@@ -10,8 +10,8 @@ import requests
 # Internal Packages
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry, GithubContentConfig, GithubRepoConfig
-from ridge.processor.markdown.markdown_to_entries import MarkdownToEntries
-from ridge.processor.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.data_sources.markdown.markdown_to_entries import MarkdownToEntries
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.text_to_entries import TextToEntries
 from database.models import Entry as DbEntry, GithubConfig, RidgeUser
 
