@@ -3,7 +3,7 @@ import json
 import os
 
 # Internal Packages
-from ridge.processor.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.text_to_entries import TextToEntries
 from ridge.utils.helpers import is_none_or_empty
 from ridge.utils.rawconfig import Entry

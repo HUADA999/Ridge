@@ -6,7 +6,7 @@ from pathlib import Path
 # Internal Packages
 from ridge.utils.fs_syncer import get_plaintext_files
 from ridge.utils.rawconfig import TextContentConfig
-from ridge.processor.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
 from database.models import LocalPlaintextConfig, RidgeUser
 
 

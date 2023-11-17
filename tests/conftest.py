@@ -15,7 +15,7 @@ app = FastAPI()
 # Internal Packages
 from ridge.configure import configure_routes, configure_search_types, configure_middleware
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
-from ridge.processor.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
 from ridge.search_type import image_search, text_search
 from ridge.utils.config import SearchModels
 from ridge.utils.constants import web_directory
@@ -28,7 +28,7 @@ from ridge.utils.rawconfig import (
 )
 from ridge.utils import state, fs_syncer
 from ridge.routers.indexer import configure_content
-from ridge.processor.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
 from database.models import (
     RidgeApiUser,
     LocalOrgConfig,

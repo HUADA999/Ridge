@@ -10,8 +10,8 @@ import pytest
 # Internal Packages
 from ridge.search_type import text_search
 from ridge.utils.rawconfig import ContentConfig, SearchConfig
-from ridge.processor.org_mode.org_to_entries import OrgToEntries
-from ridge.processor.github.github_to_entries import GithubToEntries
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.data_sources.github.github_to_entries import GithubToEntries
 from ridge.utils.fs_syncer import collect_files, get_org_files
 from database.models import LocalOrgConfig, RidgeUser, Entry, GithubConfig
 

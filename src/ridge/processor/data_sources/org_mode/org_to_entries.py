@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Iterable, List, Tuple
 
 # Internal Packages
-from ridge.processor.org_mode import orgnode
+from ridge.processor.data_sources.org_mode import orgnode
 from ridge.processor.text_to_entries import TextToEntries
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
