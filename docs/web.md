@@ -1,19 +1,18 @@
-<h1><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo">Web</h1>
+<h1><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo"> Web</h1>
 
-> An AI personal assistant for your Digital Brain
+> An AI copilot for your Second Brain
 
 ## Features
+- **Chat**
+  - **Faster answers**: Find answers quickly, from your private notes or the public internet
+  - **Assisted creativity**: Smoothly weave across retrieving answers and generating content
+  - **Iterative discovery**: Iteratively explore and re-discover your notes
 - **Search**
   - **Natural**: Advanced natural language understanding using Transformer based ML Models
-  - **Local**: Your personal data stays local. All search and indexing is done on your machine. *Unlike chat which requires access to GPT.*
   - **Incremental**: Incremental search for a fast, search-as-you-type experience
-- **Chat**
-  - **Faster answers**: Find answers faster and with less effort than search
-  - **Iterative discovery**: Iteratively explore and (re-)discover your notes
-  - **Assisted creativity**: Smoothly weave across answers retrieval and content generation
 
 ## Setup
-The Ridge web interface is the default interface. It comes packaged with the ridge server.
+No setup required. The Ridge web app is the default interface to Ridge. You can access it from any web browser. Try it on [Ridge Cloud](https://app.ridge.dev)
 
 ## Interface
 ![](./assets/ridge_search_on_web.png ':size=400px')

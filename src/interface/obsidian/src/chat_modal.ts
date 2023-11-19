@@ -142,7 +142,8 @@ export class RidgeChatModal extends Modal {
     async getChatHistory(): Promise<void> {
         // Get chat history from Ridge backend
         let chatUrl = `${this.setting.ridgeUrl}/api/chat/history?client=obsidian`;
-        let response = await request(chatUrl);
+        let headers = { "Authorization": `Bearer ${this.setting.ridgeApiKey}` };
+        let response = await request({ url: chatUrl, headers: headers });
         let chatLogs = JSON.parse(response).response;
         chatLogs.forEach((chatLog: any) => {
             this.renderMessageWithReferences(chatLog.message, chatLog.by, chatLog.context, new Date(chatLog.created));
@@ -168,7 +169,8 @@ export class RidgeChatModal extends Modal {
             method: "GET",
             headers: {
                 "Access-Control-Allow-Origin": "*",
-                "Content-Type": "text/event-stream"
+                "Content-Type": "text/event-stream",
+                "Authorization": `Bearer ${this.setting.ridgeApiKey}`,
             },
         })
 
