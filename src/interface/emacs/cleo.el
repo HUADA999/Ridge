@@ -6,7 +6,7 @@
 ;;         Saba Imran <saba@ridge.dev>
 ;; Description: An AI copilot for your Second Brain
 ;; Keywords: search, chat, org-mode, outlines, markdown, pdf, image
-;; Version: 0.14.0
+;; Version: 1.0.0
 ;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1"))
 ;; URL: https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs
 
@@ -63,7 +63,7 @@
 ;; Ridge Static Configuration
 ;; -------------------------
 
-(defcustom ridge-server-url "http://localhost:42110"
+(defcustom ridge-server-url "https://app.ridge.dev"
   "Location of Ridge API server."
   :group 'ridge
   :type 'string)
@@ -94,7 +94,7 @@
   :type 'number)
 
 (defcustom ridge-api-key nil
-  "API Key to Ridge server."
+  "API Key to your Ridge. Default at https://app.ridge.dev/config#clients."
   :group 'ridge
   :type 'string)
 
