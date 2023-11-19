@@ -1,8 +1,8 @@
-import { Notice, Plugin, TFile } from 'obsidian';
+import { Notice, Plugin, request } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
 import { RidgeChatModal } from 'src/chat_modal'
-import { configureRidgeBackend, updateContentIndex } from './utils';
+import { updateContentIndex } from './utils';
 
 
 export default class Ridge extends Plugin {
@@ -39,9 +39,9 @@ export default class Ridge extends Plugin {
             id: 'chat',
             name: 'Chat',
             checkCallback: (checking) => {
-                if (!checking && this.settings.connectedToBackend && (!!this.settings.openaiApiKey || this.settings.enableOfflineChat))
+                if (!checking && this.settings.connectedToBackend)
                     new RidgeChatModal(this.app, this.settings).open();
-                return !!this.settings.openaiApiKey || this.settings.enableOfflineChat;
+                return this.settings.connectedToBackend;
             }
         });
 
@@ -70,16 +70,27 @@ export default class Ridge extends Plugin {
         // Load ridge obsidian plugin settings
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-        if (this.settings.autoConfigure) {
-            // Load, configure ridge server settings
-            await configureRidgeBackend(this.app.vault, this.settings);
+        // Check if ridge backend is configured, note if cannot connect to backend
+        let headers = { "Authorization": `Bearer ${this.settings.ridgeApiKey}` };
+
+        if (this.settings.ridgeUrl === "https://app.ridge.dev") {
+            if (this.settings.ridgeApiKey === "") {
+                new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev/config#clients to get an API key.`);
+                return;
+            }
+
+            await request({ url: this.settings.ridgeUrl ,method: "GET", headers: headers })
+                .then(response => {
+                    this.settings.connectedToBackend = true;
+                })
+                .catch(error => {
+                    this.settings.connectedToBackend = false;
+                    new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
+                });
         }
     }
 
     async saveSettings() {
-        if (this.settings.autoConfigure) {
-            await configureRidgeBackend(this.app.vault, this.settings, false);
-        }
         this.saveData(this.settings);
     }
 

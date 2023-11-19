@@ -3,22 +3,20 @@ import Ridge from 'src/main';
 import { updateContentIndex } from './utils';
 
 export interface RidgeSetting {
-    enableOfflineChat: boolean;
-    openaiApiKey: string;
     resultsCount: number;
     ridgeUrl: string;
+    ridgeApiKey: string;
     connectedToBackend: boolean;
     autoConfigure: boolean;
     lastSyncedFiles: TFile[];
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
-    enableOfflineChat: false,
     resultsCount: 6,
-    ridgeUrl: 'http://127.0.0.1:42110',
+    ridgeUrl: 'https://app.ridge.dev',
+    ridgeApiKey: '',
     connectedToBackend: false,
     autoConfigure: true,
-    openaiApiKey: '',
     lastSyncedFiles: []
 }
 
@@ -49,21 +47,12 @@ export class RidgeSettingTab extends PluginSettingTab {
                     containerEl.firstElementChild?.setText(this.getBackendStatusMessage());
                 }));
         new Setting(containerEl)
-            .setName('OpenAI API Key')
-            .setDesc('Use OpenAI for Ridge Chat with your API key.')
+            .setName('Ridge API Key')
+            .setDesc('Use Ridge Cloud with your Ridge API Key')
             .addText(text => text
-                .setValue(`${this.plugin.settings.openaiApiKey}`)
+                .setValue(`${this.plugin.settings.ridgeApiKey}`)
                 .onChange(async (value) => {
-                    this.plugin.settings.openaiApiKey = value.trim();
-                    await this.plugin.saveSettings();
-                }));
-        new Setting(containerEl)
-            .setName('Enable Offline Chat')
-            .setDesc('Chat privately without an internet connection. Enabling this will use offline chat even if OpenAI is configured.')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.enableOfflineChat)
-                .onChange(async (value) => {
-                    this.plugin.settings.enableOfflineChat = value;
+                    this.plugin.settings.ridgeApiKey = value.trim();
                     await this.plugin.saveSettings();
                 }));
         new Setting(containerEl)
@@ -78,8 +67,8 @@ export class RidgeSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
         new Setting(containerEl)
-            .setName('Auto Configure')
-            .setDesc('Automatically configure the Ridge backend.')
+            .setName('Auto Sync')
+            .setDesc('Automatically index your vault with Ridge.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.autoConfigure)
                 .onChange(async (value) => {
@@ -88,7 +77,7 @@ export class RidgeSettingTab extends PluginSettingTab {
                 }));
         let indexVaultSetting = new Setting(containerEl);
         indexVaultSetting
-            .setName('Index Vault')
+            .setName('Force Sync')
             .setDesc('Manually force Ridge to re-index your Obsidian Vault.')
             .addButton(button => button
                 .setButtonText('Update')
