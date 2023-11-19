@@ -1,6 +1,6 @@
-<h1><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo">Emacs</h1>
+<h1><img src="./assets/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo"> Emacs</h1>
 
-> An AI personal assistance for your digital brain
+> An AI copilot for your Second Brain in Emacs
 
 <img src="https://stable.melpa.org/packages/ridge-badge.svg" width="150" alt="Melpa Stable Badge">
 <img src="https://melpa.org/packages/ridge-badge.svg" width="150" alt="Melpa Badge">
@@ -10,14 +10,13 @@
 
 
 ## Features
+- **Chat**
+  - **Faster answers**: Find answers quickly, from your private notes or the public internet
+  - **Assisted creativity**: Smoothly weave across retrieving answers and generating content
+  - **Iterative discovery**: Iteratively explore and re-discover your notes
 - **Search**
   - **Natural**: Advanced natural language understanding using Transformer based ML Models
-  - **Local**: Your personal data stays local. All search, indexing is done on your machine*
   - **Incremental**: Incremental search for a fast, search-as-you-type experience
-- **Chat**
-  - **Faster answers**: Find answers faster than search
-  - **Iterative discovery**: Iteratively explore and (re-)discover your notes
-  - **Assisted creativity**: Smoothly weave across answer retrieval and content generation
 
 ## Interface
 #### Search
@@ -27,79 +26,76 @@
 ![ridge chat on emacs](./assets/ridge_chat_on_emacs.png ':size=400px')
 
 ## Setup
-- *Make sure [python](https://realpython.com/installing-python/) and [pip](https://pip.pypa.io/en/stable/installation/) are installed on your machine*
+1. Generate an API key on the [Ridge Web App](https://app.ridge.dev/config#clients)
+2. Add below snippet to your Emacs config file, usually at `~/.emacs.d/init.el`
 
-- *ridge.el attempts to automatically install, start and configure the ridge server.*
-  If this fails, follow [these instructions](/setup) to manually setup the ridge server.
 
-### Direct Install
+<!-- tabs:start -->
+
+#### **Direct Install**
+*Ridge will index your org-agenda files, by default*
+
 ```elisp
+;; Install Ridge.el
 M-x package-install ridge
+
+; Set your Ridge API key
+(setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY")
 ```
 
-### Minimal Install
-Add below snippet to your Emacs config file.
-Indexes your org-agenda files, by default.
+#### **Minimal Install**
+*Ridge will index your org-agenda files, by default*
 
 ```elisp
-  ;; Install Ridge Package from MELPA Stable
-  (use-package ridge
-    :ensure t
-    :pin melpa-stable
-    :bind ("C-c s" . 'ridge))
-```
-
-- Note: Install `ridge.el` from MELPA (instead of MELPA Stable) if you installed the pre-release version of ridge
-  - That is, use `:pin melpa` to install ridge.el in above snippet if ridge server was installed with `--pre` flag, i.e `pip install --pre ridge-assistant`
-  - Else use `:pin melpa-stable` to install ridge.el in above snippet if ridge was installed with `pip install ridge-assistant`
-  - This ensures both ridge.el and ridge app are from the same version (git tagged or latest)
-
-### Standard Install
-  Add below snippet to your Emacs config file.
-  Indexes the specified org files, directories. Sets up OpenAI API key for Ridge Chat
-
-```elisp
-;; Install Ridge Package from MELPA Stable
+;; Install Ridge client from MELPA Stable
 (use-package ridge
   :ensure t
   :pin melpa-stable
   :bind ("C-c s" . 'ridge)
-  :config (setq ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
-                ridge-org-files '("~/docs/todo.org" "~/docs/work.org")
-                ridge-openai-api-key "YOUR_OPENAI_API_KEY")) ; required to enable chat
+  :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"))
 ```
 
-### With [ Straight.el](https://github.com/raxod502/straight.el)
-Add below snippet to your Emacs config file.
-Indexes the specified org files, directories. Sets up OpenAI API key for Ridge Chat
+#### **Standard Install**
+*Configures the specified org files, directories to be indexed by Ridge*
 
 ```elisp
-  ;; Install Ridge Package using Straight.el
-  (use-package ridge
-    :after org
-    :straight (ridge :type git :host github :repo "ridge-ai/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
-    :bind ("C-c s" . 'ridge)
-    :config (setq ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
-                  ridge-org-files '("~/docs/todo.org" "~/docs/work.org")
-                  ridge-openai-api-key "YOUR_OPENAI_API_KEY" ; required to enable chat)
-  ```
+;; Install Ridge client from MELPA Stable
+(use-package ridge
+  :ensure t
+  :pin melpa-stable
+  :bind ("C-c s" . 'ridge)
+  :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"
+                ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
+                ridge-org-files '("~/docs/todo.org" "~/docs/work.org")))
+```
 
+#### **Straight.el**
+*Configures the specified org files, directories to be indexed by Ridge*
+
+```elisp
+;; Install Ridge client using Straight.el
+(use-package ridge
+  :after org
+  :straight (ridge :type git :host github :repo "ridge-ai/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
+  :bind ("C-c s" . 'ridge)
+  :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"
+                ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
+                ridge-org-files '("~/docs/todo.org" "~/docs/work.org")))
+```
+
+<!-- tabs:end -->
 ## Use
 ### Search
+See [Ridge Search](/search) for details
 1. Hit  `C-c s s` (or `M-x ridge RET s`) to open ridge search
-
-2. Enter your query in natural language
-
-  e.g "What is the meaning of life?", "My life goals for 2023"
+2. Enter your query in natural language<br/>
+  E.g *"What is the meaning of life?"*, *"My life goals for 2023"*
 
 ### Chat
+See [Ridge Chat](/chat) for details
 1. Hit `C-c s c` (or `M-x ridge RET c`) to open ridge chat
-
-2. Ask questions in a natural, conversational style
-
-  E.g "When did I file my taxes last year?"
-
-  See [Ridge Chat](/#/chat) for more details
+2. Ask questions in a natural, conversational style<br/>
+  E.g *"When did I file my taxes last year?"*
 
 ### Find Similar Entries
 This feature finds entries similar to the one you are currently on.
@@ -108,7 +104,6 @@ This feature finds entries similar to the one you are currently on.
 
 ### Advanced Usage
 - Add [query filters](https://github.com/ridge-ai/ridge/#query-filters) during search to narrow down results further
-
   e.g `What is the meaning of life? -"god" +"none" dt>"last week"`
 
 - Use `C-c C-o 2` to open the current result at cursor in its source org file
@@ -121,31 +116,21 @@ This feature finds entries similar to the one you are currently on.
 ![](./assets/ridge_emacs_menu.png)
 Hit `C-c s` (or `M-x ridge`) to open the ridge menu above. Then:
 - Hit `t` until you preferred content type is selected in the ridge menu
-
   `Content Type` specifies the content to perform `Search`, `Update` or `Find Similar` actions on
 - Hit `n` twice and then enter number of results you want to see
-
   `Results Count` is used by the `Search` and `Find Similar` actions
 - Hit `-f u` to `force` update the ridge content index
-
   The `Force Update` switch is only used by the `Update` action
 
 ## Upgrade
-### Upgrade Ridge Backend
-```bash
-pip install --upgrade ridge-assistant
-```
-### Upgrade Ridge.el
 Use your Emacs package manager to upgrade `ridge.el`
+<!-- tabs:start -->
 
-- For `ridge.el` from MELPA
-  - Method 1
-    - Run `M-x package-list-packages` to list all packages
-    - Press `U` on `ridge` to mark it for upgrade
-    - Press `x` to execute the marked actions
-  - Method 2
-    - Run `M-x package-refresh-content`
-    - Run `M-x package-reinstall ridge`
+#### **With MELPA**
+1. Run `M-x package-refresh-content`
+2. Run `M-x package-reinstall ridge`
 
-- For `ridge.el` from Straight
-  - Run `M-x straight-pull-package ridge`
+#### **With Straight.el**
+- Run `M-x straight-pull-package ridge`
+
+<!-- tabs:end -->

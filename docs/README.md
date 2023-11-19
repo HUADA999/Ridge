@@ -9,7 +9,7 @@
 </div>
 
 <div align="center">
-<b>An AI personal assistant for your digital brain</b>
+<b>An AI copilot for your Second Brain</b>
 
 </div>
 
@@ -24,20 +24,19 @@
 </div>
 
 ## Introduction
-Welcome to the Ridge Docs! This is the best place to [get started](./setup.md) with Ridge. We have instructions on self-hosting, using Ridge with Emacs, Obsidian, and the Web, and more. We also include setup instructions for users on the hosted instance at [app.ridge.dev](https://app.ridge.dev).
+Welcome to the Ridge Docs! This is the best place to get setup and explore Ridge's features.
 
-- Ridge is an application to dynamically engage with your notes, documents and images. We support APIs for [semantic search](./search.md) and [chat](./chat.md).
-- It can be easily self-hosted and run on your consumer hardware or private cloud.
-- It provides an open source, AI personal assistant accessible from your [Emacs](./emacs.md), [Obsidian](./obsidian.md) or [Web browser](./web.md), or our [desktop app](https://ridge.dev/downloads).
-- It works with plaintext, markdown, [notion](./notion_integration.md) org-mode, pdf files and [github repositories](./github_integration.md)
-- It can support use with multiple users. If you're self-hosting, your family, friends, or team can have a shared assistance server. You'll the the suite of server admin settings at `/server/admin`.
+- Ridge is an open source, personal AI
+- You can [chat](./chat.md) with it about anything. When relevant, it'll use any notes or documents you shared with it to respond
+- Use natural language to quickly [find](./search.md) relevant notes and documents
+- Access it from your [Emacs](./emacs.md), [Obsidian](./obsidian.md), [Web browser](./web.md) or the [Ridge Desktop app](https://ridge.dev/downloads)
+- It understands pdf, plaintext, markdown, org-mode files, [notion pages](./notion_integration.md) and [github repositories](./github_integration.md)
+- You can self-host and run Ridge on your consumer hardware or private cloud
+- It supports multiple users. If you want, you can self-host, a shared assistance server for your family, friends, or team
 
 ## Quickstart
-[Click here](./setup.md) for full setup instructions
-
-```shell
-pip install ridge-assistant && ridge
-```
+- [Try Ridge Cloud](https://app.ridge.dev) to get started quickly
+- [Read these instructions](./setup.md) to self-host a private instance of Ridge
 
 ## Overview
 <img src="https://docs.ridge.dev/assets/ridge_search_on_web.png" width="400px">
@@ -45,7 +44,7 @@ pip install ridge-assistant && ridge
 <img src="https://docs.ridge.dev/assets/ridge_chat_on_web.png" width="400px">
 
 #### [Search](./search.md)
-  - **Local**: Your personal data stays local. All search and indexing is done on your machine.
+  - **Natural**: Use natural language queries to quickly find relevant notes and documents.
   - **Incremental**: Incremental search for a fast, search-as-you-type experience
 
 #### [Chat](./chat.md)
