@@ -13,7 +13,7 @@ export interface RidgeSetting {
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
     resultsCount: 6,
-    ridgeUrl: 'http://127.0.0.1:42110',
+    ridgeUrl: 'https://app.ridge.dev',
     ridgeApiKey: '',
     connectedToBackend: false,
     autoConfigure: true,
