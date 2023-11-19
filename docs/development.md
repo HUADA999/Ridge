@@ -25,13 +25,7 @@ pip install -e .'[dev]'
    ridge -vv
    ```
 2. Configure Ridge
-   - **Via the Settings UI**: Add files, directories to index the [Ridge settings](http://localhost:42110/config) UI once Ridge has started up. Once you've saved all your settings, click `Configure`.
-   - **Manually**:
-     - Copy the `config/ridge_sample.yml` to `~/.ridge/ridge.yml`
-     - Set `input-files` or `input-filter` in each relevant `content-type` section of `~/.ridge/ridge.yml`
-       - Set `input-directories` field in `image` `content-type` section
-     - Delete `content-type` and `processor` sub-section(s) irrelevant for your use-case
-     - Restart ridge
+   - **Via the Desktop application**: Add files, directories to index using the settings page of your desktop application. Click "Save" to immediately trigger indexing.
 
   Note: Wait after configuration for ridge to Load ML model, generate embeddings and expose API to query notes, images, documents etc specified in config YAML
 

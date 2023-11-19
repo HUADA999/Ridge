@@ -63,7 +63,7 @@
 ;; Ridge Static Configuration
 ;; -------------------------
 
-(defcustom ridge-server-url "http://localhost:42110"
+(defcustom ridge-server-url "https://app.ridge.dev"
   "Location of Ridge API server."
   :group 'ridge
   :type 'string)
@@ -94,7 +94,7 @@
   :type 'number)
 
 (defcustom ridge-api-key nil
-  "API Key to Ridge server."
+  "API Key to your Ridge. Default at https://app.ridge.dev/config#clients."
   :group 'ridge
   :type 'string)
 
