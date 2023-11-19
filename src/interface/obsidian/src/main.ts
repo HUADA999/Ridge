@@ -75,7 +75,7 @@ export default class Ridge extends Plugin {
 
         if (this.settings.ridgeUrl === "https://app.ridge.dev") {
             if (this.settings.ridgeApiKey === "") {
-                new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev to get an API key.`);
+                new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev/config#clients to get an API key.`);
                 return;
             }
 
