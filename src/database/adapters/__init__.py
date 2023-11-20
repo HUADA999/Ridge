@@ -4,7 +4,6 @@ from datetime import date, datetime
 import secrets
 from typing import Type, List
 from datetime import date, timezone
-import random
 
 from django.db import models
 from django.contrib.sessions.backends.db import SessionStore
@@ -35,6 +34,8 @@ from database.models import (
     OfflineChatProcessorConversationConfig,
 )
 from ridge.utils.helpers import generate_random_name
+from ridge.utils import state
+from ridge.utils.config import GPT4AllProcessorModel
 from ridge.search_filter.word_filter import WordFilter
 from ridge.search_filter.file_filter import FileFilter
 from ridge.search_filter.date_filter import DateFilter
