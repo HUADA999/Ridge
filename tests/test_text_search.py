@@ -1,19 +1,20 @@
 # System Packages
-import logging
-from pathlib import Path
-import os
 import asyncio
+import logging
+import os
+from pathlib import Path
 
 # External Packages
 import pytest
 
+from ridge.database.models import Entry, GithubConfig, RidgeUser, LocalOrgConfig
+from ridge.processor.data_sources.github.github_to_entries import GithubToEntries
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
+
 # Internal Packages
 from ridge.search_type import text_search
-from ridge.utils.rawconfig import ContentConfig, SearchConfig
-from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
-from ridge.processor.data_sources.github.github_to_entries import GithubToEntries
 from ridge.utils.fs_syncer import collect_files, get_org_files
-from database.models import LocalOrgConfig, RidgeUser, Entry, GithubConfig
+from ridge.utils.rawconfig import ContentConfig, SearchConfig
 
 logger = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from ridge.utils.helpers import get_absolute_path, is_none_or_empty
 from ridge.utils.rawconfig import TextContentConfig
 from ridge.utils.config import SearchType
-from database.models import LocalMarkdownConfig, LocalOrgConfig, LocalPdfConfig, LocalPlaintextConfig
+from ridge.database.models import LocalMarkdownConfig, LocalOrgConfig, LocalPdfConfig, LocalPlaintextConfig
 
 logger = logging.getLogger(__name__)
 

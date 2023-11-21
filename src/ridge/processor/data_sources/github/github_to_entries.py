@@ -2,19 +2,20 @@
 import logging
 import time
 from datetime import datetime
-from typing import Dict, List, Union, Tuple
+from typing import Dict, List, Tuple, Union
 
 # External Packages
 import requests
 
-# Internal Packages
-from ridge.utils.helpers import timer
-from ridge.utils.rawconfig import Entry, GithubContentConfig, GithubRepoConfig
+from ridge.database.models import Entry as DbEntry
+from ridge.database.models import GithubConfig, RidgeUser
 from ridge.processor.data_sources.markdown.markdown_to_entries import MarkdownToEntries
 from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.text_to_entries import TextToEntries
-from database.models import Entry as DbEntry, GithubConfig, RidgeUser
 
+# Internal Packages
+from ridge.utils.helpers import timer
+from ridge.utils.rawconfig import Entry, GithubContentConfig, GithubRepoConfig
 
 logger = logging.getLogger(__name__)
 

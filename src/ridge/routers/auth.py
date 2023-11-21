@@ -15,8 +15,8 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 
 # Internal Packages
-from database.adapters import get_ridge_tokens, get_or_create_user, create_ridge_token, delete_ridge_token
-from database.models import RidgeApiUser
+from ridge.database.adapters import get_ridge_tokens, get_or_create_user, create_ridge_token, delete_ridge_token
+from ridge.database.models import RidgeApiUser
 from ridge.routers.helpers import update_telemetry_state
 from ridge.utils import state
 
