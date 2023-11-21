@@ -73,21 +73,19 @@ export default class Ridge extends Plugin {
         // Check if ridge backend is configured, note if cannot connect to backend
         let headers = { "Authorization": `Bearer ${this.settings.ridgeApiKey}` };
 
-        if (this.settings.ridgeUrl === "https://app.ridge.dev") {
-            if (this.settings.ridgeApiKey === "") {
-                new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev/config#clients to get an API key.`);
-                return;
-            }
-
-            await request({ url: this.settings.ridgeUrl ,method: "GET", headers: headers })
-                .then(response => {
-                    this.settings.connectedToBackend = true;
-                })
-                .catch(error => {
-                    this.settings.connectedToBackend = false;
-                    new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
-                });
+        if (this.settings.ridgeApiKey === "" && this.settings.ridgeUrl === "https://app.ridge.dev") {
+            new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev/config#clients to get an API key.`);
+            return;
         }
+
+        await request({ url: this.settings.ridgeUrl ,method: "GET", headers: headers })
+            .then(response => {
+                this.settings.connectedToBackend = true;
+            })
+            .catch(error => {
+                this.settings.connectedToBackend = false;
+                new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
+            });
     }
 
     async saveSettings() {
