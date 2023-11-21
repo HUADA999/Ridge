@@ -10,7 +10,7 @@ from ridge.processor.text_to_entries import TextToEntries
 from ridge.utils.helpers import timer
 from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.rawconfig import Entry
-from database.models import Entry as DbEntry, RidgeUser
+from ridge.database.models import Entry as DbEntry, RidgeUser
 
 
 logger = logging.getLogger(__name__)
