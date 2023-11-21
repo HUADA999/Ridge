@@ -1,18 +1,19 @@
 # Standard Packages
-import os
-import logging
-from typing import List, Tuple
 import base64
+import logging
+import os
+from typing import List, Tuple
 
 # External Packages
 from langchain.document_loaders import PyMuPDFLoader
+
+from ridge.database.models import Entry as DbEntry
+from ridge.database.models import RidgeUser
 
 # Internal Packages
 from ridge.processor.text_to_entries import TextToEntries
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
-from database.models import Entry as DbEntry, RidgeUser
-
 
 logger = logging.getLogger(__name__)
 

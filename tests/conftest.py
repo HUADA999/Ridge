@@ -1,48 +1,40 @@
 # External Packages
 import os
-from fastapi.testclient import TestClient
 from pathlib import Path
-import pytest
-from fastapi.staticfiles import StaticFiles
-from fastapi import FastAPI
-import os
-from fastapi import FastAPI
 
+import pytest
+from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.testclient import TestClient
 
 # Internal Packages
-from ridge.configure import configure_routes, configure_search_types, configure_middleware
-from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
+from ridge.configure import configure_middleware, configure_routes, configure_search_types
+from ridge.database.models import (
+    GithubConfig,
+    GithubRepoConfig,
+    RidgeApiUser,
+    RidgeUser,
+    LocalMarkdownConfig,
+    LocalOrgConfig,
+    LocalPlaintextConfig,
+)
+from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
+from ridge.routers.indexer import configure_content
 from ridge.search_type import image_search, text_search
+from ridge.utils import fs_syncer, state
 from ridge.utils.config import SearchModels
 from ridge.utils.constants import web_directory
 from ridge.utils.helpers import resolve_absolute_path
-from ridge.utils.rawconfig import (
-    ContentConfig,
-    ImageContentConfig,
-    SearchConfig,
-    ImageSearchConfig,
-)
-from ridge.utils import state, fs_syncer
-from ridge.routers.indexer import configure_content
-from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
-from database.models import (
-    RidgeApiUser,
-    LocalOrgConfig,
-    LocalMarkdownConfig,
-    LocalPlaintextConfig,
-    GithubConfig,
-    RidgeUser,
-    GithubRepoConfig,
-)
-
+from ridge.utils.rawconfig import ContentConfig, ImageContentConfig, ImageSearchConfig, SearchConfig
 from tests.helpers import (
-    UserFactory,
     ChatModelOptionsFactory,
-    OpenAIProcessorConversationConfigFactory,
     OfflineChatProcessorConversationConfigFactory,
-    UserConversationProcessorConfigFactory,
+    OpenAIProcessorConversationConfigFactory,
     SubscriptionFactory,
+    UserConversationProcessorConfigFactory,
+    UserFactory,
 )
 
 

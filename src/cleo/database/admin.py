@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 # Register your models here.
 
-from database.models import (
+from ridge.database.models import (
     RidgeUser,
     ChatModelOptions,
     OpenAIProcessorConversationConfig,

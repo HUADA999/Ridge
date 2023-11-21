@@ -1,31 +1,28 @@
 # Standard Packages
 import asyncio
+import json
+import logging
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from functools import partial
-import logging
 from time import time
-import json
-from typing import Annotated, Iterator, List, Optional, Union, Tuple, Dict, Any
-
-from datetime import datetime
-
-from ridge.processor.conversation import prompts
+from typing import Annotated, Any, Dict, Iterator, List, Optional, Tuple, Union
 
 # External Packages
-from fastapi import HTTPException, Header, Request, Depends
+from fastapi import Depends, Header, HTTPException, Request
+
+from ridge.database.adapters import ConversationAdapters
+from ridge.database.models import RidgeUser, Subscription
+from ridge.processor.conversation import prompts
+from ridge.processor.conversation.gpt4all.chat_model import converse_offline, send_message_to_model_offline
+from ridge.processor.conversation.openai.gpt import converse, send_message_to_model
+from ridge.processor.conversation.utils import ThreadedGenerator, message_to_log
 
 # Internal Packages
 from ridge.utils import state
 from ridge.utils.config import GPT4AllProcessorModel
 from ridge.utils.helpers import ConversationCommand, log_telemetry
-from ridge.processor.conversation.openai.gpt import converse, send_message_to_model
-from ridge.processor.conversation.gpt4all.chat_model import converse_offline, send_message_to_model_offline
-from ridge.processor.conversation.utils import message_to_log, ThreadedGenerator
-from database.models import RidgeUser, Subscription, ChatModelOptions
-from database.adapters import ConversationAdapters
-
 
 logger = logging.getLogger(__name__)
 

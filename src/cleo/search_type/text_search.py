@@ -19,8 +19,8 @@ from ridge.utils.state import SearchType
 from ridge.utils.rawconfig import SearchResponse, Entry
 from ridge.utils.jsonl import load_jsonl
 from ridge.processor.text_to_entries import TextToEntries
-from database.adapters import EntryAdapters
-from database.models import RidgeUser, Entry as DbEntry
+from ridge.database.adapters import EntryAdapters
+from ridge.database.models import RidgeUser, Entry as DbEntry
 
 logger = logging.getLogger(__name__)
 

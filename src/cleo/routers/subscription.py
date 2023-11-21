@@ -10,7 +10,7 @@ from starlette.authentication import requires
 import stripe
 
 # Internal Packages
-from database import adapters
+from ridge.database import adapters
 
 
 # Stripe integration for Ridge Cloud Subscription
