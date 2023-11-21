@@ -51,9 +51,16 @@ app = FastAPI()
 django_app = get_asgi_application()
 
 # Add CORS middleware
+RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "app.ridge.dev")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["app://obsidian.md", "http://localhost:*", "https://app.ridge.dev/*", "app://ridge.dev"],
+    allow_origins=[
+        "app://obsidian.md",
+        "http://localhost:*",
+        "http://127.0.0.1:*",
+        f"https://{RIDGE_DOMAIN}",
+        "app://ridge.dev",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
