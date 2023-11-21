@@ -30,7 +30,7 @@ from ridge.utils.config import (
     ContentIndex,
     SearchModels,
 )
-from database.models import (
+from ridge.database.models import (
     RidgeUser,
     GithubConfig,
     NotionConfig,

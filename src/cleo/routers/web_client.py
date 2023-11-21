@@ -8,8 +8,8 @@ from fastapi import Request
 from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.authentication import requires
-from database import adapters
-from database.models import RidgeUser
+from ridge.database import adapters
+from ridge.database.models import RidgeUser
 from ridge.utils.rawconfig import (
     GithubContentConfig,
     GithubRepoConfig,
@@ -18,7 +18,7 @@ from ridge.utils.rawconfig import (
 
 # Internal Packages
 from ridge.utils import constants, state
-from database.adapters import (
+from ridge.database.adapters import (
     EntryAdapters,
     get_user_github_config,
     get_user_notion_config,

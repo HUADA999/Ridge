@@ -44,9 +44,9 @@ from ridge.processor.conversation.openai.gpt import extract_questions
 from ridge.processor.conversation.gpt4all.chat_model import extract_questions_offline
 from fastapi.requests import Request
 
-from database import adapters
-from database.adapters import EntryAdapters, ConversationAdapters
-from database.models import (
+from ridge.database import adapters
+from ridge.database.adapters import EntryAdapters, ConversationAdapters
+from ridge.database.models import (
     LocalMarkdownConfig,
     LocalOrgConfig,
     LocalPdfConfig,

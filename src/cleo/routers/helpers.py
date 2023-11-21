@@ -18,8 +18,8 @@ from ridge.utils.helpers import ConversationCommand, log_telemetry
 from ridge.processor.conversation.openai.gpt import converse
 from ridge.processor.conversation.gpt4all.chat_model import converse_offline
 from ridge.processor.conversation.utils import message_to_log, ThreadedGenerator
-from database.models import RidgeUser, Subscription
-from database.adapters import ConversationAdapters
+from ridge.database.models import RidgeUser, Subscription
+from ridge.database.adapters import ConversationAdapters
 
 
 logger = logging.getLogger(__name__)

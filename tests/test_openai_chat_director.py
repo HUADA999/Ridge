@@ -10,7 +10,7 @@ from ridge.processor.conversation import prompts
 # Internal Packages
 from ridge.processor.conversation.utils import message_to_log
 from tests.helpers import ConversationFactory
-from database.models import RidgeUser
+from ridge.database.models import RidgeUser
 
 # Initialize variables for tests
 api_key = os.getenv("OPENAI_API_KEY")
