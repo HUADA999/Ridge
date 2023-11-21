@@ -1,3 +1,7 @@
+""" Main module for Ridge Assistant
+   isort:skip_file
+"""
+
 # Standard Packages
 import os
 import sys
