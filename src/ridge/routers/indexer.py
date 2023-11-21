@@ -1,40 +1,25 @@
-# Standard Packages
-import logging
-from typing import Optional, Union, Dict
 import asyncio
+import logging
+from typing import Dict, Optional, Union
 
-# External Packages
 from fastapi import APIRouter, Header, Request, Response, UploadFile
 from pydantic import BaseModel
 from starlette.authentication import requires
 
-# Internal Packages
-from ridge.utils import state, constants
+from ridge.database.models import GithubConfig, RidgeUser, NotionConfig
+from ridge.processor.github.github_to_entries import GithubToEntries
 from ridge.processor.markdown.markdown_to_entries import MarkdownToEntries
+from ridge.processor.notion.notion_to_entries import NotionToEntries
 from ridge.processor.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.pdf.pdf_to_entries import PdfToEntries
-from ridge.processor.github.github_to_entries import GithubToEntries
-from ridge.processor.notion.notion_to_entries import NotionToEntries
 from ridge.processor.plaintext.plaintext_to_entries import PlaintextToEntries
-from ridge.search_type import text_search, image_search
 from ridge.routers.helpers import update_telemetry_state
-from ridge.utils.yaml import save_config_to_file_updated_state
-from ridge.utils.config import SearchModels
+from ridge.search_type import image_search, text_search
+from ridge.utils import constants, state
+from ridge.utils.config import ContentIndex, SearchModels
 from ridge.utils.helpers import LRU, get_file_type
-from ridge.utils.rawconfig import (
-    ContentConfig,
-    FullConfig,
-    SearchConfig,
-)
-from ridge.utils.config import (
-    ContentIndex,
-    SearchModels,
-)
-from ridge.database.models import (
-    RidgeUser,
-    GithubConfig,
-    NotionConfig,
-)
+from ridge.utils.rawconfig import ContentConfig, FullConfig, SearchConfig
+from ridge.utils.yaml import save_config_to_file_updated_state
 
 logger = logging.getLogger(__name__)
 
@@ -189,6 +174,9 @@ def configure_content(
     content_index = ContentIndex()
 
     success = True
+    if t == None:
+        t = state.SearchType.All
+
     if t is not None and t in [type.value for type in state.SearchType]:
         t = state.SearchType(t)
 
@@ -315,7 +303,7 @@ def configure_content(
         # Initialize Notion Search
         notion_config = NotionConfig.objects.filter(user=user).first()
         if (
-            search_type == state.SearchType.All.value or search_type in state.SearchType.Notion.value
+            search_type == state.SearchType.All.value or search_type == state.SearchType.Notion.value
         ) and notion_config:
             logger.info("🔌 Setting up search for notion")
             text_search.setup(
@@ -328,7 +316,7 @@ def configure_content(
             )
 
     except Exception as e:
-        logger.error(f"🚨 Failed to setup GitHub: {e}", exc_info=True)
+        logger.error(f"🚨 Failed to setup Notion: {e}", exc_info=True)
         success = False
 
     # Invalidate Query Cache
