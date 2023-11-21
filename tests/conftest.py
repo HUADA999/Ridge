@@ -26,7 +26,7 @@ from ridge.utils.rawconfig import (
 from ridge.utils import state, fs_syncer
 from ridge.routers.indexer import configure_content
 from ridge.processor.org_mode.org_to_entries import OrgToEntries
-from database.models import (
+from ridge.database.models import (
     RidgeApiUser,
     LocalOrgConfig,
     LocalMarkdownConfig,
