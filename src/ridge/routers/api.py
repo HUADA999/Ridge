@@ -1,64 +1,63 @@
 # Standard Packages
 import concurrent.futures
+import json
+import logging
 import math
 import time
-import logging
-import json
-from typing import List, Optional, Union, Any, Dict
+from typing import Any, Dict, List, Optional, Union
+
+from asgiref.sync import sync_to_async
 
 # External Packages
-from fastapi import APIRouter, Depends, HTTPException, Header, Request
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi.requests import Request
+from fastapi.responses import Response, StreamingResponse
 from starlette.authentication import requires
-from asgiref.sync import sync_to_async
 
 # Internal Packages
 from ridge.configure import configure_server
-from ridge.search_type import image_search, text_search
-from ridge.search_filter.date_filter import DateFilter
-from ridge.search_filter.file_filter import FileFilter
-from ridge.search_filter.word_filter import WordFilter
-from ridge.utils.config import TextSearchModel, GPT4AllProcessorModel
-from ridge.utils.helpers import ConversationCommand, is_none_or_empty, timer, command_descriptions
-from ridge.utils.rawconfig import (
-    FullConfig,
-    SearchConfig,
-    SearchResponse,
-    GithubContentConfig,
-    NotionContentConfig,
-)
-from ridge.utils.state import SearchType
-from ridge.utils import state, constants
-from ridge.utils.helpers import AsyncIteratorWrapper, get_device
-from fastapi.responses import StreamingResponse, Response
-from ridge.routers.helpers import (
-    CommonQueryParams,
-    get_conversation_command,
-    validate_conversation_config,
-    agenerate_chat_response,
-    update_telemetry_state,
-    is_ready_to_chat,
-    ApiUserRateLimiter,
-)
-from ridge.processor.conversation.prompts import help_message, no_entries_found
-from ridge.processor.conversation.openai.gpt import extract_questions
-from ridge.processor.conversation.gpt4all.chat_model import extract_questions_offline
-from ridge.processor.tools.online_search import search_with_google
-from fastapi.requests import Request
-
-from database import adapters
-from database.adapters import EntryAdapters, ConversationAdapters
-from database.models import (
+from ridge.database import adapters
+from ridge.database.adapters import ConversationAdapters, EntryAdapters
+from ridge.database.models import ChatModelOptions
+from ridge.database.models import Entry as DbEntry
+from ridge.database.models import (
+    GithubConfig,
+    RidgeUser,
     LocalMarkdownConfig,
     LocalOrgConfig,
     LocalPdfConfig,
     LocalPlaintextConfig,
-    RidgeUser,
-    Entry as DbEntry,
-    GithubConfig,
     NotionConfig,
-    ChatModelOptions,
 )
-
+from ridge.processor.conversation.gpt4all.chat_model import extract_questions_offline
+from ridge.processor.conversation.openai.gpt import extract_questions
+from ridge.processor.conversation.prompts import help_message, no_entries_found
+from ridge.processor.tools.online_search import search_with_google
+from ridge.routers.helpers import (
+    ApiUserRateLimiter,
+    CommonQueryParams,
+    agenerate_chat_response,
+    get_conversation_command,
+    is_ready_to_chat,
+    update_telemetry_state,
+    validate_conversation_config,
+)
+from ridge.search_filter.date_filter import DateFilter
+from ridge.search_filter.file_filter import FileFilter
+from ridge.search_filter.word_filter import WordFilter
+from ridge.search_type import image_search, text_search
+from ridge.utils import constants, state
+from ridge.utils.config import GPT4AllProcessorModel, TextSearchModel
+from ridge.utils.helpers import (
+    AsyncIteratorWrapper,
+    ConversationCommand,
+    command_descriptions,
+    get_device,
+    is_none_or_empty,
+    timer,
+)
+from ridge.utils.rawconfig import FullConfig, GithubContentConfig, NotionContentConfig, SearchConfig, SearchResponse
+from ridge.utils.state import SearchType
 
 # Initialize Router
 api = APIRouter()

@@ -1,32 +1,29 @@
 import math
-from typing import Optional, Type, List
-from datetime import date, datetime
 import secrets
-from typing import Type, List
-from datetime import date, timezone
+from datetime import date, datetime, timezone
+from typing import List, Optional, Type
 
-from django.db import models
+from asgiref.sync import sync_to_async
 from django.contrib.sessions.backends.db import SessionStore
-from pgvector.django import CosineDistance
-from django.db.models.manager import BaseManager
+from django.db import models
 from django.db.models import Q
+from django.db.models.manager import BaseManager
+from fastapi import HTTPException
+from pgvector.django import CosineDistance
 from torch import Tensor
 
-# Import sync_to_async from Django Channels
-from asgiref.sync import sync_to_async
-
-from fastapi import HTTPException
-
-from database.models import (
-    RidgeUser,
+from ridge.database.models import (
+    ChatModelOptions,
+    Conversation,
+    Entry,
+    GithubConfig,
+    GithubRepoConfig,
     GoogleUser,
     RidgeApiUser,
+    RidgeUser,
     NotionConfig,
-    GithubConfig,
-    Entry,
-    GithubRepoConfig,
-    Conversation,
-    ChatModelOptions,
+    OfflineChatProcessorConversationConfig,
+    OpenAIProcessorConversationConfig,
     SearchModelConfig,
     Subscription,
     UserConversationConfig,
@@ -34,12 +31,12 @@ from database.models import (
     OfflineChatProcessorConversationConfig,
     ReflectiveQuestion,
 )
-from ridge.utils.helpers import generate_random_name
+from ridge.search_filter.date_filter import DateFilter
+from ridge.search_filter.file_filter import FileFilter
+from ridge.search_filter.word_filter import WordFilter
 from ridge.utils import state
 from ridge.utils.config import GPT4AllProcessorModel
-from ridge.search_filter.word_filter import WordFilter
-from ridge.search_filter.file_filter import FileFilter
-from ridge.search_filter.date_filter import DateFilter
+from ridge.utils.helpers import generate_random_name
 
 
 async def set_notion_config(token: str, user: RidgeUser):

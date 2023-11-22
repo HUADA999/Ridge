@@ -4,7 +4,7 @@ from pathlib import Path
 import os
 
 # Internal Packages
-from ridge.processor.data_sources.markdown.markdown_to_entries import MarkdownToEntries
+from ridge.processor.content.markdown.markdown_to_entries import MarkdownToEntries
 from ridge.utils.fs_syncer import get_markdown_files
 from ridge.utils.rawconfig import TextContentConfig
 

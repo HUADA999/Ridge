@@ -1,7 +1,7 @@
 import factory
 import os
 
-from database.models import (
+from ridge.database.models import (
     RidgeUser,
     RidgeApiUser,
     ChatModelOptions,

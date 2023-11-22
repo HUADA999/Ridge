@@ -20,8 +20,8 @@ from starlette.authentication import (
 )
 
 # Internal Packages
-from database.models import RidgeUser, Subscription
-from database.adapters import get_all_users, get_or_create_search_model
+from ridge.database.models import RidgeUser, Subscription
+from ridge.database.adapters import get_all_users, get_or_create_search_model
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.routers.indexer import configure_content, load_content, configure_search
 from ridge.utils import constants, state
@@ -45,7 +45,7 @@ class UserAuthenticationBackend(AuthenticationBackend):
     def __init__(
         self,
     ):
-        from database.models import RidgeUser, RidgeApiUser
+        from ridge.database.models import RidgeUser, RidgeApiUser
 
         self.ridgeuser_manager = RidgeUser.objects
         self.ridgeapiuser_manager = RidgeApiUser.objects
