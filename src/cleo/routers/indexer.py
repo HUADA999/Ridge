@@ -7,12 +7,12 @@ from pydantic import BaseModel
 from starlette.authentication import requires
 
 from ridge.database.models import GithubConfig, RidgeUser, NotionConfig
-from ridge.processor.data_sources.github.github_to_entries import GithubToEntries
-from ridge.processor.data_sources.markdown.markdown_to_entries import MarkdownToEntries
-from ridge.processor.data_sources.notion.notion_to_entries import NotionToEntries
-from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
-from ridge.processor.data_sources.pdf.pdf_to_entries import PdfToEntries
-from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.content.github.github_to_entries import GithubToEntries
+from ridge.processor.content.markdown.markdown_to_entries import MarkdownToEntries
+from ridge.processor.content.notion.notion_to_entries import NotionToEntries
+from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.content.pdf.pdf_to_entries import PdfToEntries
+from ridge.processor.content.plaintext.plaintext_to_entries import PlaintextToEntries
 from ridge.routers.helpers import update_telemetry_state
 from ridge.search_type import image_search, text_search
 from ridge.utils import constants, state

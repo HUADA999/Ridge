@@ -13,7 +13,7 @@ from PIL import Image
 from ridge.configure import configure_routes, configure_search_types
 from ridge.database.adapters import EntryAdapters
 from ridge.database.models import RidgeApiUser, RidgeUser
-from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
 from ridge.search_type import image_search, text_search
 from ridge.utils import state
 from ridge.utils.rawconfig import ContentConfig, SearchConfig
