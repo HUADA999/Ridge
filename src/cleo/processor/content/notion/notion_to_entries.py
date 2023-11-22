@@ -8,7 +8,7 @@ import requests
 
 from ridge.database.models import Entry as DbEntry
 from ridge.database.models import RidgeUser, NotionConfig
-from ridge.processor.text_to_entries import TextToEntries
+from ridge.processor.content.text_to_entries import TextToEntries
 
 # Internal Packages
 from ridge.utils.helpers import timer

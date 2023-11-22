@@ -18,7 +18,7 @@ from ridge.utils.models import BaseEncoder
 from ridge.utils.state import SearchType
 from ridge.utils.rawconfig import SearchResponse, Entry
 from ridge.utils.jsonl import load_jsonl
-from ridge.processor.text_to_entries import TextToEntries
+from ridge.processor.content.text_to_entries import TextToEntries
 from ridge.database.adapters import EntryAdapters
 from ridge.database.models import RidgeUser, Entry as DbEntry
 
@@ -141,7 +141,7 @@ def collate_results(hits, dedupe=True):
 
         else:
             hit_ids.add(hit.corpus_id)
-            yield SearchResponse.parse_obj(
+            yield SearchResponse.model_validate(
                 {
                     "entry": hit.raw,
                     "score": hit.distance,
