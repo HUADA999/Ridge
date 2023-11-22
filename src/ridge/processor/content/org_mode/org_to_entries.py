@@ -8,7 +8,7 @@ from ridge.database.models import RidgeUser
 
 # Internal Packages
 from ridge.processor.content.org_mode import orgnode
-from ridge.processor.text_to_entries import TextToEntries
+from ridge.processor.content.text_to_entries import TextToEntries
 from ridge.utils import state
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
