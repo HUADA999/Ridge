@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 from ridge.database.models import RidgeUser, LocalPlaintextConfig
-from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.content.plaintext.plaintext_to_entries import PlaintextToEntries
 
 # Internal Packages
 from ridge.utils.fs_syncer import get_plaintext_files

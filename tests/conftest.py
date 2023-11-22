@@ -18,8 +18,8 @@ from ridge.database.models import (
     LocalOrgConfig,
     LocalPlaintextConfig,
 )
-from ridge.processor.data_sources.org_mode.org_to_entries import OrgToEntries
-from ridge.processor.data_sources.plaintext.plaintext_to_entries import PlaintextToEntries
+from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
+from ridge.processor.content.plaintext.plaintext_to_entries import PlaintextToEntries
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.routers.indexer import configure_content
 from ridge.search_type import image_search, text_search
