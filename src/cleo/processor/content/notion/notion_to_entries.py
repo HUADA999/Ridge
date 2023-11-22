@@ -1,19 +1,18 @@
 # Standard Packages
 import logging
+from enum import Enum
 from typing import Tuple
 
 # External Packages
 import requests
 
+from ridge.database.models import Entry as DbEntry
+from ridge.database.models import RidgeUser, NotionConfig
+from ridge.processor.content.text_to_entries import TextToEntries
+
 # Internal Packages
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry, NotionContentConfig
-from ridge.processor.text_to_entries import TextToEntries
-from ridge.utils.rawconfig import Entry
-from database.models import Entry as DbEntry, RidgeUser, NotionConfig
-
-from enum import Enum
-
 
 logger = logging.getLogger(__name__)
 

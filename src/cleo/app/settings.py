@@ -14,7 +14,7 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -24,15 +24,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = os.getenv("RIDGE_DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("RIDGE_DEBUG", "False") == "True"
+DEBUG = os.getenv("RIDGE_DEBUG") == "True"
 
-ALLOWED_HOSTS = [".ridge.dev", "localhost", "127.0.0.1", "[::1]", "beta.ridge.dev"]
+# All Subdomains of RIDGE_DOMAIN are trusted
+RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "ridge.dev")
+ALLOWED_HOSTS = [f".{RIDGE_DOMAIN}", "localhost", "127.0.0.1", "[::1]"]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://app.ridge.dev",
-    "https://beta.ridge.dev",
-    "https://ridge.dev",
-    "https://*.ridge.dev",
+    f"https://*.{RIDGE_DOMAIN}",
+    f"https://{RIDGE_DOMAIN}",
 ]
 
 COOKIE_SAMESITE = "None"
@@ -40,8 +40,8 @@ if DEBUG:
     SESSION_COOKIE_DOMAIN = "localhost"
     CSRF_COOKIE_DOMAIN = "localhost"
 else:
-    SESSION_COOKIE_DOMAIN = "ridge.dev"
-    CSRF_COOKIE_DOMAIN = "ridge.dev"
+    SESSION_COOKIE_DOMAIN = RIDGE_DOMAIN
+    CSRF_COOKIE_DOMAIN = RIDGE_DOMAIN
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
@@ -53,7 +53,7 @@ SESSION_COOKIE_SAMESITE = "None"
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
-    "database.apps.DatabaseConfig",
+    "ridge.database.apps.DatabaseConfig",
     "django.contrib.admin",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -143,7 +143,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_ROOT = BASE_DIR / "static"
-STATICFILES_DIRS = [BASE_DIR / "src/ridge/interface/web"]
+STATICFILES_DIRS = [BASE_DIR / "interface/web"]
 STATIC_URL = "/static/"
 
 # Default primary key field type

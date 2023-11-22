@@ -13,8 +13,8 @@ from ridge.utils.helpers import is_none_or_empty, timer, batcher
 # Internal Packages
 from ridge.utils.rawconfig import Entry
 from ridge.search_filter.date_filter import DateFilter
-from database.models import RidgeUser, Entry as DbEntry, EntryDates
-from database.adapters import EntryAdapters
+from ridge.database.models import RidgeUser, Entry as DbEntry, EntryDates
+from ridge.database.adapters import EntryAdapters
 
 
 logger = logging.getLogger(__name__)

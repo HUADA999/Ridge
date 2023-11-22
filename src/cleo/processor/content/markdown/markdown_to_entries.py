@@ -1,17 +1,19 @@
 # Standard Packages
 import logging
 import re
-import urllib3
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
+
+import urllib3
+
+from ridge.database.models import Entry as DbEntry
+from ridge.database.models import RidgeUser
 
 # Internal Packages
-from ridge.processor.text_to_entries import TextToEntries
-from ridge.utils.helpers import timer
+from ridge.processor.content.text_to_entries import TextToEntries
 from ridge.utils.constants import empty_escape_sequences
+from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry
-from database.models import Entry as DbEntry, RidgeUser
-
 
 logger = logging.getLogger(__name__)
 
