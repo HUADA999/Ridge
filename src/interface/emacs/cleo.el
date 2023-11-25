@@ -98,6 +98,11 @@
   :group 'ridge
   :type 'string)
 
+(defcustom ridge-auto-index t
+  "Should content be automatically re-indexed every `ridge-index-interval' seconds."
+  :group 'ridge
+  :type 'boolean)
+
 (defcustom ridge-index-interval 3600
   "Interval (in seconds) to wait before updating content index."
   :group 'ridge
@@ -405,14 +410,14 @@ Auto invokes setup steps on calling main entrypoint."
                         ;; render response from indexing API endpoint on server
                         (lambda (status)
                           (if (not status)
-                              (message "ridge.el: %scontent index %supdated" (if content-type (format "%s " content-type) "") (if force "force " ""))
+                              (message "ridge.el: %scontent index %supdated" (if content-type (format "%s " content-type) "all ") (if force "force " ""))
                             (with-current-buffer (current-buffer)
-                              (goto-char "\n\n")
-                              (message "ridge.el: Failed to %supdate %s content index. Status: %s. Response: %s"
+                              (search-forward "\n\n" nil t)
+                              (message "ridge.el: Failed to %supdate %s content index. Status: %s%s"
                                        (if force "force " "")
-                                       content-type
-                                       status
-                                       (string-trim (buffer-substring-no-properties (point) (point-max)))))))
+                                       (if content-type (format "%s " content-type) "all")
+                                       (string-trim (format "%s %s" (nth 1 (nth 1 status)) (nth 2 (nth 1 status))))
+                                       (if (> (- (point-max) (point)) 0) (format ". Response: %s" (string-trim (buffer-substring-no-properties (point) (point-max)))) "")))))
                         nil t t)))
     (setq ridge--indexed-files files-to-index)))
 
@@ -444,8 +449,9 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
 (when ridge--index-timer
     (cancel-timer ridge--index-timer))
 ;; Send files to index on server every `ridge-index-interval' seconds
-(setq ridge--index-timer
-      (run-with-timer 60 ridge-index-interval 'ridge--server-index-files))
+(when ridge-auto-index
+  (setq ridge--index-timer
+        (run-with-timer 60 ridge-index-interval 'ridge--server-index-files)))
 
 
 ;; -------------------------------------------
