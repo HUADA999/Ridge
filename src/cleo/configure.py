@@ -82,7 +82,8 @@ class UserAuthenticationBackend(AuthenticationBackend):
                         return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(
                             user_with_token.user
                         )
-                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
+                    return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
         if len(request.headers.get("Authorization", "").split("Bearer ")) == 2:
             # Get bearer token from header
             bearer_token = request.headers["Authorization"].split("Bearer ")[1]
@@ -101,7 +102,8 @@ class UserAuthenticationBackend(AuthenticationBackend):
                         return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(
                             user_with_token.user
                         )
-                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
+                    return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
         if state.anonymous_mode:
             user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
