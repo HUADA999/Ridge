@@ -98,6 +98,11 @@
   :group 'ridge
   :type 'string)
 
+(defcustom ridge-auto-index t
+  "Should content be automatically re-indexed every `ridge-index-interval' seconds."
+  :group 'ridge
+  :type 'boolean)
+
 (defcustom ridge-index-interval 3600
   "Interval (in seconds) to wait before updating content index."
   :group 'ridge
@@ -444,8 +449,9 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
 (when ridge--index-timer
     (cancel-timer ridge--index-timer))
 ;; Send files to index on server every `ridge-index-interval' seconds
-(setq ridge--index-timer
-      (run-with-timer 60 ridge-index-interval 'ridge--server-index-files))
+(when ridge-auto-index
+  (setq ridge--index-timer
+        (run-with-timer 60 ridge-index-interval 'ridge--server-index-files)))
 
 
 ;; -------------------------------------------
