@@ -106,8 +106,8 @@ class UserAuthenticationBackend(AuthenticationBackend):
                         return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(
                             user_with_token.user
                         )
-                    return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
-                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
+                    return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
+                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user_with_token.user)
         if state.anonymous_mode:
             user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
