@@ -21,7 +21,12 @@ from starlette.authentication import (
 
 # Internal Packages
 from ridge.database.models import RidgeUser, Subscription
-from ridge.database.adapters import get_all_users, get_or_create_search_model
+from ridge.database.adapters import (
+    get_all_users,
+    get_or_create_search_model,
+    aget_user_subscription_state,
+    SubscriptionState,
+)
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.routers.indexer import configure_content, load_content, configure_search
 from ridge.utils import constants, state
@@ -70,7 +75,11 @@ class UserAuthenticationBackend(AuthenticationBackend):
                 .afirst()
             )
             if user:
-                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
+                subscription_state = await aget_user_subscription_state(user)
+                subscribed = subscription_state == SubscriptionState.SUBSCRIBED.value
+                if subscribed:
+                    return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
         if len(request.headers.get("Authorization", "").split("Bearer ")) == 2:
             # Get bearer token from header
             bearer_token = request.headers["Authorization"].split("Bearer ")[1]
@@ -82,11 +91,15 @@ class UserAuthenticationBackend(AuthenticationBackend):
                 .afirst()
             )
             if user_with_token:
+                subscription_state = await aget_user_subscription_state(user_with_token.user)
+                subscribed = subscription_state == SubscriptionState.SUBSCRIBED.value
+                if subscribed:
+                    return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user_with_token.user)
                 return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
         if state.anonymous_mode:
             user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
-                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
 
         return AuthCredentials(), UnauthenticatedUser()
 
