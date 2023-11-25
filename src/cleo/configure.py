@@ -82,9 +82,7 @@ class UserAuthenticationBackend(AuthenticationBackend):
                         or subscription_state == SubscriptionState.TRIAL.value
                     )
                     if subscribed:
-                        return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(
-                            user_with_token.user
-                        )
+                        return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
                     return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
                 return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
         if len(request.headers.get("Authorization", "").split("Bearer ")) == 2:
