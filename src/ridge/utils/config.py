@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, List, Optional, Union, Any
 import torch
 
 # Internal Packages
-from ridge.processor.conversation.gpt4all.utils import download_model
+from ridge.processor.conversation.offline.utils import download_model
 
 
 logger = logging.getLogger(__name__)

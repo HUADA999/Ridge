@@ -30,7 +30,7 @@ from ridge.database.models import (
     LocalPlaintextConfig,
     NotionConfig,
 )
-from ridge.processor.conversation.gpt4all.chat_model import extract_questions_offline
+from ridge.processor.conversation.offline.chat_model import extract_questions_offline
 from ridge.processor.conversation.openai.gpt import extract_questions
 from ridge.processor.conversation.openai.whisper import transcribe_audio
 from ridge.processor.conversation.prompts import help_message, no_entries_found
