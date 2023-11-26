@@ -275,7 +275,7 @@ export class RidgeChatModal extends Modal {
             const requestBody = await generateRequestBody(audioBlob, boundary_string);
 
             const response = await requestUrl({
-                url: `${this.setting.ridgeUrl}/api/speak?client=obsidian`,
+                url: `${this.setting.ridgeUrl}/api/transcribe?client=obsidian`,
                 method: 'POST',
                 headers: { "Authorization": `Bearer ${this.setting.ridgeApiKey}` },
                 contentType: `multipart/form-data; boundary=----${boundary_string}`,
