@@ -15,7 +15,7 @@ from fastapi import Depends, Header, HTTPException, Request
 from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import RidgeUser, Subscription
 from ridge.processor.conversation import prompts
-from ridge.processor.conversation.gpt4all.chat_model import converse_offline, send_message_to_model_offline
+from ridge.processor.conversation.offline.chat_model import converse_offline, send_message_to_model_offline
 from ridge.processor.conversation.openai.gpt import converse, send_message_to_model
 from ridge.processor.conversation.utils import ThreadedGenerator, message_to_log
 
