@@ -9,6 +9,7 @@ from ridge.database.models import (
     OpenAIProcessorConversationConfig,
     OfflineChatProcessorConversationConfig,
     SearchModelConfig,
+    SpeechToTextModelOptions,
     Subscription,
     ReflectiveQuestion,
 )
@@ -16,6 +17,7 @@ from ridge.database.models import (
 admin.site.register(RidgeUser, UserAdmin)
 
 admin.site.register(ChatModelOptions)
+admin.site.register(SpeechToTextModelOptions)
 admin.site.register(OpenAIProcessorConversationConfig)
 admin.site.register(OfflineChatProcessorConversationConfig)
 admin.site.register(SearchModelConfig)
