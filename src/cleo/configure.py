@@ -83,9 +83,9 @@ class UserAuthenticationBackend(AuthenticationBackend):
                         or subscription_state == SubscriptionState.UNSUBSCRIBED.value
                     )
                     if subscribed:
-                        return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
+                        return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
                     return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
-                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
         if len(request.headers.get("Authorization", "").split("Bearer ")) == 2:
             # Get bearer token from header
             bearer_token = request.headers["Authorization"].split("Bearer ")[1]
@@ -105,15 +105,15 @@ class UserAuthenticationBackend(AuthenticationBackend):
                         or subscription_state == SubscriptionState.UNSUBSCRIBED.value
                     )
                     if subscribed:
-                        return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(
+                        return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(
                             user_with_token.user
                         )
                     return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
-                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user_with_token.user)
+                return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user_with_token.user)
         if state.anonymous_mode:
             user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
-                return AuthCredentials(["authenticated", "subscribed"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
 
         return AuthCredentials(), UnauthenticatedUser()
 
