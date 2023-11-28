@@ -123,6 +123,40 @@ python -m pip install ridge-assistant
 
 ##### Local Server Start
 
+Before getting started, configure the following environment variables in your terminal for the first run
+
+<!-- tabs:start -->
+
+#### **MacOS**
+
+```shell
+export RIDGE_ADMIN_EMAIL=<your-email>
+export RIDGE_ADMIN_PASSWORD=<your-password>
+```
+
+#### **Windows**
+
+If you're using PowerShell:
+```shell
+$env:RIDGE_ADMIN_EMAIL="<your-email>"
+$env:RIDGE_ADMIN_PASSWORD="<your-password>"
+```
+
+If you're using a Unix shell:
+```shell
+export RIDGE_ADMIN_EMAIL="<your-email>"
+export RIDGE_ADMIN_PASSWORD="<your-password>"
+```
+
+#### **Linux**
+
+```shell
+export RIDGE_ADMIN_EMAIL=<your-email>
+export RIDGE_ADMIN_PASSWORD=<your-password>
+```
+
+<!-- tabs:end -->
+
 Run the following command from your terminal to start the Ridge backend and open Ridge in your browser.
 
 ```shell
