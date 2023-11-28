@@ -8,8 +8,9 @@ If your plugin does not need CSS, delete this file.
 */
 
 :root {
-    --ridge-chat-primary: #fee285;
-    --ridge-chat-dark-grey: #475569;
+    --ridge-winter-sun: #f9f5de;
+    --ridge-sun: #fee285;
+    --ridge-storm-grey: #475569;
  }
 
 .ridge-chat {
@@ -29,7 +30,7 @@ If your plugin does not need CSS, delete this file.
 
 #ridge-chat-title {
     font-weight: 200;
-    color: var(--ridge-chat-primary);
+    color: var(--ridge-sun);
 }
 
 #ridge-chat-body {
@@ -68,8 +69,8 @@ If your plugin does not need CSS, delete this file.
 }
 /* color chat bubble by ridge blue */
 .ridge-chat-message-text.ridge {
-    color: var(--ridge-chat-dark-grey);
-    background: var(--ridge-chat-primary);
+    color: var(--ridge-storm-grey);
+    background: var(--ridge-winter-sun);
     margin-left: auto;
     white-space: pre-line;
 }
@@ -80,14 +81,14 @@ If your plugin does not need CSS, delete this file.
     bottom: -2px;
     left: -7px;
     border: 10px solid transparent;
-    border-top-color: var(--ridge-chat-primary);
+    border-top-color: var(--ridge-winter-sun);
     border-bottom: 0;
     transform: rotate(-60deg);
 }
 /* color chat bubble by you dark grey */
 .ridge-chat-message-text.you {
     color: var(--text-on-accent);
-    background: var(--ridge-chat-dark-grey);
+    background: var(--ridge-storm-grey);
     margin-right: auto;
 }
 /* add right protrusion to you chat bubble */
@@ -97,7 +98,7 @@ If your plugin does not need CSS, delete this file.
     top: 91%;
     right: -2px;
     border: 10px solid transparent;
-    border-left-color: var(--ridge-chat-dark-grey);
+    border-left-color: var(--ridge-storm-grey);
     border-right: 0;
     margin-top: -10px;
     transform: rotate(-60deg)
