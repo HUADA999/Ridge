@@ -241,6 +241,7 @@ export class RidgeChatModal extends Modal {
         let responseElement = this.createRidgeResponseDiv();
 
         // Temporary status message to indicate that Ridge is thinking
+        this.result = "";
         this.renderIncrementalMessage(responseElement, "🤔");
 
         let response = await fetch(chatUrl, {
