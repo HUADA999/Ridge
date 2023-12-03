@@ -41,7 +41,6 @@ from ridge.search_filter.word_filter import WordFilter
 from ridge.utils import state
 from ridge.utils.config import GPT4AllProcessorModel
 from ridge.utils.helpers import generate_random_name
-from ridge.database.adapters import get_or_create_user_by_email
 
 
 class SubscriptionState(Enum):
