@@ -145,6 +145,11 @@ class UserConversationConfig(BaseModel):
     setting = models.ForeignKey(ChatModelOptions, on_delete=models.CASCADE, default=None, null=True, blank=True)
 
 
+class UserSearchModelConfig(BaseModel):
+    user = models.OneToOneField(RidgeUser, on_delete=models.CASCADE)
+    setting = models.ForeignKey(SearchModelConfig, on_delete=models.CASCADE)
+
+
 class Conversation(BaseModel):
     user = models.ForeignKey(RidgeUser, on_delete=models.CASCADE)
     conversation_log = models.JSONField(default=dict)
