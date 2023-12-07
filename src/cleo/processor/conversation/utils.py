@@ -4,6 +4,7 @@ from time import perf_counter
 import json
 from datetime import datetime
 import queue
+from typing import Any, Dict, List
 import tiktoken
 
 # External packages
@@ -11,6 +12,8 @@ from langchain.schema import ChatMessage
 from transformers import AutoTokenizer
 
 # Internal Packages
+from ridge.database.adapters import ConversationAdapters
+from ridge.database.models import RidgeUser
 from ridge.utils.helpers import merge_dicts
 
 
@@ -87,6 +90,32 @@ def message_to_log(
 
     conversation_log.extend([human_log, ridge_log])
     return conversation_log
+
+
+def save_to_conversation_log(
+    q: str,
+    chat_response: str,
+    user: RidgeUser,
+    meta_log: Dict,
+    user_message_time: str = None,
+    compiled_references: List[str] = [],
+    online_results: Dict[str, Any] = {},
+    inferred_queries: List[str] = [],
+    intent_type: str = "remember",
+):
+    user_message_time = user_message_time or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    updated_conversation = message_to_log(
+        user_message=q,
+        chat_response=chat_response,
+        user_message_metadata={"created": user_message_time},
+        ridge_message_metadata={
+            "context": compiled_references,
+            "intent": {"inferred-queries": inferred_queries, "type": intent_type},
+            "onlineContext": online_results,
+        },
+        conversation_log=meta_log.get("chat", []),
+    )
+    ConversationAdapters.save_conversation(user, {"chat": updated_conversation})
 
 
 def generate_chatml_messages_with_context(
