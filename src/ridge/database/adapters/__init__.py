@@ -22,6 +22,7 @@ from ridge.database.models import (
     GithubConfig,
     GithubRepoConfig,
     GoogleUser,
+    TextToImageModelConfig,
     RidgeApiUser,
     RidgeUser,
     NotionConfig,
@@ -425,6 +426,10 @@ class ConversationAdapters:
 
         else:
             raise ValueError("Invalid conversation config - either configure offline chat or openai chat")
+
+    @staticmethod
+    async def aget_text_to_image_model_config():
+        return await TextToImageModelConfig.objects.filter().afirst()
 
 
 class EntryAdapters:
