@@ -33,6 +33,9 @@ ALLOWED_HOSTS = [f".{RIDGE_DOMAIN}", "localhost", "127.0.0.1", "[::1]"]
 CSRF_TRUSTED_ORIGINS = [
     f"https://*.{RIDGE_DOMAIN}",
     f"https://{RIDGE_DOMAIN}",
+    f"http://*.{RIDGE_DOMAIN}",
+    f"http://{RIDGE_DOMAIN}",
+    f"https://app.{RIDGE_DOMAIN}",
 ]
 
 COOKIE_SAMESITE = "None"
@@ -42,6 +45,7 @@ if DEBUG or os.getenv("RIDGE_DOMAIN") == None:
 else:
     SESSION_COOKIE_DOMAIN = RIDGE_DOMAIN
     CSRF_COOKIE_DOMAIN = RIDGE_DOMAIN
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTOCOL", "https")
 
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
