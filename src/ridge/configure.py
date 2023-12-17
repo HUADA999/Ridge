@@ -77,17 +77,18 @@ class UserAuthenticationBackend(AuthenticationBackend):
                 .afirst()
             )
             if user:
-                if state.billing_enabled:
-                    subscription_state = await aget_user_subscription_state(user)
-                    subscribed = (
-                        subscription_state == SubscriptionState.SUBSCRIBED.value
-                        or subscription_state == SubscriptionState.TRIAL.value
-                        or subscription_state == SubscriptionState.UNSUBSCRIBED.value
-                    )
-                    if subscribed:
-                        return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
-                    return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
-                return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
+                if not state.billing_enabled:
+                    return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
+
+                subscription_state = await aget_user_subscription_state(user)
+                subscribed = (
+                    subscription_state == SubscriptionState.SUBSCRIBED.value
+                    or subscription_state == SubscriptionState.TRIAL.value
+                    or subscription_state == SubscriptionState.UNSUBSCRIBED.value
+                )
+                if subscribed:
+                    return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user)
+                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user)
         if len(request.headers.get("Authorization", "").split("Bearer ")) == 2:
             # Get bearer token from header
             bearer_token = request.headers["Authorization"].split("Bearer ")[1]
@@ -99,19 +100,18 @@ class UserAuthenticationBackend(AuthenticationBackend):
                 .afirst()
             )
             if user_with_token:
-                if state.billing_enabled:
-                    subscription_state = await aget_user_subscription_state(user_with_token.user)
-                    subscribed = (
-                        subscription_state == SubscriptionState.SUBSCRIBED.value
-                        or subscription_state == SubscriptionState.TRIAL.value
-                        or subscription_state == SubscriptionState.UNSUBSCRIBED.value
-                    )
-                    if subscribed:
-                        return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(
-                            user_with_token.user
-                        )
-                    return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
-                return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user_with_token.user)
+                if not state.billing_enabled:
+                    return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user_with_token.user)
+
+                subscription_state = await aget_user_subscription_state(user_with_token.user)
+                subscribed = (
+                    subscription_state == SubscriptionState.SUBSCRIBED.value
+                    or subscription_state == SubscriptionState.TRIAL.value
+                    or subscription_state == SubscriptionState.UNSUBSCRIBED.value
+                )
+                if subscribed:
+                    return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user_with_token.user)
+                return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
         if state.anonymous_mode:
             user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
