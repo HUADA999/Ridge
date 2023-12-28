@@ -1,13 +1,10 @@
-# Standard Packages
-import re
 import logging
+import re
 from collections import defaultdict
 from typing import List
 
-# Internal Packages
 from ridge.search_filter.base_filter import BaseFilter
 from ridge.utils.helpers import LRU
-
 
 logger = logging.getLogger(__name__)
 

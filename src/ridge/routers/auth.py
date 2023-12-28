@@ -1,25 +1,25 @@
-# Standard Packages
 import logging
 import os
 from typing import Optional
 
-# External Packages
+from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token
+from starlette.authentication import requires
 from starlette.config import Config
 from starlette.requests import Request
 from starlette.responses import HTMLResponse, RedirectResponse, Response
-from starlette.authentication import requires
-from authlib.integrations.starlette_client import OAuth, OAuthError
 
-from google.oauth2 import id_token
-from google.auth.transport import requests as google_requests
-
-# Internal Packages
-from ridge.database.adapters import get_ridge_tokens, get_or_create_user, create_ridge_token, delete_ridge_token
+from ridge.database.adapters import (
+    create_ridge_token,
+    delete_ridge_token,
+    get_ridge_tokens,
+    get_or_create_user,
+)
 from ridge.database.models import RidgeApiUser
 from ridge.routers.helpers import update_telemetry_state
 from ridge.utils import state
-
 
 logger = logging.getLogger(__name__)
 

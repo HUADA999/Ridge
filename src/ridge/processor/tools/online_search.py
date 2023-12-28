@@ -1,7 +1,8 @@
-import requests
 import json
-import os
 import logging
+import os
+
+import requests
 
 from ridge.routers.helpers import generate_online_subqueries
 

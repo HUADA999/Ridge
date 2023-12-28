@@ -4,14 +4,11 @@ import logging
 import os
 from pathlib import Path
 
-# External Packages
 import pytest
 
 from ridge.database.models import Entry, GithubConfig, RidgeUser, LocalOrgConfig
 from ridge.processor.content.github.github_to_entries import GithubToEntries
 from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
-
-# Internal Packages
 from ridge.search_type import text_search
 from ridge.utils.fs_syncer import collect_files, get_org_files
 from ridge.utils.rawconfig import ContentConfig, SearchConfig

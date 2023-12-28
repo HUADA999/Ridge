@@ -5,21 +5,22 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.http import HttpResponse
 
-# Register your models here.
-
 from ridge.database.models import (
-    RidgeUser,
     ChatModelOptions,
-    OpenAIProcessorConversationConfig,
+    Conversation,
+    RidgeUser,
     OfflineChatProcessorConversationConfig,
+    OpenAIProcessorConversationConfig,
+    ReflectiveQuestion,
     SearchModelConfig,
     SpeechToTextModelOptions,
     Subscription,
-    ReflectiveQuestion,
-    UserSearchModelConfig,
     TextToImageModelConfig,
-    Conversation,
+    UserSearchModelConfig,
 )
+
+# Register your models here.
+
 
 admin.site.register(RidgeUser, UserAdmin)
 

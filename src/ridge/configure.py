@@ -1,43 +1,36 @@
-# Standard Packages
-import logging
 import json
+import logging
+import os
 from enum import Enum
 from typing import Optional
-import requests
-import os
 
-# External Packages
 import openai
+import requests
 import schedule
-from starlette.middleware.sessions import SessionMiddleware
-from starlette.middleware.authentication import AuthenticationMiddleware
-from starlette.requests import HTTPConnection
-
 from starlette.authentication import (
     AuthCredentials,
     AuthenticationBackend,
     SimpleUser,
     UnauthenticatedUser,
 )
+from starlette.middleware.authentication import AuthenticationMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.requests import HTTPConnection
 
-# Internal Packages
-from ridge.database.models import RidgeUser, Subscription
 from ridge.database.adapters import (
     ConversationAdapters,
+    SubscriptionState,
+    aget_user_subscription_state,
     get_all_users,
     get_or_create_search_models,
-    aget_user_subscription_state,
-    SubscriptionState,
 )
+from ridge.database.models import RidgeUser, Subscription
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
-from ridge.routers.indexer import configure_content, load_content, configure_search
+from ridge.routers.indexer import configure_content, configure_search, load_content
 from ridge.utils import constants, state
-from ridge.utils.config import (
-    SearchType,
-)
+from ridge.utils.config import SearchType
 from ridge.utils.fs_syncer import collect_files
 from ridge.utils.rawconfig import FullConfig
-
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +45,7 @@ class UserAuthenticationBackend(AuthenticationBackend):
     def __init__(
         self,
     ):
-        from ridge.database.models import RidgeUser, RidgeApiUser
+        from ridge.database.models import RidgeApiUser, RidgeUser
 
         self.ridgeuser_manager = RidgeUser.objects
         self.ridgeapiuser_manager = RidgeApiUser.objects
@@ -190,10 +183,10 @@ def configure_routes(app):
     # Import APIs here to setup search types before while configuring server
     from ridge.routers.api import api
     from ridge.routers.api_beta import api_beta
-    from ridge.routers.web_client import web_client
-    from ridge.routers.indexer import indexer
     from ridge.routers.auth import auth_router
+    from ridge.routers.indexer import indexer
     from ridge.routers.subscription import subscription_router
+    from ridge.routers.web_client import web_client
 
     app.include_router(api, prefix="/api")
     app.include_router(api_beta, prefix="/api/beta")

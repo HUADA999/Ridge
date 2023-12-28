@@ -1,31 +1,28 @@
 # System Packages
 import json
-import os
 import math
+import os
 from datetime import timedelta
 
-# External Packages
-from fastapi import APIRouter
-from fastapi import Request
-from fastapi.responses import HTMLResponse, FileResponse, RedirectResponse
+from fastapi import APIRouter, Request
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from starlette.authentication import requires, has_required_scope
+from starlette.authentication import has_required_scope, requires
+
 from ridge.database import adapters
+from ridge.database.adapters import (
+    ConversationAdapters,
+    EntryAdapters,
+    get_user_github_config,
+    get_user_notion_config,
+    get_user_subscription_state,
+)
 from ridge.database.models import RidgeUser
+from ridge.utils import constants, state
 from ridge.utils.rawconfig import (
     GithubContentConfig,
     GithubRepoConfig,
     NotionContentConfig,
-)
-
-# Internal Packages
-from ridge.utils import constants, state
-from ridge.database.adapters import (
-    EntryAdapters,
-    get_user_github_config,
-    get_user_notion_config,
-    ConversationAdapters,
-    get_user_subscription_state,
 )
 
 # Initialize Router

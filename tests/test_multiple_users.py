@@ -1,13 +1,10 @@
 # Standard Modules
 from urllib.parse import quote
 
-# External Packages
 import pytest
 
 from ridge.database.models import RidgeApiUser, RidgeUser
 from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
-
-# Internal Packages
 from ridge.search_type import text_search
 
 

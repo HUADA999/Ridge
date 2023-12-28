@@ -1,8 +1,6 @@
-# External Packages
-from asgiref.sync import sync_to_async
 import whisper
+from asgiref.sync import sync_to_async
 
-# Internal Packages
 from ridge.utils import state
 
 

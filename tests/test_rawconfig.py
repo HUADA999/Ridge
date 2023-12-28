@@ -1,8 +1,6 @@
-# External Packages
 import pytest
 
-# Internal Packages
-from ridge.utils.rawconfig import TextContentConfig, ImageContentConfig
+from ridge.utils.rawconfig import ImageContentConfig, TextContentConfig
 
 
 # Test

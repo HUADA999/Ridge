@@ -1,21 +1,17 @@
-# Standard Packages
-import logging
-from time import perf_counter
 import json
-from datetime import datetime
+import logging
 import queue
+from datetime import datetime
+from time import perf_counter
 from typing import Any, Dict, List
-import tiktoken
 
-# External packages
+import tiktoken
 from langchain.schema import ChatMessage
 from transformers import AutoTokenizer
 
-# Internal Packages
 from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import RidgeUser
 from ridge.utils.helpers import merge_dicts
-
 
 logger = logging.getLogger(__name__)
 model_to_prompt_size = {

@@ -1,18 +1,16 @@
 # Standard Modules
 import logging
 from pathlib import Path
+
+import pytest
 from PIL import Image
 
-# External Packages
-import pytest
-from ridge.utils.config import SearchModels
-
-# Internal Packages
-from ridge.utils.state import content_index, search_models
-from ridge.utils.constants import web_directory
 from ridge.search_type import image_search
+from ridge.utils.config import SearchModels
+from ridge.utils.constants import web_directory
 from ridge.utils.helpers import resolve_absolute_path
 from ridge.utils.rawconfig import ContentConfig, SearchConfig
+from ridge.utils.state import content_index, search_models
 
 
 # Test

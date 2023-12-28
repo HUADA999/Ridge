@@ -1,11 +1,8 @@
-# Standard Packages
 import re
 from datetime import datetime
 
-# External Packages
 import pytest
 
-# Internal Packages
 from ridge.search_filter.date_filter import DateFilter
 
 

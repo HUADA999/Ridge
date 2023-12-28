@@ -1,18 +1,15 @@
-# Standard Packages
-from collections import defaultdict
 import os
-from pathlib import Path
 import threading
-from typing import List, Dict
+from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List
 
-# External Packages
 from openai import OpenAI
 from whisper import Whisper
 
-# Internal Packages
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.utils import config as utils_config
-from ridge.utils.config import ContentIndex, SearchModels, GPT4AllProcessorModel
+from ridge.utils.config import ContentIndex, GPT4AllProcessorModel, SearchModels
 from ridge.utils.helpers import LRU, get_device
 from ridge.utils.rawconfig import FullConfig
 

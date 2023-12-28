@@ -1,13 +1,19 @@
-import logging
 import glob
+import logging
 import os
 from typing import Optional
+
 from bs4 import BeautifulSoup
 
+from ridge.database.models import (
+    LocalMarkdownConfig,
+    LocalOrgConfig,
+    LocalPdfConfig,
+    LocalPlaintextConfig,
+)
+from ridge.utils.config import SearchType
 from ridge.utils.helpers import get_absolute_path, is_none_or_empty
 from ridge.utils.rawconfig import TextContentConfig
-from ridge.utils.config import SearchType
-from ridge.database.models import LocalMarkdownConfig, LocalOrgConfig, LocalPdfConfig, LocalPlaintextConfig
 
 logger = logging.getLogger(__name__)
 

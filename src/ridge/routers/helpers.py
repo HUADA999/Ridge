@@ -1,4 +1,3 @@
-# Standard Packages
 import asyncio
 import json
 import logging
@@ -9,22 +8,25 @@ from functools import partial
 from time import time
 from typing import Annotated, Any, Dict, Iterator, List, Optional, Tuple, Union
 
-# External Packages
-from fastapi import Depends, Header, HTTPException, Request, UploadFile
 import openai
+from fastapi import Depends, Header, HTTPException, Request, UploadFile
 from starlette.authentication import has_required_scope
 
-# Internal Packages
 from ridge.database.adapters import ConversationAdapters, EntryAdapters
 from ridge.database.models import RidgeUser, Subscription, TextToImageModelConfig
 from ridge.processor.conversation import prompts
-from ridge.processor.conversation.offline.chat_model import converse_offline, send_message_to_model_offline
+from ridge.processor.conversation.offline.chat_model import (
+    converse_offline,
+    send_message_to_model_offline,
+)
 from ridge.processor.conversation.openai.gpt import converse, send_message_to_model
-from ridge.processor.conversation.utils import ThreadedGenerator, save_to_conversation_log
+from ridge.processor.conversation.utils import (
+    ThreadedGenerator,
+    save_to_conversation_log,
+)
 from ridge.utils import state
 from ridge.utils.config import GPT4AllProcessorModel
 from ridge.utils.helpers import ConversationCommand, log_telemetry
-
 
 logger = logging.getLogger(__name__)
 

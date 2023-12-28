@@ -1,6 +1,6 @@
 from typing import List
 
-from sentence_transformers import SentenceTransformer, CrossEncoder
+from sentence_transformers import CrossEncoder, SentenceTransformer
 from torch import nn
 
 from ridge.utils.helpers import get_device

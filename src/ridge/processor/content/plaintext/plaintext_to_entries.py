@@ -1,4 +1,3 @@
-# Standard Packages
 import logging
 from pathlib import Path
 from typing import List, Tuple
@@ -7,8 +6,6 @@ from bs4 import BeautifulSoup
 
 from ridge.database.models import Entry as DbEntry
 from ridge.database.models import RidgeUser
-
-# Internal Packages
 from ridge.processor.content.text_to_entries import TextToEntries
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import Entry

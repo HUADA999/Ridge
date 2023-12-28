@@ -1,17 +1,14 @@
-# Standard Packages
 import os
 import urllib.parse
 from urllib.parse import quote
 
-# External Packages
 import pytest
 from freezegun import freeze_time
-from ridge.processor.conversation import prompts
 
-# Internal Packages
+from ridge.database.models import RidgeUser
+from ridge.processor.conversation import prompts
 from ridge.processor.conversation.utils import message_to_log
 from tests.helpers import ConversationFactory
-from ridge.database.models import RidgeUser
 
 # Initialize variables for tests
 api_key = os.getenv("OPENAI_API_KEY")

@@ -1,14 +1,17 @@
-from typing import Iterator, Union, List, Any
-from datetime import datetime
 import logging
+from datetime import datetime
 from threading import Thread
+from typing import Any, Iterator, List, Union
 
 from langchain.schema import ChatMessage
 
-from ridge.processor.conversation.utils import ThreadedGenerator, generate_chatml_messages_with_context
 from ridge.processor.conversation import prompts
-from ridge.utils.constants import empty_escape_sequences
+from ridge.processor.conversation.utils import (
+    ThreadedGenerator,
+    generate_chatml_messages_with_context,
+)
 from ridge.utils import state
+from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.helpers import ConversationCommand, is_none_or_empty
 
 logger = logging.getLogger(__name__)

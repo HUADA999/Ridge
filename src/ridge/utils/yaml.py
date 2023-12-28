@@ -1,13 +1,9 @@
-# Standard Packages
 from pathlib import Path
 
-# External Packages
 import yaml
 
-# Internal Packages
-from ridge.utils.rawconfig import FullConfig
 from ridge.utils import state
-
+from ridge.utils.rawconfig import FullConfig
 
 # Do not emit tags when dumping to YAML
 yaml.emitter.Emitter.process_tag = lambda self, *args, **kwargs: None  # type: ignore[assignment]

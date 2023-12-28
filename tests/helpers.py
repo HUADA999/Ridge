@@ -1,16 +1,17 @@
-import factory
 import os
 
+import factory
+
 from ridge.database.models import (
-    RidgeUser,
-    RidgeApiUser,
     ChatModelOptions,
+    Conversation,
+    RidgeApiUser,
+    RidgeUser,
     OfflineChatProcessorConversationConfig,
     OpenAIProcessorConversationConfig,
     SearchModelConfig,
-    UserConversationConfig,
-    Conversation,
     Subscription,
+    UserConversationConfig,
 )
 
 
