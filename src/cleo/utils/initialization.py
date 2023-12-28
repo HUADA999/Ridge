@@ -1,20 +1,17 @@
 import logging
 import os
 
+from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import (
+    ChatModelOptions,
     RidgeUser,
     OfflineChatProcessorConversationConfig,
     OpenAIProcessorConversationConfig,
-    ChatModelOptions,
     SpeechToTextModelOptions,
     TextToImageModelConfig,
 )
-
-from ridge.utils.constants import default_offline_chat_model, default_online_chat_model
 from ridge.processor.conversation.utils import model_to_prompt_size, model_to_tokenizer
-
-from ridge.database.adapters import ConversationAdapters
-
+from ridge.utils.constants import default_offline_chat_model, default_online_chat_model
 
 logger = logging.getLogger(__name__)
 

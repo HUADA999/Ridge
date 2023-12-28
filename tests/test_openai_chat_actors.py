@@ -1,16 +1,12 @@
-# Standard Packages
 import os
 from datetime import datetime
 
-# External Packages
-import pytest
 import freezegun
+import pytest
 from freezegun import freeze_time
 
-# Internal Packages
 from ridge.processor.conversation.openai.gpt import converse, extract_questions
 from ridge.processor.conversation.utils import message_to_log
-
 
 # Initialize variables for tests
 api_key = os.getenv("OPENAI_API_KEY")

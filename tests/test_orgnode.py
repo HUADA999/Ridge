@@ -1,7 +1,5 @@
-# Standard Packages
 import datetime
 
-# Internal Packages
 from ridge.processor.content.org_mode import orgnode
 
 

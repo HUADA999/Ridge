@@ -1,21 +1,23 @@
-# Standard Packages
 import argparse
+import logging
+import os
 import pathlib
 from importlib.metadata import version
-import os
-import logging
 
 logger = logging.getLogger(__name__)
 
-# Internal Packages
+from ridge.migrations.migrate_offline_chat_default_model import (
+    migrate_offline_chat_default_model,
+)
+from ridge.migrations.migrate_offline_chat_schema import migrate_offline_chat_schema
+from ridge.migrations.migrate_offline_model import migrate_offline_model
+from ridge.migrations.migrate_processor_config_openai import (
+    migrate_processor_conversation_schema,
+)
+from ridge.migrations.migrate_server_pg import migrate_server_pg
+from ridge.migrations.migrate_version import migrate_config_to_version
 from ridge.utils.helpers import resolve_absolute_path
 from ridge.utils.yaml import parse_config_from_file
-from ridge.migrations.migrate_version import migrate_config_to_version
-from ridge.migrations.migrate_processor_config_openai import migrate_processor_conversation_schema
-from ridge.migrations.migrate_offline_model import migrate_offline_model
-from ridge.migrations.migrate_offline_chat_schema import migrate_offline_chat_schema
-from ridge.migrations.migrate_offline_chat_default_model import migrate_offline_chat_default_model
-from ridge.migrations.migrate_server_pg import migrate_server_pg
 
 
 def cli(args=None):

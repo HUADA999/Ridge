@@ -1,26 +1,22 @@
-# Standard Packages
 import logging
 import math
 from pathlib import Path
 from typing import List, Tuple, Type, Union
 
-# External Packages
 import torch
+from asgiref.sync import sync_to_async
 from sentence_transformers import util
 
-from asgiref.sync import sync_to_async
-
-
-# Internal Packages
+from ridge.database.adapters import EntryAdapters, get_user_search_model_or_default
+from ridge.database.models import Entry as DbEntry
+from ridge.database.models import RidgeUser
+from ridge.processor.content.text_to_entries import TextToEntries
 from ridge.utils import state
 from ridge.utils.helpers import get_absolute_path, timer
-from ridge.utils.models import BaseEncoder
-from ridge.utils.state import SearchType
-from ridge.utils.rawconfig import SearchResponse, Entry
 from ridge.utils.jsonl import load_jsonl
-from ridge.processor.content.text_to_entries import TextToEntries
-from ridge.database.adapters import EntryAdapters, get_user_search_model_or_default
-from ridge.database.models import RidgeUser, Entry as DbEntry
+from ridge.utils.models import BaseEncoder
+from ridge.utils.rawconfig import Entry, SearchResponse
+from ridge.utils.state import SearchType
 
 logger = logging.getLogger(__name__)
 

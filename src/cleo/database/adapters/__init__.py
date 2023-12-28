@@ -2,9 +2,9 @@ import math
 import random
 import secrets
 import sys
-from datetime import date, datetime, timezone, timedelta
-from typing import List, Optional, Type
+from datetime import date, datetime, timedelta, timezone
 from enum import Enum
+from typing import List, Optional, Type
 
 from asgiref.sync import sync_to_async
 from django.contrib.sessions.backends.db import SessionStore
@@ -22,20 +22,18 @@ from ridge.database.models import (
     GithubConfig,
     GithubRepoConfig,
     GoogleUser,
-    TextToImageModelConfig,
     RidgeApiUser,
     RidgeUser,
     NotionConfig,
     OfflineChatProcessorConversationConfig,
     OpenAIProcessorConversationConfig,
+    ReflectiveQuestion,
     SearchModelConfig,
     SpeechToTextModelOptions,
     Subscription,
+    TextToImageModelConfig,
     UserConversationConfig,
     UserSearchModelConfig,
-    OpenAIProcessorConversationConfig,
-    OfflineChatProcessorConversationConfig,
-    ReflectiveQuestion,
 )
 from ridge.search_filter.date_filter import DateFilter
 from ridge.search_filter.file_filter import FileFilter

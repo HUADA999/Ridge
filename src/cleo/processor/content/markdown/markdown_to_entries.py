@@ -1,4 +1,3 @@
-# Standard Packages
 import logging
 import re
 from pathlib import Path
@@ -8,8 +7,6 @@ import urllib3
 
 from ridge.database.models import Entry as DbEntry
 from ridge.database.models import RidgeUser
-
-# Internal Packages
 from ridge.processor.content.text_to_entries import TextToEntries
 from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.helpers import timer

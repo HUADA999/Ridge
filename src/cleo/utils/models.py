@@ -1,13 +1,10 @@
-# Standard Packages
 from abc import ABC, abstractmethod
 from typing import List
 
-# External Packages
 import openai
 import torch
 from tqdm import trange
 
-# Internal Packages
 from ridge.utils import state
 
 

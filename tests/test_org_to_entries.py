@@ -1,14 +1,11 @@
-# Standard Packages
 import json
 import os
 
-# Internal Packages
 from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.content.text_to_entries import TextToEntries
-from ridge.utils.helpers import is_none_or_empty
-from ridge.utils.rawconfig import Entry
 from ridge.utils.fs_syncer import get_org_files
-from ridge.utils.rawconfig import TextContentConfig
+from ridge.utils.helpers import is_none_or_empty
+from ridge.utils.rawconfig import Entry, TextContentConfig
 
 
 def test_configure_heading_entry_to_jsonl(tmp_path):

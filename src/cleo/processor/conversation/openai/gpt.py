@@ -1,22 +1,18 @@
-# Standard Packages
-import logging
 import json
+import logging
 from datetime import datetime, timedelta
 from typing import Optional
 
-# External Packages
 from langchain.schema import ChatMessage
 
-# Internal Packages
-from ridge.utils.constants import empty_escape_sequences
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.openai.utils import (
     chat_completion_with_backoff,
     completion_with_backoff,
 )
 from ridge.processor.conversation.utils import generate_chatml_messages_with_context
+from ridge.utils.constants import empty_escape_sequences
 from ridge.utils.helpers import ConversationCommand, is_none_or_empty
-
 
 logger = logging.getLogger(__name__)
 

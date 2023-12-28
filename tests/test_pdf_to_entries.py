@@ -1,10 +1,7 @@
-# Standard Packages
 import json
 import os
 
-# Internal Packages
 from ridge.processor.content.pdf.pdf_to_entries import PdfToEntries
-
 from ridge.utils.fs_syncer import get_pdf_files
 from ridge.utils.rawconfig import TextContentConfig
 
