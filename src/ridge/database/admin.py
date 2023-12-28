@@ -16,6 +16,7 @@ from ridge.database.models import (
     SpeechToTextModelOptions,
     Subscription,
     ReflectiveQuestion,
+    UserSearchModelConfig,
     TextToImageModelConfig,
     Conversation,
 )
@@ -29,6 +30,7 @@ admin.site.register(OfflineChatProcessorConversationConfig)
 admin.site.register(SearchModelConfig)
 admin.site.register(Subscription)
 admin.site.register(ReflectiveQuestion)
+admin.site.register(UserSearchModelConfig)
 admin.site.register(TextToImageModelConfig)
 
 
