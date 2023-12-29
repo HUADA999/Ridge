@@ -1,6 +1,6 @@
 // Toggle the navigation menu
 function toggleMenu() {
-    var menu = document.getElementById("ridge-nav-menu");
+    let menu = document.getElementById("ridge-nav-menu");
     menu.classList.toggle("show");
 }
 
