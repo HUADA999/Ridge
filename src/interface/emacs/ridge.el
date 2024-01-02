@@ -241,13 +241,26 @@ for example), set this to the full interpreter path."
           (member val '("python" "python3" "pythonw" "py")))
   :group 'ridge)
 
-(defcustom ridge-org-files (org-agenda-files t t)
+(defcustom ridge-org-files nil
   "List of org-files to index on ridge server."
   :type '(repeat string)
   :group 'ridge)
 
 (defcustom ridge-org-directories nil
   "List of directories with `org-mode' files to index on ridge server."
+  :type '(repeat string)
+  :group 'ridge)
+
+(make-obsolete-variable 'ridge-org-directories 'ridge-index-directories "1.2.0" 'set)
+(make-obsolete-variable 'ridge-org-files 'ridge-index-files "1.2.0" 'set)
+
+(defcustom ridge-index-files (org-agenda-files t t)
+  "List of org, markdown, pdf and other plaintext to index on ridge server."
+  :type '(repeat string)
+  :group 'ridge)
+
+(defcustom ridge-index-directories nil
+  "List of directories with org, markdown, pdf and other plaintext files to index on ridge server."
   :type '(repeat string)
   :group 'ridge)
 
@@ -395,12 +408,16 @@ Auto invokes setup steps on calling main entrypoint."
   "Send files at `FILE-PATHS' to the Ridge server to index for search and chat.
 `FORCE' re-indexes all files of `CONTENT-TYPE' even if they are already indexed."
   (interactive)
-  (let ((boundary (format "-------------------------%d" (random (expt 10 10))))
-        (files-to-index (or file-paths
-                            (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.org$")) ridge-org-directories) ridge-org-files)))
-        (type-query (if (or (equal content-type "all") (not content-type)) "" (format "t=%s" content-type)))
-        (inhibit-message t)
-        (message-log-max nil))
+  (let* ((boundary (format "-------------------------%d" (random (expt 10 10))))
+         ;; Use `ridge-index-directories', `ridge-index-files' when set, else fallback to `ridge-org-directories', `ridge-org-files'
+         ;; This is a temporary change. `ridge-org-directories', `ridge-org-files' are deprecated. They will be removed in a future release
+         (content-directories (or ridge-index-directories ridge-org-directories))
+         (content-files (or ridge-index-files ridge-org-files))
+         (files-to-index (or file-paths
+                             (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.\\(org\\|md\\|markdown\\|pdf\\|txt\\|rst\\|xml\\|htm\\|html\\)$")) content-directories) content-files)))
+         (type-query (if (or (equal content-type "all") (not content-type)) "" (format "t=%s" content-type)))
+         (inhibit-message t)
+         (message-log-max nil))
     (let ((url-request-method "POST")
           (url-request-data (ridge--render-files-as-request-body files-to-index ridge--indexed-files boundary))
           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
@@ -430,20 +447,30 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
     (set-buffer-multibyte nil)
     (insert "\n")
     (dolist (file-to-index files-to-index)
+      ;; find file content-type. Choose from org, markdown, pdf, plaintext
+      (let ((content-type (cond ((string-match "\\.org$" file-to-index) "text/org")
+                                ((string-match "\\.\\(md\\|markdown\\)$" file-to-index) "text/markdown")
+                                ((string-match "\\.pdf$" file-to-index) "application/pdf")
+                                (t "text/plain"))))
       (insert (format "--%s\r\n" boundary))
       (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
-      (insert "Content-Type: text/org\r\n\r\n")
+      (insert (format "Content-Type: %s\r\n\r\n" content-type))
       (insert (with-temp-buffer
                 (insert-file-contents-literally file-to-index)
                 (buffer-string)))
-      (insert "\r\n"))
+      (insert "\r\n")))
     (dolist (file-to-index previously-indexed-files)
       (when (not (member file-to-index files-to-index))
-        (insert (format "--%s\r\n" boundary))
-        (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
-        (insert "Content-Type: text/org\r\n\r\n")
-        (insert "")
-        (insert "\r\n")))
+        ;; find file content-type. Choose from org, markdown, pdf, plaintext
+        (let ((content-type (cond ((string-match "\\.org$" file-to-index) "text/org")
+                                  ((string-match "\\.\\(md\\|markdown\\)$" file-to-index) "text/markdown")
+                                  ((string-match "\\.pdf$" file-to-index) "application/pdf")
+                                  (t "text/plain"))))
+          (insert (format "--%s\r\n" boundary))
+          (insert (format "Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n" file-to-index))
+          (insert "Content-Type: text/org\r\n\r\n")
+          (insert "")
+          (insert "\r\n"))))
     (insert (format "--%s--\r\n" boundary))
     (buffer-string)))
 
