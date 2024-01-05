@@ -242,13 +242,31 @@ docker-compose up --build
 - See the [ridge plugin setup](/obsidian.md?id=_2-setup-plugin) for details
 
 ## Uninstall
-1. (Optional) Hit `Ctrl-C` in the terminal running the ridge server to stop it
-2. Delete the ridge directory in your home folder (i.e `~/.ridge` on Linux, Mac or `C:\Users\<your-username>\.ridge` on Windows)
-5. You might want to `rm -rf` the following directories:
-    - `~/.ridge`
-    - `~/.cache/gpt4all`
-3. Uninstall the ridge server with `pip uninstall ridge-assistant`
-4. (Optional) Uninstall ridge.el or the ridge obsidian plugin in the standard way on Emacs, Obsidian
+### Uninstall Ridge Server
+
+<!-- tabs:start -->
+
+#### **Local**
+
+```shell
+# uninstall ridge server
+pip uninstall ridge-assistant
+
+# delete ridge postgres db
+dropdb ridge -U postgres
+```
+
+#### **Docker**
+From the same directory where you have your `docker-compose` file, run the command below to remove the server to delete its containers, networks, images and volumes.
+
+```shell
+docker-compose down --volumes
+```
+
+<!-- tabs:end -->
+
+### Uninstall Ridge Clients
+Uninstall the ridge emacs, obsidian or desktop client in the standard way from Emacs, Obsidian or your OS respectively
 
 ## Troubleshoot
 
