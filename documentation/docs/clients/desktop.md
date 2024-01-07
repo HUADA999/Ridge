@@ -4,10 +4,11 @@ sidebar_position: 1
 
 # Desktop
 
-Get started with using the Desktop app to index any supported files with Ridge.
-<h1><img src="/img/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo" /> Desktop</h1>
+> Query your Second Brain from your machine
 
-> An AI copilot for your Second Brain
+Use the Desktop app to chat and search with Ridge.
+You can also sync any relevant files with Ridge using the app.
+Ridge will use these files to provide contextual reponses when you search or chat.
 
 ## Features
 - **Chat**

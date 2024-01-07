@@ -9,7 +9,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Ridge AI',
-  tagline: 'Merge AI with your brain.',
+  tagline: 'An AI copilot for your Second Brain',
 
   staticDirectories: ['assets'],
 
@@ -44,17 +44,18 @@ const config = {
       ({
         docs: {
           sidebarPath: './sidebars.js',
+          routeBasePath: '/',
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/ridge-ai/ridge/tree/master/documentation/',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/',
+            'https://github.com/ridge-ai/ridge/tree/master/documentation/blog/',
         },
         theme: {
           customCss: './src/css/custom.css',
@@ -66,12 +67,7 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
-      // Replace with your project's social card
       image: 'img/ridge-logo-sideways-500.png',
-      announcementBar: {
-        backgroundColor: '#fcc50b',
-        content: "Give us a star on <a target='_blank' rel='noopener noreferrer' href='https://github.com/ridge-ai/ridge'>GitHub</a>!"
-      },
       metadata: [
         {name: 'keywords', content: 'ridge, ridge ai, chatgpt, open ai, open source, productivity'},
         {name: 'og:title', content: 'Ridge Documentation'},
@@ -90,15 +86,18 @@ const config = {
         },
         items: [
           {
-            type: 'docSidebar',
-            position: 'left',
-            label: 'Docs',
-            sidebarId: 'tutorialSidebar',
-          },
-          // {to: '/blog', label: 'Blog', position: 'left'},
-          {
             href: 'https://github.com/ridge-ai/ridge',
-            label: 'Ridge',
+            label: '📜 Code',
+            position: 'right',
+          },
+          {
+            href: 'https://app.ridge.dev/login',
+            label: '🌍 Cloud',
+            position: 'right',
+          },
+          {
+            href: 'https://discord.gg/BDgyabRM6e',
+            label: '💬 Discord',
             position: 'right',
           },
         ],
@@ -111,7 +110,23 @@ const config = {
             items: [
               {
                 label: 'Get Started',
-                to: '/docs/get-started/overview',
+                to: '/',
+              },
+              {
+                label: 'Features',
+                to: '/features/all_features',
+              },
+              {
+                label: 'Client Apps',
+                to: '/category/clients',
+              },
+              {
+                label: 'Self-Hosting',
+                to: '/get-started/setup',
+              },
+              {
+                label: 'Contributing',
+                to: '/contributing/development',
               },
             ],
           },
@@ -123,13 +138,13 @@ const config = {
                 href: 'https://discord.gg/BDgyabRM6e',
               },
               {
-                label: 'Twitter',
-                href: 'https://twitter.com/sabaimran_go',
-              },
-              {
                 label: 'LinkedIn',
                 href: 'https://www.linkedin.com/company/ridge-ai/'
-              }
+              },
+              {
+                label: 'Twitter',
+                href: 'https://twitter.com/ridge_ai',
+              },
             ],
           },
           {
@@ -140,8 +155,16 @@ const config = {
               //   to: '/blog',
               // },
               {
-                label: 'GitHub',
+                label: 'Cloud',
+                href: 'https://app.ridge.dev/login',
+              },
+              {
+                label: 'Code',
                 href: 'https://github.com/ridge-ai/ridge',
+              },
+              {
+                label: 'Website',
+                href: 'https://ridge.dev',
               },
             ],
           },

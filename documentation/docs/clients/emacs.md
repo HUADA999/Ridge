@@ -4,18 +4,15 @@ sidebar_position: 2
 
 # Emacs
 
-Use Ridge with Emacs to search your Second Brain from within Emacs.
-
-<h1><img src="/img/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo" /> Emacs</h1>
-
-> An AI copilot for your Second Brain in Emacs
-
-<img src="https://stable.melpa.org/packages/ridge-badge.svg" width="150" alt="Melpa Stable Badge" />
+<img src="https://stable.melpa.org/packages/ridge-badge.svg" width="130" alt="Melpa Stable Badge" />
 <img src="https://melpa.org/packages/ridge-badge.svg" width="150" alt="Melpa Badge" />
 
 <img src="https://github.com/ridge-ai/ridge/actions/workflows/build_ridge_el.yml/badge.svg" width="150" alt="Build Badge" />
 <img src="https://github.com/ridge-ai/ridge/actions/workflows/test_ridge_el.yml/badge.svg" width="150" alt="Test Badge" />
 
+<br />
+<br />
+> Query your Second Brain from Emacs
 
 ## Features
 - **Chat**
@@ -90,13 +87,13 @@ M-x package-install ridge
 
 ## Use
 ### Search
-See [Ridge Search](/features/search.md) for details
+See [Ridge Search](/features/search) for details
 1. Hit  `C-c s s` (or `M-x ridge RET s`) to open ridge search
 2. Enter your query in natural language<br/>
   E.g *"What is the meaning of life?"*, *"My life goals for 2023"*
 
 ### Chat
-See [Ridge Chat](/features/chat.md) for details
+See [Ridge Chat](/features/chat) for details
 1. Hit `C-c s c` (or `M-x ridge RET c`) to open ridge chat
 2. Ask questions in a natural, conversational style<br/>
   E.g *"When did I file my taxes last year?"*
