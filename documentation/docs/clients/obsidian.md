@@ -36,7 +36,7 @@ See the official [Obsidian Plugin Docs](https://help.obsidian.md/Extending+Obsid
 Run *Ridge: Chat* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette) and ask questions in a natural, conversational style.<br />
 E.g *"When did I file my taxes last year?"*
 
-See [Ridge Chat](/docs/features/chat) for more details
+See [Ridge Chat](/features/chat) for more details
 
 ### Find Similar Notes
 To see other notes similar to the current one, run *Ridge: Find Similar Notes* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
@@ -44,7 +44,7 @@ To see other notes similar to the current one, run *Ridge: Find Similar Notes* f
 ### Search
 Click the *Ridge search* icon 🔎 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Search* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
 
-See [Ridge Search](/docs/features/search) for more details. Use [query filters](/docs/miscellaneous/advanced#query-filters) to limit entries to search
+See [Ridge Search](/features/search) for more details. Use [query filters](/miscellaneous/advanced#query-filters) to limit entries to search
 
 [search_demo](https://user-images.githubusercontent.com/6413477/218801155-cd67e8b4-a770-404a-8179-d6b61caa0f93.mp4 ':include :type=mp4')
 

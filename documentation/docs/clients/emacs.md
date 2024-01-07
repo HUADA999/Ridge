@@ -87,13 +87,13 @@ M-x package-install ridge
 
 ## Use
 ### Search
-See [Ridge Search](/features/search.md) for details
+See [Ridge Search](/features/search) for details
 1. Hit  `C-c s s` (or `M-x ridge RET s`) to open ridge search
 2. Enter your query in natural language<br/>
   E.g *"What is the meaning of life?"*, *"My life goals for 2023"*
 
 ### Chat
-See [Ridge Chat](/features/chat.md) for details
+See [Ridge Chat](/features/chat) for details
 1. Hit `C-c s c` (or `M-x ridge RET c`) to open ridge chat
 2. Ask questions in a natural, conversational style<br/>
   E.g *"When did I file my taxes last year?"*

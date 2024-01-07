@@ -46,7 +46,7 @@ This will enable Ridge to send your chat queries and query relevant notes to Ope
     - **On Web**: Open [/chat](https://app.ridge.dev/chat) in your web browser
     - **On Obsidian**: Search for *Ridge: Chat* in the [Command Palette](https://help.obsidian.md/Plugins/Command+palette)
     - **On Emacs**: Run `M-x ridge <user-query>`
-2. Enter your queries to chat with Ridge. Use [slash commands](#commands) and [query filters](/docs/miscellaneous/advanced.md#query-filters) to change what Ridge uses to respond
+2. Enter your queries to chat with Ridge. Use [slash commands](#commands) and [query filters](/miscellaneous/advanced#query-filters) to change what Ridge uses to respond
 
 ![](/img/ridge_chat_on_web.png ':size=400px')
 
