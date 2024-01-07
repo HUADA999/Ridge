@@ -4,11 +4,9 @@ sidebar_position: 4
 
 # Web
 
-Without any desktop clients, you can get started with using Ridge on the web for chat. Bear in mind you do need one of the desktop clients in order to index and sync your data with Ridge.
+> Query your Second Brain from your Web Browser
 
-<h1><img src="/img/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo" /> Web</h1>
-
-> An AI copilot for your Second Brain
+Without any desktop clients, you can start chatting with Ridge on the web. Bear in mind you do need one of the desktop clients in order to share and sync your data with Ridge.
 
 ## Features
 - **Chat**

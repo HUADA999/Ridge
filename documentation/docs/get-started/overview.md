@@ -4,30 +4,20 @@ sidebar_position: 0
 
 # Overview
 
-Learn about Ridge and its features.
-
 <p align="center"><img src="/img/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo"></img></p>
 
 <div align="center">
-
-[![test](https://github.com/ridge-ai/ridge/actions/workflows/test.yml/badge.svg)](https://github.com/ridge-ai/ridge/actions/workflows/test.yml)
-[![dockerize](https://github.com/ridge-ai/ridge/actions/workflows/dockerize.yml/badge.svg)](https://github.com/ridge-ai/ridge/pkgs/container/ridge)
-[![pypi](https://github.com/ridge-ai/ridge/actions/workflows/pypi.yml/badge.svg)](https://pypi.org/project/ridge-assistant/)
-
+  <b>An AI copilot for your Second Brain</b>
 </div>
 
-<div align="center">
-<b>An AI copilot for your Second Brain</b>
-
-</div>
-
+<br />
 <div align="center">
 
-[📜 Explore Code](https://github.com/ridge-ai/ridge)
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-[🌍 Try Ridge Cloud](https://ridge.dev)
-<span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
-[💬 Get Involved](https://discord.gg/BDgyabRM6e)
+  [📜 Explore Code](https://github.com/ridge-ai/ridge)
+  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  [🌍 Try Ridge Cloud](https://ridge.dev)
+  <span>&nbsp;&nbsp;•&nbsp;&nbsp;</span>
+  [💬 Get Involved](https://discord.gg/BDgyabRM6e)
 
 </div>
 
@@ -46,9 +36,9 @@ Welcome to the Ridge Docs! This is the best place to get setup and explore Ridge
 - [Read these instructions](/get-started/setup.mdx) to self-host a private instance of Ridge
 
 ## At a Glance
-<img src="https://docs.ridge.dev/assets/ridge_search_on_web.png" width="400px" />
+<img src="https://docs.ridge.dev/img/ridge_search_on_web.png" width="400px" />
 <span>&nbsp;&nbsp;</span>
-<img src="https://docs.ridge.dev/assets/ridge_chat_on_web.png" width="400px" />
+<img src="https://docs.ridge.dev/img/ridge_chat_on_web.png" width="400px" />
 
 #### [Search](/features/search.md)
   - **Natural**: Use natural language queries to quickly find relevant notes and documents.

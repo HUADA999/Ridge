@@ -4,11 +4,7 @@ sidebar_position: 3
 
 # Obsidian
 
-Connect Obsidian to Ridge to search your notes and the web, and chat with your Second Brain.
-
-<h1><img src="/img/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo" /> Obsidian</h1>
-
-> An AI copilot for your Second Brain in Obsidian
+> Query your Second Brain from Obsidian
 
 ## Features
 - **Chat**
