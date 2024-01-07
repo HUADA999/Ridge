@@ -1,5 +1,6 @@
 ---
 sidebar_position: 0
+slug: /
 ---
 
 # Overview
@@ -25,26 +26,26 @@ sidebar_position: 0
 Welcome to the Ridge Docs! This is the best place to get setup and explore Ridge's features.
 
 - Ridge is an open source, personal AI
-- You can [chat](/features/chat.md) with it about anything. When relevant, it'll use any notes or documents you shared with it to respond
-- Quickly [find](/features/search.md) relevant notes and documents using natural language
-- It understands pdf, plaintext, markdown, org-mode files, [notion pages](/online-data-sources/notion_integration.md) and [github repositories](/online-data-sources/github_integration.md)
-- Access it from your [Emacs](/clients/emacs.md), [Obsidian](/clients/obsidian.md), [Web browser](/clients/web.md) or the [Ridge Desktop app](/clients/desktop.md)
+- You can [chat](/features/chat) with it about anything. When relevant, it'll use any notes or documents you shared with it to respond
+- Quickly [find](/features/search) relevant notes and documents using natural language
+- It understands pdf, plaintext, markdown, org-mode files, [notion pages](/online-data-sources/notion_integration) and [github repositories](/online-data-sources/github_integration)
+- Access it from your [Emacs](/clients/emacs), [Obsidian](/clients/obsidian), [Web browser](/clients/web) or the [Ridge Desktop app](/clients/desktop)
 - You can self-host Ridge on your consumer hardware or share it with your family, friends or team from your private cloud
 
 ## Quickstart
 - [Try Ridge Cloud](https://app.ridge.dev) to get started quickly
-- [Read these instructions](/get-started/setup.mdx) to self-host a private instance of Ridge
+- [Read these instructions](/get-started/setup) to self-host a private instance of Ridge
 
 ## At a Glance
 <img src="https://docs.ridge.dev/img/ridge_search_on_web.png" width="400px" />
 <span>&nbsp;&nbsp;</span>
 <img src="https://docs.ridge.dev/img/ridge_chat_on_web.png" width="400px" />
 
-#### [Search](/features/search.md)
+#### [Search](/features/search)
   - **Natural**: Use natural language queries to quickly find relevant notes and documents.
   - **Incremental**: Incremental search for a fast, search-as-you-type experience
 
-#### [Chat](/features/chat.md)
+#### [Chat](/features/chat)
   - **Faster answers**: Find answers faster, smoother than search. No need to manually scan through your notes to find answers.
   - **Iterative discovery**: Iteratively explore and (re-)discover your notes
   - **Assisted creativity**: Smoothly weave across answers retrieval and content generation
