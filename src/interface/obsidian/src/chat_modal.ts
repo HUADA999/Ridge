@@ -245,7 +245,7 @@ export class RidgeChatModal extends Modal {
             if (responseJson.detail) {
                 // If the server returns error details in response, render a setup hint.
                 let setupMsg = "Hi 👋🏾, to start chatting add available chat models options via [the Django Admin panel](/server/admin) on the Server";
-                this.renderMessage(chatBodyEl, setupMsg, "ridge", undefined, true);
+                this.renderMessage(chatBodyEl, setupMsg, "ridge", undefined);
 
                 return false;
             } else if (responseJson.response) {

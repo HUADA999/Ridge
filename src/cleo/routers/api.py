@@ -55,7 +55,7 @@ from ridge.search_filter.file_filter import FileFilter
 from ridge.search_filter.word_filter import WordFilter
 from ridge.search_type import image_search, text_search
 from ridge.utils import constants, state
-from ridge.utils.config import GPT4AllProcessorModel, TextSearchModel
+from ridge.utils.config import GPT4AllProcessorModel
 from ridge.utils.helpers import (
     AsyncIteratorWrapper,
     ConversationCommand,
