@@ -183,6 +183,7 @@ def configure_routes(app):
     # Import APIs here to setup search types before while configuring server
     from ridge.routers.api import api
     from ridge.routers.api_beta import api_beta
+    from ridge.routers.api_config import api_config
     from ridge.routers.auth import auth_router
     from ridge.routers.indexer import indexer
     from ridge.routers.subscription import subscription_router
@@ -190,6 +191,7 @@ def configure_routes(app):
 
     app.include_router(api, prefix="/api")
     app.include_router(api_beta, prefix="/api/beta")
+    app.include_router(api_config, prefix="/api/config")
     app.include_router(indexer, prefix="/api/v1/index")
     if state.billing_enabled:
         logger.info("💳 Enabled Billing")
