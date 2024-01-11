@@ -42,7 +42,7 @@ export class RidgeSettingTab extends PluginSettingTab {
             .addText(text => text
                 .setValue(`${this.plugin.settings.ridgeUrl}`)
                 .onChange(async (value) => {
-                    this.plugin.settings.ridgeUrl = value.trim();
+                    this.plugin.settings.ridgeUrl = value.trim().replace(/\/$/, '');
                     await this.plugin.saveSettings();
                     containerEl.firstElementChild?.setText(this.getBackendStatusMessage());
                 }));
