@@ -348,7 +348,7 @@ Auto invokes setup steps on calling main entrypoint."
       t
     ;; else general check via ping to ridge-server-url
     (if (ignore-errors
-          (url-retrieve-synchronously (format "%s/api/config/data/default" ridge-server-url)))
+          (url-retrieve-synchronously (format "%s/api/health" ridge-server-url)))
         ;; Successful ping to non-emacs ridge server indicates it is started and ready.
         ;; So update ready state tracker variable (and implicitly return true for started)
         (setq ridge--server-ready? t)
@@ -432,7 +432,7 @@ Auto invokes setup steps on calling main entrypoint."
                               (ridge--delete-open-network-connections-to-server)
                               (with-current-buffer (current-buffer)
                                 (search-forward "\n\n" nil t)
-                                (message "ridge.el: Failed to %supdate %s content index. Status: %s%s"
+                                (message "ridge.el: Failed to %supdate %scontent index. Status: %s%s"
                                          (if force "force " "")
                                          (if content-type (format "%s " content-type) "all")
                                          (string-trim (format "%s %s" (nth 1 (nth 1 status)) (nth 2 (nth 1 status))))
@@ -603,22 +603,6 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
 ;; --------------
 ;; Query Ridge API
 ;; --------------
-
-(defun ridge--post-new-config (config)
-  "Configure ridge server with provided CONFIG."
-  ;; POST provided config to ridge server
-  (let ((url-request-method "POST")
-        (url-request-extra-headers `(("Content-Type" . "application/json")
-                                     ("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-        (url-request-data (encode-coding-string (json-encode-alist config) 'utf-8))
-        (config-url (format "%s/api/config/data" ridge-server-url)))
-    (with-current-buffer (url-retrieve-synchronously config-url)
-      (buffer-string)))
-  ;; Update index on ridge server after configuration update
-  (let ((ridge--server-ready? nil)
-        (url-request-extra-headers `(("Authorization" . ,(format "\"Bearer %s\"" ridge-api-key)))))
-    (url-retrieve (format "%s/api/update?client=emacs" ridge-server-url) #'identity)))
-
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
   (let ((config-url (format "%s/api/config/types" ridge-server-url))
