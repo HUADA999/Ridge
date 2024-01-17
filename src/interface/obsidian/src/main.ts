@@ -1,8 +1,8 @@
-import { Notice, Plugin, request } from 'obsidian';
+import { Plugin } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
 import { RidgeChatModal } from 'src/chat_modal'
-import { updateContentIndex } from './utils';
+import { updateContentIndex, canConnectToBackend } from './utils';
 
 
 export default class Ridge extends Plugin {
@@ -70,22 +70,9 @@ export default class Ridge extends Plugin {
         // Load ridge obsidian plugin settings
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
-        // Check if ridge backend is configured, note if cannot connect to backend
-        let headers = { "Authorization": `Bearer ${this.settings.ridgeApiKey}` };
-
-        if (this.settings.ridgeApiKey === "" && this.settings.ridgeUrl === "https://app.ridge.dev") {
-            new Notice(`❗️Ridge API key is not configured. Please visit https://app.ridge.dev/config#clients to get an API key.`);
-            return;
-        }
-
-        await request({ url: this.settings.ridgeUrl ,method: "GET", headers: headers })
-            .then(response => {
-                this.settings.connectedToBackend = true;
-            })
-            .catch(error => {
-                this.settings.connectedToBackend = false;
-                new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings.\n\n${error}`);
-            });
+        // Check if can connect to ridge server
+        ({ connectedToBackend: this.settings.connectedToBackend } =
+            await canConnectToBackend(this.settings.ridgeUrl, this.settings.ridgeApiKey, true));
     }
 
     async saveSettings() {
