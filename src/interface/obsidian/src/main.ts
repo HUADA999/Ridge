@@ -46,11 +46,8 @@ export default class Ridge extends Plugin {
         });
 
         // Create an icon in the left ribbon.
-        this.addRibbonIcon('search', 'Ridge', (_: MouseEvent) => {
-            // Called when the user clicks the icon.
-            this.settings.connectedToBackend
-                ? new RidgeSearchModal(this.app, this.settings).open()
-                : new Notice(`❗️Ensure Ridge backend is running and Ridge URL is pointing to it in the plugin settings`);
+        this.addRibbonIcon('message-circle', 'Ridge', (_: MouseEvent) => {
+            new RidgeChatModal(this.app, this.settings).open()
         });
 
         // Add a settings tab so the user can configure ridge
