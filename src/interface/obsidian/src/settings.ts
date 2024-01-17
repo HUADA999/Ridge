@@ -1,6 +1,6 @@
 import { App, Notice, PluginSettingTab, Setting, TFile } from 'obsidian';
 import Ridge from 'src/main';
-import { updateContentIndex } from './utils';
+import { canConnectToBackend, getBackendStatusMessage, updateContentIndex } from './utils';
 
 export interface RidgeSetting {
     resultsCount: number;
@@ -9,6 +9,7 @@ export interface RidgeSetting {
     connectedToBackend: boolean;
     autoConfigure: boolean;
     lastSyncedFiles: TFile[];
+    userEmail: string;
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
@@ -17,7 +18,8 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     ridgeApiKey: '',
     connectedToBackend: false,
     autoConfigure: true,
-    lastSyncedFiles: []
+    lastSyncedFiles: [],
+    userEmail: '',
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
@@ -33,7 +35,15 @@ export class RidgeSettingTab extends PluginSettingTab {
         containerEl.empty();
 
         // Add notice whether able to connect to ridge backend or not
-        containerEl.createEl('small', { text: this.getBackendStatusMessage() });
+        let backendStatusEl = containerEl.createEl('small', {
+            text: getBackendStatusMessage(
+                this.plugin.settings.connectedToBackend,
+                this.plugin.settings.userEmail,
+                this.plugin.settings.ridgeUrl,
+                this.plugin.settings.ridgeApiKey
+            )}
+        );
+        let backendStatusMessage: string = '';
 
         // Add ridge settings configurable from the plugin settings tab
         new Setting(containerEl)
@@ -43,8 +53,14 @@ export class RidgeSettingTab extends PluginSettingTab {
                 .setValue(`${this.plugin.settings.ridgeUrl}`)
                 .onChange(async (value) => {
                     this.plugin.settings.ridgeUrl = value.trim().replace(/\/$/, '');
+                    ({
+                        connectedToBackend: this.plugin.settings.connectedToBackend,
+                        userEmail: this.plugin.settings.userEmail,
+                        statusMessage: backendStatusMessage,
+                    } = await canConnectToBackend(this.plugin.settings.ridgeUrl, this.plugin.settings.ridgeApiKey));
+
                     await this.plugin.saveSettings();
-                    containerEl.firstElementChild?.setText(this.getBackendStatusMessage());
+                    backendStatusEl.setText(backendStatusMessage);
                 }));
         new Setting(containerEl)
             .setName('Ridge API Key')
@@ -53,7 +69,13 @@ export class RidgeSettingTab extends PluginSettingTab {
                 .setValue(`${this.plugin.settings.ridgeApiKey}`)
                 .onChange(async (value) => {
                     this.plugin.settings.ridgeApiKey = value.trim();
+                    ({
+                        connectedToBackend: this.plugin.settings.connectedToBackend,
+                        userEmail: this.plugin.settings.userEmail,
+                        statusMessage: backendStatusMessage,
+                    } = await canConnectToBackend(this.plugin.settings.ridgeUrl, this.plugin.settings.ridgeApiKey));
                     await this.plugin.saveSettings();
+                    backendStatusEl.setText(backendStatusMessage);
                 }));
         new Setting(containerEl)
             .setName('Results Count')
@@ -122,11 +144,5 @@ export class RidgeSettingTab extends PluginSettingTab {
                     indexVaultSetting = indexVaultSetting.setDisabled(false);
                 })
             );
-    }
-
-    getBackendStatusMessage() {
-        return !this.plugin.settings.connectedToBackend
-            ? '❗Disconnected from Ridge backend. Ensure Ridge backend is running and Ridge URL is correctly set below.'
-            : '✅ Connected to Ridge backend.';
     }
 }
