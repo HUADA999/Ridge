@@ -9,6 +9,7 @@ import openai
 import requests
 import schedule
 from django.utils.timezone import make_aware
+from fastapi import Response
 from starlette.authentication import (
     AuthCredentials,
     AuthenticationBackend,
@@ -20,27 +21,32 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.requests import HTTPConnection
 
 from ridge.database.adapters import (
+    ClientApplicationAdapters,
     ConversationAdapters,
     SubscriptionState,
+    aget_or_create_user_by_phone_number,
+    aget_user_by_phone_number,
     aget_user_subscription_state,
     get_all_users,
     get_or_create_search_models,
 )
-from ridge.database.models import RidgeUser, Subscription
+from ridge.database.models import ClientApplication, RidgeUser, Subscription
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.routers.indexer import configure_content, configure_search, load_content
 from ridge.utils import constants, state
 from ridge.utils.config import SearchType
 from ridge.utils.fs_syncer import collect_files
+from ridge.utils.helpers import is_none_or_empty
 from ridge.utils.rawconfig import FullConfig
 
 logger = logging.getLogger(__name__)
 
 
 class AuthenticatedRidgeUser(SimpleUser):
-    def __init__(self, user):
+    def __init__(self, user, client_app: Optional[ClientApplication] = None):
         self.object = user
-        super().__init__(user.email)
+        self.client_app = client_app
+        super().__init__(user.username)
 
 
 class UserAuthenticationBackend(AuthenticationBackend):
@@ -108,6 +114,53 @@ class UserAuthenticationBackend(AuthenticationBackend):
                 if subscribed:
                     return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user_with_token.user)
                 return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user_with_token.user)
+        # Get query params for client_id and client_secret
+        client_id = request.query_params.get("client_id")
+        if client_id:
+            # Get the client secret, which is passed in the Authorization header
+            client_secret = request.headers["Authorization"].split("Bearer ")[1]
+            if not client_secret:
+                return Response(
+                    status_code=401,
+                    content="Please provide a client secret in the Authorization header with a client_id query param.",
+                )
+
+            # Get the client application
+            client_application = await ClientApplicationAdapters.aget_client_application_by_id(client_id, client_secret)
+            if client_application is None:
+                return AuthCredentials(), UnauthenticatedUser()
+            # Get the identifier used for the user
+            phone_number = request.query_params.get("phone_number")
+            if is_none_or_empty(phone_number):
+                return AuthCredentials(), UnauthenticatedUser()
+
+            if not phone_number.startswith("+"):
+                phone_number = f"+{phone_number}"
+
+            create_if_not_exists = request.query_params.get("create_if_not_exists")
+            if create_if_not_exists:
+                user = await aget_or_create_user_by_phone_number(phone_number)
+            else:
+                user = await aget_user_by_phone_number(phone_number)
+
+            if user is None:
+                return AuthCredentials(), UnauthenticatedUser()
+
+            if not state.billing_enabled:
+                return AuthCredentials(["authenticated", "premium"]), AuthenticatedRidgeUser(user, client_application)
+
+            subscription_state = await aget_user_subscription_state(user)
+            subscribed = (
+                subscription_state == SubscriptionState.SUBSCRIBED.value
+                or subscription_state == SubscriptionState.TRIAL.value
+                or subscription_state == SubscriptionState.UNSUBSCRIBED.value
+            )
+            if subscribed:
+                return (
+                    AuthCredentials(["authenticated", "premium"]),
+                    AuthenticatedRidgeUser(user),
+                )
+            return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user, client_application)
         if state.anonymous_mode:
             user = await self.ridgeuser_manager.filter(username="default").prefetch_related("subscription").afirst()
             if user:
