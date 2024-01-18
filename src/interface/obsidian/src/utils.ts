@@ -1,4 +1,4 @@
-import { FileSystemAdapter, Notice, Vault, Modal, TFile } from 'obsidian';
+import { FileSystemAdapter, Notice, Vault, Modal, TFile, request } from 'obsidian';
 import { RidgeSetting } from 'src/settings'
 
 export function getVaultAbsolutePath(vault: Vault): string {
@@ -122,4 +122,51 @@ export async function createNoteAndCloseModal(query: string, modal: Modal, opt?:
         return
     }
     modal.close();
+}
+
+export async function canConnectToBackend(
+    ridgeUrl: string,
+    ridgeApiKey: string,
+    showNotice: boolean = false
+): Promise<{ connectedToBackend: boolean; statusMessage: string, userEmail: string }> {
+    let connectedToBackend = false;
+    let userEmail: string = '';
+
+    if (!!ridgeUrl) {
+        let headers  = !!ridgeApiKey ? { "Authorization": `Bearer ${ridgeApiKey}` } : undefined;
+        await request({ url: `${ridgeUrl}/api/health`, method: "GET", headers: headers })
+        .then(response => {
+            connectedToBackend = true;
+            userEmail = JSON.parse(response)?.email;
+        })
+        .catch(error => {
+            connectedToBackend = false;
+            console.log(`Ridge connection error:\n\n${error}`);
+        });
+    }
+
+    let statusMessage: string = getBackendStatusMessage(connectedToBackend, userEmail, ridgeUrl, ridgeApiKey);
+    if (showNotice) new Notice(statusMessage);
+    return { connectedToBackend, statusMessage, userEmail };
+}
+
+export function getBackendStatusMessage(
+    connectedToServer: boolean,
+    userEmail: string,
+    ridgeUrl: string,
+    ridgeApiKey: string
+): string {
+    // Welcome message with default settings. Ridge cloud always expects an API key.
+    if (!!ridgeApiKey && ridgeUrl === 'https://app.ridge.dev')
+        return `🌈 Welcome to Ridge! Get your API key from ${ridgeUrl}/config#clients and set it in the Ridge plugin settings on Obsidian`;
+
+    if (!connectedToServer)
+        return `❗️Could not connect to Ridge at ${ridgeUrl}. Ensure your can access it`;
+    else if (!userEmail)
+        return `✅ Connected to Ridge. ❗️Get a valid API key from ${ridgeUrl}/config#clients to log in`;
+    else if (userEmail === 'default@example.com')
+        // Logged in as default user in anonymous mode
+        return `✅ Signed in to Ridge`;
+    else
+        return `✅ Signed in to Ridge as ${userEmail}`;
 }
