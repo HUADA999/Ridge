@@ -241,14 +241,17 @@ img {
 }
 #ridge-chat-input {
     font-size: var(--font-ui-medium);
-    padding: 0 0 0 12px;
+    padding: 4px 0 0 12px;
     border-radius: 16px;
     height: 32px;
+    resize: none;
 }
 .ridge-input-row-button {
     border-radius: 50%;
     padding: 4px;
     --icon-size: var(--icon-size);
+    height: 32px;
+    width: 32px;
 }
 #ridge-chat-send .svg-icon {
     background: var(--ridge-sun);
