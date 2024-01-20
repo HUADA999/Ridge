@@ -254,10 +254,34 @@ img {
     height: 32px;
     width: 32px;
 }
-#ridge-chat-send .svg-icon {
+
+#ridge-chat-send {
+    padding: 0;
+    position: relative;
+}
+#ridge-chat-send .lucide-arrow-up-circle {
     background: var(--ridge-sun);
     border-radius: 50%;
     color: #222;
+}
+#ridge-chat-send .lucide-stop-circle {
+    transform: rotateY(-180deg) rotateZ(-90deg);
+}
+#ridge-chat-send .lucide-stop-circle circle {
+    stroke-dasharray: 62px;  /* The circumference of the circle with 7px radius */
+    stroke-dashoffset: 0px;
+    stroke-linecap: round;
+    stroke-width: 2px;
+    stroke: var(--main-text-color);
+    fill: none;
+}
+@keyframes countdown {
+    from {
+        stroke-dashoffset: 0px;
+    }
+    to {
+        stroke-dashoffset: -62px;  /* The circumference of the circle with 7px radius */
+    }
 }
 
 @media (pointer: coarse), (hover: none) {
