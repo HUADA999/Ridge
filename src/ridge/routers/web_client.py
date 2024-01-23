@@ -1,6 +1,5 @@
 # System Packages
 import json
-import math
 import os
 from datetime import timedelta
 
@@ -18,6 +17,7 @@ from ridge.database.adapters import (
     get_user_subscription_state,
 )
 from ridge.database.models import RidgeUser
+from ridge.routers.twilio import is_twilio_enabled
 from ridge.utils import constants, state
 from ridge.utils.rawconfig import (
     GithubContentConfig,
@@ -174,6 +174,9 @@ def config_page(request: Request):
             "ridge_cloud_subscription_url": os.getenv("RIDGE_CLOUD_SUBSCRIPTION_URL"),
             "is_active": has_required_scope(request, ["premium"]),
             "has_documents": has_documents,
+            "phone_number": user.phone_number,
+            "is_twilio_enabled": is_twilio_enabled(),
+            "is_phone_number_verified": user.verified_phone_number,
         },
     )
 
