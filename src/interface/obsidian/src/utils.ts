@@ -157,7 +157,7 @@ export function getBackendStatusMessage(
     ridgeApiKey: string
 ): string {
     // Welcome message with default settings. Ridge cloud always expects an API key.
-    if (!!ridgeApiKey && ridgeUrl === 'https://app.ridge.dev')
+    if (!ridgeApiKey && ridgeUrl === 'https://app.ridge.dev')
         return `🌈 Welcome to Ridge! Get your API key from ${ridgeUrl}/config#clients and set it in the Ridge plugin settings on Obsidian`;
 
     if (!connectedToServer)
