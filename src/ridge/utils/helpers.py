@@ -317,3 +317,9 @@ def batcher(iterable, max_n):
         if not chunk:
             return
         yield (x for x in chunk if x is not None)
+
+
+def in_debug_mode():
+    """Check if Ridge is running in debug mode.
+    Set RIDGE_DEBUG environment variable to true to enable debug mode."""
+    return os.getenv("RIDGE_DEBUG", "false").lower() == "true"
