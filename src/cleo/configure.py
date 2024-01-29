@@ -34,6 +34,7 @@ from ridge.database.adapters import (
 from ridge.database.models import ClientApplication, RidgeUser, Subscription
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.routers.indexer import configure_content, configure_search, load_content
+from ridge.routers.twilio import is_twilio_enabled
 from ridge.utils import constants, state
 from ridge.utils.config import SearchType
 from ridge.utils.fs_syncer import collect_files
@@ -258,17 +259,25 @@ def configure_routes(app):
     from ridge.routers.api_config import api_config
     from ridge.routers.auth import auth_router
     from ridge.routers.indexer import indexer
-    from ridge.routers.subscription import subscription_router
     from ridge.routers.web_client import web_client
 
     app.include_router(api, prefix="/api")
     app.include_router(api_config, prefix="/api/config")
     app.include_router(indexer, prefix="/api/v1/index")
-    if state.billing_enabled:
-        logger.info("💳 Enabled Billing")
-        app.include_router(subscription_router, prefix="/api/subscription")
     app.include_router(web_client)
     app.include_router(auth_router, prefix="/auth")
+
+    if state.billing_enabled:
+        from ridge.routers.subscription import subscription_router
+
+        logger.info("💳 Enabled Billing")
+        app.include_router(subscription_router, prefix="/api/subscription")
+
+    if is_twilio_enabled():
+        logger.info("📞 Enabled Twilio")
+        from ridge.routers.api_phone import api_phone
+
+        app.include_router(api_phone, prefix="/api/config/phone")
 
 
 def configure_middleware(app):

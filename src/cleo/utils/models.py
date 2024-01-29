@@ -5,8 +5,6 @@ import openai
 import torch
 from tqdm import trange
 
-from ridge.utils import state
-
 
 class BaseEncoder(ABC):
     @abstractmethod
