@@ -34,6 +34,7 @@ from ridge.database.models import (
     Subscription,
     TextToImageModelConfig,
     UserConversationConfig,
+    UserRequests,
     UserSearchModelConfig,
 )
 from ridge.search_filter.date_filter import DateFilter
@@ -282,6 +283,10 @@ def get_user_github_config(user: RidgeUser):
 def get_user_notion_config(user: RidgeUser):
     config = NotionConfig.objects.filter(user=user).first()
     return config
+
+
+def delete_user_requests(window: timedelta = timedelta(days=1)):
+    return UserRequests.objects.filter(created_at__lte=datetime.now(tz=timezone.utc) - window).delete()
 
 
 async def set_text_content_config(user: RidgeUser, object: Type[models.Model], updated_config):
