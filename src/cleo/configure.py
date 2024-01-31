@@ -160,7 +160,7 @@ class UserAuthenticationBackend(AuthenticationBackend):
             if subscribed:
                 return (
                     AuthCredentials(["authenticated", "premium"]),
-                    AuthenticatedRidgeUser(user),
+                    AuthenticatedRidgeUser(user, client_application),
                 )
             return AuthCredentials(["authenticated"]), AuthenticatedRidgeUser(user, client_application)
         if state.anonymous_mode:
