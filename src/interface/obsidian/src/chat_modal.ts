@@ -253,10 +253,13 @@ export class RidgeChatModal extends Modal {
     async getChatHistory(chatBodyEl: Element): Promise<boolean> {
         // Get chat history from Ridge backend
         let chatUrl = `${this.setting.ridgeUrl}/api/chat/history?client=obsidian`;
-        let headers = { "Authorization": `Bearer ${this.setting.ridgeApiKey}` };
 
         try {
-            let response = await fetch(chatUrl, { method: "GET", headers: headers });
+            let response = await fetch(chatUrl, {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${this.setting.ridgeApiKey}` },
+            });
+
             let responseJson: any = await response.json();
 
             if (responseJson.detail) {
@@ -361,7 +364,6 @@ export class RidgeChatModal extends Modal {
         let response = await fetch(chatUrl, {
             method: "GET",
             headers: {
-                "Access-Control-Allow-Origin": "*",
                 "Content-Type": "text/event-stream",
                 "Authorization": `Bearer ${this.setting.ridgeApiKey}`,
             },
@@ -422,7 +424,7 @@ export class RidgeChatModal extends Modal {
         let chatBody = this.contentEl.getElementsByClassName("ridge-chat-body")[0];
 
         let response = await request({
-            url: `${this.setting.ridgeUrl}/api/chat/history?client=web`,
+            url: `${this.setting.ridgeUrl}/api/chat/history?client=obsidian`,
             method: "DELETE",
             headers: { "Authorization": `Bearer ${this.setting.ridgeApiKey}` },
         })
