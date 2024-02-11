@@ -256,6 +256,7 @@ def initialize_content(regenerate: bool, search_type: Optional[SearchType] = Non
 def configure_routes(app):
     # Import APIs here to setup search types before while configuring server
     from ridge.routers.api import api
+    from ridge.routers.api_chat import api_chat
     from ridge.routers.api_config import api_config
     from ridge.routers.auth import auth_router
     from ridge.routers.indexer import indexer
@@ -266,6 +267,7 @@ def configure_routes(app):
     app.include_router(indexer, prefix="/api/v1/index")
     app.include_router(web_client)
     app.include_router(auth_router, prefix="/auth")
+    app.include_router(api_chat, prefix="/api/chat")
 
     if state.billing_enabled:
         from ridge.routers.subscription import subscription_router
