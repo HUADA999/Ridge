@@ -10,6 +10,9 @@ export interface ChatJsonResult {
 export class RidgeChatModal extends Modal {
     result: string;
     setting: RidgeSetting;
+    region: string;
+    city: string;
+    countryName: string;
 
     constructor(app: App, setting: RidgeSetting) {
         super(app);
@@ -17,6 +20,19 @@ export class RidgeChatModal extends Modal {
 
         // Register Modal Keybindings to send user message
         this.scope.register([], 'Enter', async () => { await this.chat() });
+
+
+        fetch("https://ipapi.co/json")
+            .then(response => response.json())
+            .then(data => {
+                this.region = data.region;
+                this.city = data.city;
+                this.countryName = data.country_name;
+            })
+            .catch(err => {
+                console.log(err);
+                return;
+            });
     }
 
     async chat() {
@@ -354,7 +370,7 @@ export class RidgeChatModal extends Modal {
 
         // Get chat response from Ridge backend
         let encodedQuery = encodeURIComponent(query);
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&n=${this.setting.resultsCount}&client=obsidian&stream=true`;
+        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&n=${this.setting.resultsCount}&client=obsidian&stream=true&region=${this.region}&city=${this.city}&country=${this.countryName}`;
         let responseElement = this.createRidgeResponseDiv();
 
         // Temporary status message to indicate that Ridge is thinking
