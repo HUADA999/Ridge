@@ -80,6 +80,20 @@ export class RidgeChatView extends RidgePaneView {
 
         super.onOpen();
 
+        // Construct Content Security Policy
+        let defaultDomains = `'self' ${this.setting.ridgeUrl} https://app.ridge.dev https://assets.ridge.dev`;
+        const defaultSrc = `default-src ${defaultDomains};`;
+        const scriptSrc = `script-src ${defaultDomains} 'unsafe-inline';`;
+        const connectSrc = `connect-src ${this.setting.ridgeUrl} https://ipapi.co/json;`;
+        const styleSrc = `style-src ${defaultDomains} 'unsafe-inline';`;
+        const imgSrc = `img-src ${defaultDomains} data: https://*.ridge.dev https://*.googleusercontent.com;`;
+        const childSrc = `child-src 'none';`;
+        const objectSrc = `object-src 'none';`;
+        const csp = `${defaultSrc} ${scriptSrc} ${connectSrc} ${styleSrc} ${imgSrc} ${childSrc} ${objectSrc}`;
+
+        // Add CSP meta tag to the Ridge Chat modal
+        document.head.createEl("meta", { attr: { "http-equiv": "Content-Security-Policy", "content": `${csp}` } });
+
         // Create area for chat logs
         let chatBodyEl = contentEl.createDiv({ attr: { id: "ridge-chat-body", class: "ridge-chat-body" } });
 
