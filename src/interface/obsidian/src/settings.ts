@@ -8,7 +8,7 @@ export interface RidgeSetting {
     ridgeApiKey: string;
     connectedToBackend: boolean;
     autoConfigure: boolean;
-    lastSyncedFiles: TFile[];
+    lastSync: Map<TFile, number>;
     userEmail: string;
 }
 
@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     ridgeApiKey: '',
     connectedToBackend: false,
     autoConfigure: true,
-    lastSyncedFiles: [],
+    lastSync: new Map(),
     userEmail: '',
 }
 
@@ -132,8 +132,8 @@ export class RidgeSettingTab extends PluginSettingTab {
                     }, 300);
                     this.plugin.registerInterval(progress_indicator);
 
-                    this.plugin.settings.lastSyncedFiles = await updateContentIndex(
-                        this.app.vault, this.plugin.settings, this.plugin.settings.lastSyncedFiles, true
+                    this.plugin.settings.lastSync = await updateContentIndex(
+                        this.app.vault, this.plugin.settings, this.plugin.settings.lastSync, true
                     );
                     new Notice('✅ Updated Ridge index.');
 

@@ -28,17 +28,43 @@ function fileExtensionToMimeType (extension: string): string {
     }
 }
 
-export async function updateContentIndex(vault: Vault, setting: RidgeSetting, lastSyncedFiles: TFile[], regenerate: boolean = false): Promise<TFile[]> {
+function filenameToMimeType (filename: TFile): string {
+    switch (filename.extension) {
+        case 'pdf':
+            return 'application/pdf';
+        case 'png':
+            return 'image/png';
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'md':
+        case 'markdown':
+            return 'text/markdown';
+        case 'org':
+            return 'text/org';
+        default:
+            console.warn(`Unknown file type: ${filename.extension}. Defaulting to text/plain.`);
+            return 'text/plain';
+    }
+}
+
+export async function updateContentIndex(vault: Vault, setting: RidgeSetting, lastSync: Map<TFile, number>, regenerate: boolean = false): Promise<Map<TFile, number>> {
     // Get all markdown, pdf files in the vault
     console.log(`Ridge: Updating Ridge content index...`)
     const files = vault.getFiles().filter(file => file.extension === 'md' || file.extension === 'markdown' || file.extension === 'pdf');
     const binaryFileTypes = ['pdf']
     let countOfFilesToIndex = 0;
     let countOfFilesToDelete = 0;
+    lastSync = lastSync.size > 0 ? lastSync : new Map<TFile, number>();
 
     // Add all files to index as multipart form data
     const fileData = [];
     for (const file of files) {
+        // Only push files that have been modified since last sync if not regenerating
+        if (!regenerate && file.stat.mtime < (lastSync.get(file) ?? 0)){
+            continue;
+        }
+
         countOfFilesToIndex++;
         const encoding = binaryFileTypes.includes(file.extension) ? "binary" : "utf8";
         const mimeType = fileExtensionToMimeType(file.extension) + (encoding === "utf8" ? "; charset=UTF-8" : "");
@@ -47,14 +73,18 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
     }
 
     // Add any previously synced files to be deleted to multipart form data
-    for (const lastSyncedFile of lastSyncedFiles) {
+    let filesToDelete: TFile[] = [];
+    for (const lastSyncedFile of lastSync.keys()) {
         if (!files.includes(lastSyncedFile)) {
             countOfFilesToDelete++;
-            fileData.push({blob: new Blob([]), path: lastSyncedFile.path});
+            let fileObj = new Blob([""], { type: filenameToMimeType(lastSyncedFile) });
+            fileData.push({blob: fileObj, path: lastSyncedFile.path});
+            filesToDelete.push(lastSyncedFile);
         }
     }
 
     // Iterate through all indexable files in vault, 1000 at a time
+    let responses: string[]  = [];
     let error_message = null;
     for (let i = 0; i < fileData.length; i += 1000) {
         const filesGroup = fileData.slice(i, i + 1000);
@@ -79,8 +109,23 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
             } else {
                 error_message = `❗️Failed to sync your content with Ridge server. Raise issue on Ridge Discord or Github\nError: ${response.statusText}`;
             }
+        } else {
+            responses.push(await response.text());
         }
     }
+
+    // Update last sync time for each successfully indexed file
+   files
+    .filter(file => responses.find(response => response.includes(file.path)))
+    .reduce((newSync, file) => {
+        newSync.set(file, new Date().getTime());
+        return newSync;
+    }, lastSync);
+
+    // Remove files that were deleted from last sync
+    filesToDelete
+    .filter(file => responses.find(response => response.includes(file.path)))
+    .forEach(file => lastSync.delete(file));
 
     if (error_message) {
         new Notice(error_message);
@@ -88,7 +133,7 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
         console.log(`✅ Refreshed Ridge content index. Updated: ${countOfFilesToIndex} files, Deleted: ${countOfFilesToDelete} files.`);
     }
 
-    return files;
+    return lastSync;
 }
 
 export async function createNote(name: string, newLeaf = false): Promise<void> {
