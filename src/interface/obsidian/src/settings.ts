@@ -8,7 +8,6 @@ export interface RidgeSetting {
     ridgeApiKey: string;
     connectedToBackend: boolean;
     autoConfigure: boolean;
-    lastSyncedFiles: TFile[];  // Deprecated setting, will be removed in future
     lastSync: Map<TFile, number>;
     userEmail: string;
 }
@@ -19,7 +18,6 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     ridgeApiKey: '',
     connectedToBackend: false,
     autoConfigure: true,
-    lastSyncedFiles: [],
     lastSync: new Map(),
     userEmail: '',
 }
