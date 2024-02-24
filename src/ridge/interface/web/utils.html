@@ -1,7 +1,7 @@
 {% macro heading_pane(user_photo, username, is_active, has_documents) -%}
     <div class="ridge-header">
         <a class="ridge-logo" href="/">
-            <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
+            <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways-500.png?v={{ ridge_version }}" alt="Ridge"></img>
         </a>
         <nav class="ridge-nav">
             {% if has_documents %}
