@@ -87,17 +87,22 @@ const config = {
         items: [
           {
             href: 'https://github.com/ridge-ai/ridge',
-            label: '📖 GitHub',
+            label: 'GitHub',
             position: 'right',
           },
           {
             href: 'https://app.ridge.dev/login',
-            label: '🌍 Cloud',
+            label: 'Cloud',
             position: 'right',
           },
           {
             href: 'https://discord.gg/BDgyabRM6e',
-            label: '💬 Discord',
+            label: 'Discord',
+            position: 'right',
+          },
+          {
+            href: 'https://blog.ridge.dev',
+            label: 'Blog',
             position: 'right',
           },
         ],
@@ -162,16 +167,16 @@ const config = {
           {
             title: 'More',
             items: [
-              // {
-              //   label: 'Blog',
-              //   to: '/blog',
-              // },
+              {
+                href: 'https://blog.ridge.dev',
+                label: 'Blog',
+              },
               {
                 label: 'Ridge Cloud',
                 href: 'https://app.ridge.dev/login',
               },
               {
-                label: 'Open Source',
+                label: 'GitHub',
                 href: 'https://github.com/ridge-ai/ridge',
               },
               {
