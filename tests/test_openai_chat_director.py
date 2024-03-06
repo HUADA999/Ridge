@@ -8,7 +8,10 @@ from freezegun import freeze_time
 from ridge.database.models import RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.utils import message_to_log
-from ridge.routers.helpers import aget_relevant_information_sources
+from ridge.routers.helpers import (
+    aget_relevant_information_sources,
+    aget_relevant_output_modes,
+)
 from tests.helpers import ConversationFactory
 
 # Initialize variables for tests
