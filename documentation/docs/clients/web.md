@@ -18,7 +18,18 @@ Without any desktop clients, you can start chatting with Ridge on the web. Bear 
   - **Incremental**: Incremental search for a fast, search-as-you-type experience
 
 ## Setup
-No setup required. The Ridge web app is the default interface to Ridge. You can access it from any web browser. Try it on [Ridge Cloud](https://app.ridge.dev)
+No setup required. The Ridge web app is the default Ridge client. You can access it from any web browser. Try it on [Ridge Cloud](https://app.ridge.dev)
+
+### Install on Phone
+You can optionally install Ridge as a [Progressive Web App (PWA)](https://web.dev/learn/pwa/installation). This makes it quick and easy to access Ridge on your phone.
+1. Login to [Ridge Cloud](https://app.ridge.dev) or your self-hosted Ridge server from the web browser (prefer Chrome/Edge) on your phone
+2. Open the 3 dot menu on the browser and click the "Add to Home screen" option
+3. Click "Install" on the next screen to add the Ridge icon to your phone Home screen
+
+**Process via Screenshots**
+| Step 1 | Step 2 | Step 3|
+|:---:|:---:|:---:|
+| ![](/img/pwa_install_1.png) | ![](/img/pwa_install_2.png) | ![](/img/pwa_install_3.png) |
 
 ## Interface
 
