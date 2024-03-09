@@ -20,6 +20,11 @@ Without any desktop clients, you can start chatting with Ridge on the web. Bear 
 ## Setup
 No setup required. The Ridge web app is the default Ridge client. You can access it from any web browser. Try it on [Ridge Cloud](https://app.ridge.dev)
 
+## Upload Documents
+You can upload documents to Ridge from the web interface, one at a time. This is useful for uploading documents from your phone or tablet. To upload a document:
+1. You can drag and drop the document into the chat window.
+2. Or click the paperclip icon in the chat window and select the document from your file system.
+
 ### Install on Phone
 You can optionally install Ridge as a [Progressive Web App (PWA)](https://web.dev/learn/pwa/installation). This makes it quick and easy to access Ridge on your phone.
 1. Login to [Ridge Cloud](https://app.ridge.dev) or your self-hosted Ridge server from the web browser (prefer Chrome/Edge) on your phone
