@@ -118,7 +118,7 @@ def construct_chat_history(conversation_history: dict, n: int = 4) -> str:
         if chat["by"] == "ridge" and chat["intent"].get("type") == "remember":
             chat_history += f"User: {chat['intent']['query']}\n"
             chat_history += f"Ridge: {chat['message']}\n"
-        elif chat["by"] == "ridge" and chat["intent"].get("type") == "text-to-image":
+        elif chat["by"] == "ridge" and ("text-to-image" in chat["intent"].get("type")):
             chat_history += f"User: {chat['intent']['query']}\n"
             chat_history += f"Ridge: [generated image redacted for space]\n"
     return chat_history
