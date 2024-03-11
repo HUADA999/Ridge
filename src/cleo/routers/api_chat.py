@@ -14,7 +14,7 @@ from ridge.database.adapters import ConversationAdapters, EntryAdapters, aget_us
 from ridge.database.models import RidgeUser
 from ridge.processor.conversation.prompts import help_message, no_entries_found
 from ridge.processor.conversation.utils import save_to_conversation_log
-from ridge.processor.tools.online_search import search_with_google
+from ridge.processor.tools.online_search import search_online
 from ridge.routers.api import extract_references_and_questions
 from ridge.routers.helpers import (
     ApiUserRateLimiter,
@@ -289,7 +289,7 @@ async def chat(
 
     if ConversationCommand.Online in conversation_commands:
         try:
-            online_results = await search_with_google(defiltered_query, meta_log, location)
+            online_results = await search_online(defiltered_query, meta_log, location)
         except ValueError as e:
             return StreamingResponse(
                 iter(["Please set your SERPER_DEV_API_KEY to get started with online searches 🌐"]),
