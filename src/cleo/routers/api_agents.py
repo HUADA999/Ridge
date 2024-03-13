@@ -1,0 +1,39 @@
+import json
+import logging
+
+from fastapi import APIRouter, Request
+from fastapi.requests import Request
+from fastapi.responses import Response
+
+from ridge.database.adapters import AgentAdapters
+from ridge.database.models import RidgeUser
+from ridge.routers.helpers import CommonQueryParams
+
+# Initialize Router
+logger = logging.getLogger(__name__)
+
+
+api_agents = APIRouter()
+
+
+@api_agents.get("/", response_class=Response)
+async def all_agents(
+    request: Request,
+    common: CommonQueryParams,
+) -> Response:
+    user: RidgeUser = request.user.object if request.user.is_authenticated else None
+    agents = await AgentAdapters.aget_all_accessible_agents(user)
+    agents_packet = list()
+    for agent in agents:
+        agents_packet.append(
+            {
+                "slug": agent.slug,
+                "avatar": agent.avatar,
+                "name": agent.name,
+                "tuning": agent.tuning,
+                "public": agent.public,
+                "creator": agent.creator.username if agent.creator else None,
+                "managed_by_admin": agent.managed_by_admin,
+            }
+        )
+    return Response(content=json.dumps(agents_packet), media_type="application/json", status_code=200)
