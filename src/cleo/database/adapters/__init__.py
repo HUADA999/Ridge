@@ -41,7 +41,7 @@ from ridge.search_filter.date_filter import DateFilter
 from ridge.search_filter.file_filter import FileFilter
 from ridge.search_filter.word_filter import WordFilter
 from ridge.utils import state
-from ridge.utils.config import GPT4AllProcessorModel
+from ridge.utils.config import OfflineChatProcessorModel
 from ridge.utils.helpers import generate_random_name, is_none_or_empty
 
 
@@ -610,8 +610,8 @@ class ConversationAdapters:
             conversation_config = ConversationAdapters.get_default_conversation_config()
 
         if offline_chat_config and offline_chat_config.enabled and conversation_config.model_type == "offline":
-            if state.gpt4all_processor_config is None or state.gpt4all_processor_config.loaded_model is None:
-                state.gpt4all_processor_config = GPT4AllProcessorModel(conversation_config.chat_model)
+            if state.offline_chat_processor_config is None or state.offline_chat_processor_config.loaded_model is None:
+                state.offline_chat_processor_config = OfflineChatProcessorModel(conversation_config.chat_model)
 
             return conversation_config
 
