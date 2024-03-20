@@ -35,7 +35,7 @@ from ridge.search_filter.file_filter import FileFilter
 from ridge.search_filter.word_filter import WordFilter
 from ridge.search_type import image_search, text_search
 from ridge.utils import constants, state
-from ridge.utils.config import GPT4AllProcessorModel
+from ridge.utils.config import OfflineChatProcessorModel
 from ridge.utils.helpers import ConversationCommand, timer
 from ridge.utils.rawconfig import LocationData, SearchResponse
 from ridge.utils.state import SearchType
@@ -318,10 +318,10 @@ async def extract_references_and_questions(
             using_offline_chat = True
             default_offline_llm = await ConversationAdapters.get_default_offline_llm()
             chat_model = default_offline_llm.chat_model
-            if state.gpt4all_processor_config is None:
-                state.gpt4all_processor_config = GPT4AllProcessorModel(chat_model=chat_model)
+            if state.offline_chat_processor_config is None:
+                state.offline_chat_processor_config = OfflineChatProcessorModel(chat_model=chat_model)
 
-            loaded_model = state.gpt4all_processor_config.loaded_model
+            loaded_model = state.offline_chat_processor_config.loaded_model
 
             inferred_queries = extract_questions_offline(
                 defiltered_query,
