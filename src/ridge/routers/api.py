@@ -13,7 +13,7 @@ from fastapi.requests import Request
 from fastapi.responses import Response
 from starlette.authentication import requires
 
-from ridge.configure import configure_server, initialize_content
+from ridge.configure import initialize_content
 from ridge.database.adapters import (
     ConversationAdapters,
     EntryAdapters,
