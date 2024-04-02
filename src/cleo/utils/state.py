@@ -9,7 +9,7 @@ from whisper import Whisper
 
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.utils import config as utils_config
-from ridge.utils.config import ContentIndex, GPT4AllProcessorModel, SearchModels
+from ridge.utils.config import ContentIndex, OfflineChatProcessorModel, SearchModels
 from ridge.utils.helpers import LRU, get_device
 from ridge.utils.rawconfig import FullConfig
 
@@ -20,7 +20,7 @@ embeddings_model: Dict[str, EmbeddingsModel] = None
 cross_encoder_model: Dict[str, CrossEncoderModel] = None
 content_index = ContentIndex()
 openai_client: OpenAI = None
-gpt4all_processor_config: GPT4AllProcessorModel = None
+offline_chat_processor_config: OfflineChatProcessorModel = None
 whisper_model: Whisper = None
 config_file: Path = None
 verbose: int = 0
