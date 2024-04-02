@@ -37,9 +37,7 @@ Welcome to the Ridge Docs! This is the best place to get setup and explore Ridge
 - [Read these instructions](/get-started/setup) to self-host a private instance of Ridge
 
 ## At a Glance
-<img src="https://docs.ridge.dev/img/ridge_search_on_web.png" width="400px" />
-<span>&nbsp;&nbsp;</span>
-<img src="https://docs.ridge.dev/img/ridge_chat_on_web.png" width="400px" />
+![demo_chat](/img/using_ridge_for_studying.gif)
 
 #### [Search](/features/search)
   - **Natural**: Use natural language queries to quickly find relevant notes and documents.
