@@ -1,3 +1,4 @@
+import logging
 import math
 import random
 import secrets
@@ -45,6 +46,8 @@ from ridge.search_filter.word_filter import WordFilter
 from ridge.utils import state
 from ridge.utils.config import OfflineChatProcessorModel
 from ridge.utils.helpers import generate_random_name, is_none_or_empty
+
+logger = logging.getLogger(__name__)
 
 
 class SubscriptionState(Enum):
@@ -436,6 +439,9 @@ class AgentAdapters:
     @staticmethod
     def create_default_agent():
         default_conversation_config = ConversationAdapters.get_default_conversation_config()
+        if default_conversation_config is None:
+            logger.info("No default conversation config found, skipping default agent creation")
+            return None
         default_personality = prompts.personality.format(current_date="placeholder")
 
         agent = Agent.objects.filter(name=AgentAdapters.DEFAULT_AGENT_NAME).first()
