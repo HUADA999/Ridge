@@ -2,6 +2,8 @@
 
 The Notion integration allows you to search/chat with your Notion workspaces. [Notion](https://notion.so/) is a platform people use for taking notes, especially for collaboration.
 
+Go to https://app.ridge.dev/config to connect your Notion workspace(s) to Ridge.
+
 ![notion_integration](/img/notion_integration.gif)
 
 
