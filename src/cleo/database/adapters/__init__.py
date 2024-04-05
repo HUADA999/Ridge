@@ -259,6 +259,10 @@ async def get_user_by_email(email: str) -> RidgeUser:
     return await RidgeUser.objects.filter(email=email).afirst()
 
 
+async def aget_user_by_uuid(uuid: str) -> RidgeUser:
+    return await RidgeUser.objects.filter(uuid=uuid).afirst()
+
+
 async def get_user_by_token(token: dict) -> RidgeUser:
     google_user = await GoogleUser.objects.filter(sub=token.get("sub")).select_related("user").afirst()
     if not google_user:
