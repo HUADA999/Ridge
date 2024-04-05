@@ -34,7 +34,7 @@ from ridge.database.adapters import (
 )
 from ridge.database.models import ClientApplication, RidgeUser, Subscription
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
-from ridge.routers.indexer import configure_content, configure_search, load_content
+from ridge.routers.indexer import configure_content, configure_search
 from ridge.routers.twilio import is_twilio_enabled
 from ridge.utils import constants, state
 from ridge.utils.config import SearchType
@@ -245,16 +245,12 @@ def initialize_content(regenerate: bool, search_type: Optional[SearchType] = Non
     if state.search_models:
         try:
             if init:
-                logger.info("📬 Initializing content index...")
-                state.content_index = load_content(state.config.content_type, state.content_index, state.search_models)
+                logger.info("📬 No-op...")
             else:
                 logger.info("📬 Updating content index...")
                 all_files = collect_files(user=user)
-                state.content_index, status = configure_content(
-                    state.content_index,
-                    state.config.content_type,
+                status = configure_content(
                     all_files,
-                    state.search_models,
                     regenerate,
                     search_type,
                     user=user,
@@ -272,6 +268,7 @@ def configure_routes(app):
     from ridge.routers.api_chat import api_chat
     from ridge.routers.api_config import api_config
     from ridge.routers.indexer import indexer
+    from ridge.routers.notion import notion_router
     from ridge.routers.web_client import web_client
 
     app.include_router(api, prefix="/api")
@@ -279,6 +276,7 @@ def configure_routes(app):
     app.include_router(api_agents, prefix="/api/agents")
     app.include_router(api_config, prefix="/api/config")
     app.include_router(indexer, prefix="/api/v1/index")
+    app.include_router(notion_router, prefix="/api/notion")
     app.include_router(web_client)
 
     if not state.anonymous_mode:
@@ -311,13 +309,9 @@ def update_search_index():
         logger.info("📬 Updating content index via Scheduler")
         for user in get_all_users():
             all_files = collect_files(user=user)
-            state.content_index, success = configure_content(
-                state.content_index, state.config.content_type, all_files, state.search_models, user=user
-            )
+            success = configure_content(all_files, user=user)
         all_files = collect_files(user=None)
-        state.content_index, success = configure_content(
-            state.content_index, state.config.content_type, all_files, state.search_models, user=None
-        )
+        success = configure_content(all_files, user=None)
         if not success:
             raise RuntimeError("Failed to update content index")
         logger.info("📪 Content index updated via Scheduler")
