@@ -351,6 +351,17 @@ async function deleteAllFiles () {
     }
 }
 
+// Fetch user info from Ridge server
+async function getUserInfo() {
+    const getUserInfoURL = `${store.get('hostURL') || RIDGE_URL}/api/v1/user?client=desktop`;
+    const headers = { 'Authorization': `Bearer ${store.get('ridgeToken')}` };
+    try {
+        let response = await axios.get(getUserInfoURL, { headers });
+        return response.data;
+    } catch (err) {
+        console.error(err);
+    }
+}
 
 let firstRun = true;
 let win = null;
@@ -466,6 +477,7 @@ app.whenReady().then(() => {
 
     ipcMain.handle('setToken', setToken);
     ipcMain.handle('getToken', getToken);
+    ipcMain.handle('getUserInfo', getUserInfo);
 
     ipcMain.handle('syncData', (event, regenerate) => {
         syncData(regenerate);

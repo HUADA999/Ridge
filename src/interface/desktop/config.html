@@ -9,19 +9,20 @@
         <link rel="stylesheet" href="./assets/ridge.css">
     </head>
     <script src="./utils.js"></script>
+    <script>
+        window.addEventListener("DOMContentLoaded", async() => {
+            // Setup the header pane
+            document.getElementById("ridge-header").innerHTML = await populateHeaderPane();
+            // Setup the nav menu
+            document.getElementById("profile-picture").addEventListener("click", toggleNavMenu);
+            // Set the active nav pane
+            document.getElementById("settings-nav")?.classList.add("ridge-nav-selected");
+        })
+    </script>
 
     <body>
         <!--Add Header Logo and Nav Pane-->
-        <div class="ridge-header">
-            <a class="ridge-logo" href="./chat.html">
-                <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
-            </a>
-            <nav class="ridge-nav">
-                <a class="ridge-nav" href="./chat.html">💬 Chat</a>
-                <a class="ridge-nav" href="./search.html">🔎 Search</a>
-                <a class="ridge-nav ridge-nav-selected" href="./config.html">⚙️ Settings</a>
-            </nav>
-        </div>
+        <div id="ridge-header" class="ridge-header"></div>
         <div class="section-cards">
             <div class="card-description-row">
                 <div class="card configuration">

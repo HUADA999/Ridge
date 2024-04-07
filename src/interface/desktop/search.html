@@ -246,6 +246,16 @@
             window.history.pushState({}, "", url.href);
         }
 
+        window.addEventListener("DOMContentLoaded", async() => {
+            // Setup the header pane
+            document.getElementById("ridge-header").innerHTML = await populateHeaderPane();
+            // Setup the nav menu
+            document.getElementById("profile-picture").addEventListener("click", toggleNavMenu);
+            // Set the active nav pane
+            document.getElementById("search-nav")?.classList.add("ridge-nav-selected");
+        })
+
+
         window.addEventListener("load", async function() {
             // Dynamically populate type dropdown based on enabled content types and type passed as URL query parameter
             await populate_type_dropdown();
@@ -259,16 +269,7 @@
 
     <body>
         <!--Add Header Logo and Nav Pane-->
-        <div class="ridge-header">
-            <a class="ridge-logo" href="./index.html">
-                <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
-            </a>
-            <nav class="ridge-nav">
-                <a class="ridge-nav" href="./chat.html">💬 Chat</a>
-                <a class="ridge-nav ridge-nav-selected" href="./search.html">🔎 Search</a>
-                <a class="ridge-nav" href="./config.html">⚙️ Settings</a>
-            </nav>
-        </div>
+        <div id="ridge-header" class="ridge-header"></div>
 
         <!--Add Text Box To Enter Query, Trigger Incremental Search OnChange -->
         <input type="text" id="query" class="option" onkeyup=incrementalSearch(event) autofocus="autofocus" placeholder="Search your knowledge base using natural language">
