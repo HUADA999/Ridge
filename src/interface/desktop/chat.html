@@ -629,11 +629,21 @@
             document.getElementById("chat-body").scrollTop = document.getElementById("chat-body").scrollHeight;
         }
 
+        window.addEventListener("DOMContentLoaded", async() => {
+            // Setup the header pane
+            document.getElementById("ridge-header").innerHTML = await populateHeaderPane();
+            // Setup the nav menu
+            document.getElementById("profile-picture").addEventListener("click", toggleNavMenu);
+            // Set the active nav pane
+            document.getElementById("chat-nav")?.classList.add("ridge-nav-selected");
+        })
+
         window.addEventListener('load', async() => {
             await loadChat();
         });
 
         async function loadChat() {
+            // Load chat history
             const hostURL = await window.hostURLAPI.getURL();
             const ridgeToken = await window.tokenAPI.getToken();
             const headers = { 'Authorization': `Bearer ${ridgeToken}` };
@@ -1065,20 +1075,10 @@
         }
     </script>
     <body>
-        <div id="ridge-empty-container" class="ridge-empty-container">
-        </div>
+        <div id="ridge-empty-container" class="ridge-empty-container"></div>
 
         <!--Add Header Logo and Nav Pane-->
-        <div class="ridge-header">
-            <a class="ridge-logo" href="/">
-                <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
-            </a>
-            <nav class="ridge-nav">
-                <a class="ridge-nav ridge-nav-selected" href="./chat.html">💬 Chat</a>
-                <a class="ridge-nav" href="./search.html">🔎 Search</a>
-                <a class="ridge-nav" href="./config.html">⚙️ Settings</a>
-            </nav>
-        </div>
+        <div id="ridge-header" class="ridge-header"></div>
 
         <div id="chat-section-wrapper">
             <div id="side-panel-wrapper">
