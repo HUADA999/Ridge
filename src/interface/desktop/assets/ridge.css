@@ -117,6 +117,14 @@ a.ridge-logo {
 a.ridge-nav-selected {
     background-color: var(--primary);
 }
+.nav-icon {
+    width: 24px;
+    height: 24px;
+}
+#agents-icon {
+    width: 30px;
+    height: 30px;
+}
 span.ridge-nav-item-text {
     padding-left: 8px;
 }
