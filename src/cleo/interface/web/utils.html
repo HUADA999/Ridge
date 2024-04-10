@@ -4,10 +4,16 @@
             <img class="ridge-logo" src="/static/assets/icons/ridge-logo-sideways-500.png?v={{ ridge_version }}" alt="Ridge"></img>
         </a>
         <nav class="ridge-nav">
-            <a id="chat-nav" class="ridge-nav" href="/chat">💬 <span class="ridge-nav-item-text">Chat</span></a>
-            <a id="agents-nav" class="ridge-nav" href="/agents">🤖 <span class="ridge-nav-item-text">Agents</span></a>
+            <a id="chat-nav" class="ridge-nav" href="/chat">
+                <img class="nav-icon" src="/static/assets/icons/chat.svg" alt="Chat">
+                <span class="ridge-nav-item-text">Chat</span></a>
+            <a id="agents-nav" class="ridge-nav" href="/agents">
+                <img id="agents-icon" class="nav-icon" src="/static/assets/icons/agents.svg" alt="Agents">
+                <span class="ridge-nav-item-text">Agents</span></a>
             {% if has_documents %}
-            <a id="search-nav" class="ridge-nav" href="/search">🔎 <span class="ridge-nav-item-text">Search</span></a>
+            <a id="search-nav" class="ridge-nav" href="/search">
+                <img class="nav-icon" src="/static/assets/icons/search.svg" alt="Search">
+                <span class="ridge-nav-item-text">Search</span></a>
             {% endif %}
             <!-- Dropdown Menu -->
             {% if username %}

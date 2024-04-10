@@ -59,8 +59,11 @@ async function populateHeaderPane() {
             <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
         </a>
         <nav class="ridge-nav">
-            <a id="chat-nav" class="ridge-nav" href="./chat.html">💬 <span class="ridge-nav-item-text">Chat</span></a>
-            ${has_documents ? '<a id="search-nav" class="ridge-nav" href="./search.html">🔎 <span class="ridge-nav-item-text">Search</span></a>' : ''}
+            <a id="chat-nav" class="ridge-nav" href="./chat.html">
+              <img class="nav-icon" src="./assets/icons/chat.svg" alt="Chat">
+              <span class="ridge-nav-item-text">Chat</span>
+            </a>
+            ${has_documents ? '<a id="search-nav" class="ridge-nav" href="./search.html"><img class="nav-icon" src="./assets/icons/search.svg" alt="Search"> <span class="ridge-nav-item-text">Search</span></a>' : ''}
             ${username ? `
                 <div id="ridge-nav-menu-container" class="ridge-nav dropdown">
                     ${user_photo && user_photo != "None" ? `
