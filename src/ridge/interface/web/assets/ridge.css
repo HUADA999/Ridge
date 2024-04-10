@@ -76,6 +76,9 @@
     padding: 16px 0;
     margin: 0;
 }
+.ridge-header {
+    align-items: center;
+}
 .ridge-footer {
     margin: 16px 0 0 0;
 }
@@ -111,6 +114,18 @@ a.ridge-logo {
 }
 .ridge-nav-selected {
     background-color: var(--primary);
+}
+.nav-icon {
+    width: 24px;
+    height: 24px;
+}
+#agents-icon {
+    width: 30px;
+    height: 30px;
+}
+span.ridge-nav-item-text {
+    padding-top: 6px;
+    padding-left: 8px;
 }
 img.ridge-logo {
     width: min(60vw, 90px);
@@ -177,7 +192,8 @@ img.ridge-logo {
     font-size: 20px;
     box-sizing: unset;
     width: 40px;
-    height: 40px;
+    height: 35px;
+    padding-top: 8px
 }
 .subscribed {
     border: 3px solid var(--primary-hover);
@@ -211,5 +227,11 @@ img.ridge-logo {
     nav.ridge-nav {
         grid-gap: 0px;
         justify-content: space-between;
+    }
+    a.ridge-nav {
+        padding: 0 16px;
+    }
+    span.ridge-nav-item-text {
+        display: none;
     }
 }
