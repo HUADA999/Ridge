@@ -117,7 +117,7 @@ async def auth(request: Request):
     if ridge_user:
         request.session["user"] = dict(idinfo)
 
-        if datetime.timedelta(minutes=3) > (datetime.datetime.now(datetime.UTC) - ridge_user.date_joined):
+        if datetime.timedelta(minutes=3) > (datetime.datetime.now(datetime.timezone.utc) - ridge_user.date_joined):
             asyncio.create_task(send_welcome_email(idinfo["name"], idinfo["email"]))
             update_telemetry_state(
                 request=request,
