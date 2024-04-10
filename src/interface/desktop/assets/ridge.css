@@ -126,6 +126,7 @@ a.ridge-nav-selected {
     height: 30px;
 }
 span.ridge-nav-item-text {
+    padding-top: 6px;
     padding-left: 8px;
 }
 img.ridge-logo {
@@ -193,7 +194,8 @@ img.ridge-logo {
     font-size: 20px;
     box-sizing: unset;
     width: 40px;
-    height: 40px;
+    height: 35px;
+    padding-top: 8px;
 }
 .subscribed {
     border: 3px solid var(--primary-hover);
