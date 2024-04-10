@@ -1,3 +1,5 @@
+import asyncio
+import datetime
 import logging
 import os
 from typing import Optional
@@ -15,6 +17,7 @@ from ridge.database.adapters import (
     get_ridge_tokens,
     get_or_create_user,
 )
+from ridge.routers.email import send_welcome_email
 from ridge.routers.helpers import update_telemetry_state
 from ridge.utils import state
 
@@ -110,10 +113,12 @@ async def auth(request: Request):
     except OAuthError as error:
         return HTMLResponse(f"<h1>{error.error}</h1>")
     ridge_user = await get_or_create_user(idinfo)
+
     if ridge_user:
         request.session["user"] = dict(idinfo)
 
-        if not ridge_user.last_login:
+        if datetime.timedelta(minutes=3) > (datetime.datetime.now(datetime.UTC) - ridge_user.date_joined):
+            asyncio.create_task(send_welcome_email(idinfo["name"], idinfo["email"]))
             update_telemetry_state(
                 request=request,
                 telemetry_type="api",
