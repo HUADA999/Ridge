@@ -134,7 +134,7 @@ python -m pip install ridge-assistant
  # CPU
  python -m pip install ridge-assistant
  # NVIDIA (CUDA) GPU
- CMAKE_ARGS="DLLAMA_CUBLAS=on" FORCE_CMAKE=1 python -m pip install ridge-assistant
+ CMAKE_ARGS="DLLAMA_CUDA=on" FORCE_CMAKE=1 python -m pip install ridge-assistant
  # AMD (ROCm) GPU
  CMAKE_ARGS="-DLLAMA_HIPBLAS=on" FORCE_CMAKE=1 python -m pip install ridge-assistant
  # VULCAN GPU
