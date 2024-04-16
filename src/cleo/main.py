@@ -14,7 +14,7 @@ import threading
 import warnings
 from importlib.metadata import version
 
-from ridge.utils.helpers import in_debug_mode
+from ridge.utils.helpers import in_debug_mode, is_env_var_true
 
 # Ignore non-actionable warnings
 warnings.filterwarnings("ignore", message=r"snapshot_download.py has been made private", category=FutureWarning)
@@ -73,7 +73,8 @@ app.add_middleware(
         "http://localhost",  # To allow access from Obsidian Android app
         "http://localhost:*",
         "http://127.0.0.1:*",
-        f"https://{RIDGE_DOMAIN}",
+        f"https://{RIDGE_DOMAIN}" if not is_env_var_true("RIDGE_NO_HTTPS") else f"http://{RIDGE_DOMAIN}",
+        f"https://{RIDGE_DOMAIN}:*" if not is_env_var_true("RIDGE_NO_HTTPS") else f"http://{RIDGE_DOMAIN}:*",
         "app://ridge.dev",
     ],
     allow_credentials=True,
