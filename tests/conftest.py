@@ -30,12 +30,7 @@ from ridge.utils import fs_syncer, state
 from ridge.utils.config import SearchModels
 from ridge.utils.constants import web_directory
 from ridge.utils.helpers import resolve_absolute_path
-from ridge.utils.rawconfig import (
-    ContentConfig,
-    ImageContentConfig,
-    ImageSearchConfig,
-    SearchConfig,
-)
+from ridge.utils.rawconfig import ContentConfig, ImageSearchConfig, SearchConfig
 from tests.helpers import (
     ChatModelOptionsFactory,
     OfflineChatProcessorConversationConfigFactory,
@@ -223,13 +218,6 @@ def content_config(tmp_path_factory, search_models: SearchModels, default_user: 
 
     # Generate Image Embeddings from Test Images
     content_config = ContentConfig()
-    content_config.image = ImageContentConfig(
-        input_filter=None,
-        input_directories=["tests/data/images"],
-        embeddings_file=content_dir.joinpath("image_embeddings.pt"),
-        batch_size=1,
-        use_xmp_metadata=False,
-    )
 
     LocalOrgConfig.objects.create(
         input_files=None,
