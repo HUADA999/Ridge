@@ -17,13 +17,22 @@ from typing import (
     Tuple,
     Union,
 )
+from urllib.parse import parse_qs, urlencode
 
 import openai
+import requests
 from fastapi import Depends, Header, HTTPException, Request, UploadFile
 from PIL import Image
 from starlette.authentication import has_required_scope
+from starlette.requests import URL
 
-from ridge.database.adapters import AgentAdapters, ConversationAdapters, EntryAdapters
+from ridge.database.adapters import (
+    AgentAdapters,
+    ConversationAdapters,
+    EntryAdapters,
+    create_ridge_token,
+    get_ridge_tokens,
+)
 from ridge.database.models import (
     ChatModelOptions,
     ClientApplication,
@@ -779,3 +788,27 @@ class CommonQueryParamsClass:
 
 
 CommonQueryParams = Annotated[CommonQueryParamsClass, Depends()]
+
+
+def scheduled_chat(query, user: RidgeUser, calling_url: URL):
+    # Construct the URL, header for the chat API
+    scheme = "http" if calling_url.scheme == "http" or calling_url.scheme == "ws" else "https"
+    # Replace the original scheduling query with the scheduled query
+    query_dict = parse_qs(calling_url.query)
+    query_dict["q"] = [query]
+    # Convert the dictionary back into a query string
+    scheduled_query = urlencode(query_dict, doseq=True)
+    url = f"{scheme}://{calling_url.netloc}/api/chat?{scheduled_query}"
+
+    headers = {"User-Agent": "Ridge"}
+    if not state.anonymous_mode:
+        # Add authorization request header in non-anonymous mode
+        token = get_ridge_tokens(user)
+        if is_none_or_empty(token):
+            token = create_ridge_token(user)
+        else:
+            token = token[0]
+        headers["Authorization"] = f"Bearer {token}"
+
+    # Call the chat API endpoint with authenticated user token and query
+    return requests.get(url, headers=headers)
