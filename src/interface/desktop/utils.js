@@ -59,6 +59,17 @@ async function populateHeaderPane() {
             <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
         </a>
         <nav class="ridge-nav">
+        ${
+            userInfo && userInfo.email
+              ? `<div class="ridge-status-box">
+              <span class="ridge-status-connected"></span>
+               <span class="ridge-status-text">Connected to server</span>
+               </div>`
+              : `<div class="ridge-status-box">
+              <span class="ridge-status-not-connected"></span>
+               <span class="ridge-status-text">Not connected to server</span>
+               </div>`
+          }
             <a id="chat-nav" class="ridge-nav" href="./chat.html">
               <img class="nav-icon" src="./assets/icons/chat.svg" alt="Chat">
               <span class="ridge-nav-item-text">Chat</span>

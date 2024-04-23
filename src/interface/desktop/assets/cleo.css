@@ -89,7 +89,37 @@ nav.ridge-nav {
     grid-auto-flow: column;
     grid-gap: 32px;
     justify-self: right;
+    align-items: center;
+  }
+
+  .ridge-status-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    gap: 4px;
+    -webkit-app-region: no-drag;
 }
+
+  .ridge-status-box .ridge-status-connected {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background-color: rgb(90, 235, 90);
+  }
+  .ridge-status-box .ridge-status-not-connected {
+    height: 12px;
+    width: 12px;
+    border-radius: 50%;
+    background-color: rgb(235, 90, 90);
+  }
+
+  .ridge-status-box .ridge-status-text {
+    display: none;
+}
+.ridge-status-box:hover .ridge-status-text {
+    display: block;
+  }
 
 a.ridge-nav {
     display: flex;
