@@ -5,7 +5,6 @@ from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import (
     ChatModelOptions,
     RidgeUser,
-    OfflineChatProcessorConversationConfig,
     OpenAIProcessorConversationConfig,
     SpeechToTextModelOptions,
     TextToImageModelConfig,
@@ -35,7 +34,6 @@ def initialization():
             use_offline_model = input("Use offline chat model? (y/n): ")
             if use_offline_model == "y":
                 logger.info("🗣️ Setting up offline chat model")
-                OfflineChatProcessorConversationConfig.objects.create(enabled=True)
 
                 offline_chat_model = input(
                     f"Enter the offline chat model you want to use. See HuggingFace for available GGUF models (default: {default_offline_chat_model}): "

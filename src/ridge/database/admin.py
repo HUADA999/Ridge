@@ -14,7 +14,6 @@ from ridge.database.models import (
     GithubConfig,
     RidgeUser,
     NotionConfig,
-    OfflineChatProcessorConversationConfig,
     OpenAIProcessorConversationConfig,
     ReflectiveQuestion,
     SearchModelConfig,
@@ -47,7 +46,6 @@ admin.site.register(RidgeUser, RidgeUserAdmin)
 admin.site.register(ChatModelOptions)
 admin.site.register(SpeechToTextModelOptions)
 admin.site.register(OpenAIProcessorConversationConfig)
-admin.site.register(OfflineChatProcessorConversationConfig)
 admin.site.register(SearchModelConfig)
 admin.site.register(Subscription)
 admin.site.register(ReflectiveQuestion)

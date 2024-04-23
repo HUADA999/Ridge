@@ -33,7 +33,6 @@ from ridge.utils.helpers import resolve_absolute_path
 from ridge.utils.rawconfig import ContentConfig, ImageSearchConfig, SearchConfig
 from tests.helpers import (
     ChatModelOptionsFactory,
-    OfflineChatProcessorConversationConfigFactory,
     OpenAIProcessorConversationConfigFactory,
     ProcessLockFactory,
     SubscriptionFactory,
@@ -377,7 +376,12 @@ def client_offline_chat(search_config: SearchConfig, default_user2: RidgeUser):
     configure_content(all_files, user=default_user2)
 
     # Initialize Processor from Config
-    OfflineChatProcessorConversationConfigFactory(enabled=True)
+    ChatModelOptionsFactory(
+        chat_model="NousResearch/Hermes-2-Pro-Mistral-7B-GGUF",
+        tokenizer=None,
+        max_prompt_size=None,
+        model_type="offline",
+    )
     UserConversationProcessorConfigFactory(user=default_user2)
 
     state.anonymous_mode = True
