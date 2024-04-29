@@ -507,7 +507,7 @@ Ridge:
 """.strip()
 )
 
-# Schedule task
+# Automations
 # --
 crontime_prompt = PromptTemplate.from_template(
     """
@@ -525,7 +525,7 @@ AI: Here is one I found: "It's not denial. I'm just selective about the reality 
 User: Hahah, nice! Show a new one every morning.
 Ridge: {{
     "crontime": "0 9 * * *",
-    "query": "/task Share a funny Calvin and Hobbes or Bill Watterson quote from my notes",
+    "query": "/automated_task Share a funny Calvin and Hobbes or Bill Watterson quote from my notes",
     "subject": "Your Calvin and Hobbes Quote for the Day"
 }}
 
@@ -534,7 +534,7 @@ Ridge: {{
 User: Every monday evening at 6 share the top posts on hacker news from last week. Format it as a newsletter
 Ridge: {{
     "crontime": "0 18 * * 1",
-    "query": "/task Top posts last week on Hacker News",
+    "query": "/automated_task Top posts last week on Hacker News",
     "subject": "Your Weekly Top Hacker News Posts Newsletter"
 }}
 
@@ -545,7 +545,7 @@ AI: The latest released Ridge python package version is 1.5.0.
 User: Notify me when version 2.0.0 is released
 Ridge: {{
     "crontime": "0 10 * * *",
-    "query": "/task What is the latest released version of the Ridge python package?",
+    "query": "/automated_task What is the latest released version of the Ridge python package?",
     "subject": "Ridge Python Package Version 2.0.0 Release"
 }}
 
@@ -554,7 +554,7 @@ Ridge: {{
 User: Tell me the latest local tech news on the first sunday of every month
 Ridge: {{
     "crontime": "0 8 1-7 * 0",
-    "query": "/task Find the latest local tech, AI and engineering news. Format it as a newsletter.",
+    "query": "/automated_task Find the latest local tech, AI and engineering news. Format it as a newsletter.",
     "subject": "Your Monthly Dose of Local Tech News"
 }}
 
@@ -563,7 +563,7 @@ Ridge: {{
 User: Inform me when the national election results are declared. Run task at 4pm every thursday.
 Ridge: {{
     "crontime": "0 16 * * 4",
-    "query": "/task Check if the Indian national election results are officially declared",
+    "query": "/automated_task Check if the Indian national election results are officially declared",
     "subject": "Indian National Election Results Declared"
 }}
 
