@@ -72,7 +72,14 @@ async def set_notion_config(token: str, user: RidgeUser):
     return notion_config
 
 
-async def create_ridge_token(user: RidgeUser, name=None):
+def create_ridge_token(user: RidgeUser, name=None):
+    "Create Ridge API key for user"
+    token = f"kk-{secrets.token_urlsafe(32)}"
+    name = name or f"{generate_random_name().title()}"
+    return RidgeApiUser.objects.create(token=token, user=user, name=name)
+
+
+async def acreate_ridge_token(user: RidgeUser, name=None):
     "Create Ridge API key for user"
     token = f"kk-{secrets.token_urlsafe(32)}"
     name = name or f"{generate_random_name().title()}"
