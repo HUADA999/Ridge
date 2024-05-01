@@ -44,7 +44,7 @@ async def send_welcome_email(name, email):
         {
             "from": "team@ridge.dev",
             "to": email,
-            "subject": f"Welcome to Ridge, {name}!" if name else "Welcome to Ridge!",
+            "subject": f"{name}, four ways to use Ridge!" if name else "Four ways to use Ridge!",
             "html": html_content,
         }
     )
@@ -54,6 +54,8 @@ def send_task_email(name, email, query, result, subject):
     if not is_resend_enabled():
         logger.debug("Email sending disabled")
         return
+
+    logger.info(f"Sending email to {email} for task {subject}")
 
     template = env.get_template("task.html")
 
