@@ -44,7 +44,7 @@ async def send_welcome_email(name, email):
         {
             "from": "team@ridge.dev",
             "to": email,
-            "subject": f"{name}, four ways to use Ridge!" if name else "Four ways to use Ridge!",
+            "subject": f"{name}, four ways to use Ridge" if name else "Four ways to use Ridge",
             "html": html_content,
         }
     )
