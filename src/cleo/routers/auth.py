@@ -12,7 +12,7 @@ from starlette.responses import HTMLResponse, RedirectResponse, Response
 from starlette.status import HTTP_302_FOUND
 
 from ridge.database.adapters import (
-    create_ridge_token,
+    acreate_ridge_token,
     delete_ridge_token,
     get_ridge_tokens,
     get_or_create_user,
@@ -67,9 +67,9 @@ async def login(request: Request):
 async def generate_token(request: Request, token_name: Optional[str] = None):
     "Generate API token for given user"
     if token_name:
-        token = await create_ridge_token(user=request.user.object, name=token_name)
+        token = await acreate_ridge_token(user=request.user.object, name=token_name)
     else:
-        token = await create_ridge_token(user=request.user.object)
+        token = await acreate_ridge_token(user=request.user.object)
     return {
         "token": token.token,
         "name": token.name,
