@@ -15,6 +15,7 @@ from ridge.database.models import (
     RidgeUser,
     NotionConfig,
     OpenAIProcessorConversationConfig,
+    ProcessLock,
     ReflectiveQuestion,
     SearchModelConfig,
     SpeechToTextModelOptions,
@@ -44,6 +45,7 @@ class RidgeUserAdmin(UserAdmin):
 admin.site.register(RidgeUser, RidgeUserAdmin)
 
 admin.site.register(ChatModelOptions)
+admin.site.register(ProcessLock)
 admin.site.register(SpeechToTextModelOptions)
 admin.site.register(OpenAIProcessorConversationConfig)
 admin.site.register(SearchModelConfig)
