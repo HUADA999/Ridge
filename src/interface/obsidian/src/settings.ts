@@ -2,6 +2,15 @@ import { App, Notice, PluginSettingTab, Setting, TFile } from 'obsidian';
 import Ridge from 'src/main';
 import { canConnectToBackend, getBackendStatusMessage, updateContentIndex } from './utils';
 
+export interface UserInfo {
+    username?: string;
+    photo?: string;
+    is_active?: boolean;
+    has_documents?: boolean;
+    email?: string;
+}
+
+
 export interface RidgeSetting {
     resultsCount: number;
     ridgeUrl: string;
@@ -9,7 +18,7 @@ export interface RidgeSetting {
     connectedToBackend: boolean;
     autoConfigure: boolean;
     lastSync: Map<TFile, number>;
-    userEmail: string;
+    userInfo: UserInfo | null;
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
@@ -19,7 +28,7 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
     connectedToBackend: false,
     autoConfigure: true,
     lastSync: new Map(),
-    userEmail: '',
+    userInfo: null,
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
@@ -38,7 +47,7 @@ export class RidgeSettingTab extends PluginSettingTab {
         let backendStatusEl = containerEl.createEl('small', {
             text: getBackendStatusMessage(
                 this.plugin.settings.connectedToBackend,
-                this.plugin.settings.userEmail,
+                this.plugin.settings.userInfo?.email,
                 this.plugin.settings.ridgeUrl,
                 this.plugin.settings.ridgeApiKey
             )}
@@ -55,7 +64,7 @@ export class RidgeSettingTab extends PluginSettingTab {
                     this.plugin.settings.ridgeUrl = value.trim().replace(/\/$/, '');
                     ({
                         connectedToBackend: this.plugin.settings.connectedToBackend,
-                        userEmail: this.plugin.settings.userEmail,
+                        userInfo: this.plugin.settings.userInfo,
                         statusMessage: backendStatusMessage,
                     } = await canConnectToBackend(this.plugin.settings.ridgeUrl, this.plugin.settings.ridgeApiKey));
 
@@ -71,7 +80,7 @@ export class RidgeSettingTab extends PluginSettingTab {
                     this.plugin.settings.ridgeApiKey = value.trim();
                     ({
                         connectedToBackend: this.plugin.settings.connectedToBackend,
-                        userEmail: this.plugin.settings.userEmail,
+                        userInfo: this.plugin.settings.userInfo,
                         statusMessage: backendStatusMessage,
                     } = await canConnectToBackend(this.plugin.settings.ridgeUrl, this.plugin.settings.ridgeApiKey));
                     await this.plugin.saveSettings();
