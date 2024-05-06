@@ -1,5 +1,5 @@
 import { FileSystemAdapter, Notice, Vault, Modal, TFile, request } from 'obsidian';
-import { RidgeSetting } from 'src/settings'
+import { RidgeSetting, UserInfo } from 'src/settings'
 
 export function getVaultAbsolutePath(vault: Vault): string {
     let adaptor = vault.adapter;
@@ -173,31 +173,30 @@ export async function canConnectToBackend(
     ridgeUrl: string,
     ridgeApiKey: string,
     showNotice: boolean = false
-): Promise<{ connectedToBackend: boolean; statusMessage: string, userEmail: string }> {
+): Promise<{ connectedToBackend: boolean; statusMessage: string, userInfo: UserInfo | null }> {
     let connectedToBackend = false;
-    let userEmail: string = '';
+    let userInfo: UserInfo | null = null;
 
     if (!!ridgeUrl) {
         let headers  = !!ridgeApiKey ? { "Authorization": `Bearer ${ridgeApiKey}` } : undefined;
-        await request({ url: `${ridgeUrl}/api/health`, method: "GET", headers: headers })
-        .then(response => {
+        try {
+            let response = await request({ url: `${ridgeUrl}/api/v1/user`, method: "GET", headers: headers })
             connectedToBackend = true;
-            userEmail = JSON.parse(response)?.email;
-        })
-        .catch(error => {
+            userInfo = JSON.parse(response);
+        } catch (error) {
             connectedToBackend = false;
             console.log(`Ridge connection error:\n\n${error}`);
-        });
+        };
     }
 
-    let statusMessage: string = getBackendStatusMessage(connectedToBackend, userEmail, ridgeUrl, ridgeApiKey);
+    let statusMessage: string = getBackendStatusMessage(connectedToBackend, userInfo?.email, ridgeUrl, ridgeApiKey);
     if (showNotice) new Notice(statusMessage);
-    return { connectedToBackend, statusMessage, userEmail };
+    return { connectedToBackend, statusMessage, userInfo };
 }
 
 export function getBackendStatusMessage(
     connectedToServer: boolean,
-    userEmail: string,
+    userEmail: string | undefined,
     ridgeUrl: string,
     ridgeApiKey: string
 ): string {
