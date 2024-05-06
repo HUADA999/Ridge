@@ -1,7 +1,7 @@
-import { ItemView, MarkdownRenderer, WorkspaceLeaf, request, requestUrl, setIcon } from 'obsidian';
+import { MarkdownRenderer, WorkspaceLeaf, request, requestUrl, setIcon } from 'obsidian';
 import { RidgeSetting } from 'src/settings';
-
-export const RIDGE_CHAT_VIEW = "ridge-chat-view";
+import { RidgePaneView } from 'src/pane_view';
+import { RidgeView } from 'src/utils';
 
 export interface ChatJsonResult {
     image?: string;
@@ -11,7 +11,7 @@ export interface ChatJsonResult {
 }
 
 
-export class RidgeChatView extends ItemView {
+export class RidgeChatView extends RidgePaneView {
     result: string;
     setting: RidgeSetting;
     region: string;
@@ -20,33 +20,15 @@ export class RidgeChatView extends ItemView {
     timezone: string;
 
     constructor(leaf: WorkspaceLeaf, setting: RidgeSetting) {
-        super(leaf);
-
-        this.setting = setting;
-
-        // Register Modal Keybindings to send user message
-        // this.scope.register([], 'Enter', async () => { await this.chat() });
-
-        fetch("https://ipapi.co/json")
-            .then(response => response.json())
-            .then(data => {
-                this.region = data.region;
-                this.city = data.city;
-                this.countryName = data.country_name;
-                this.timezone = data.timezone;
-            })
-            .catch(err => {
-                console.log(err);
-                return;
-            });
+        super(leaf, setting);
     }
 
     getViewType(): string {
-        return RIDGE_CHAT_VIEW;
+        return RidgeView.CHAT;
     }
 
     getDisplayText(): string {
-        return "Ridge";
+        return "Ridge Chat";
     }
 
     getIcon(): string {
@@ -70,8 +52,7 @@ export class RidgeChatView extends ItemView {
         let { contentEl } = this;
         contentEl.addClass("ridge-chat");
 
-        // Add title to the Ridge Chat modal
-        contentEl.createEl("h1", ({ attr: { id: "ridge-chat-title" }, text: "Ridge Chat" }));
+        super.onOpen();
 
         // Create area for chat logs
         let chatBodyEl = contentEl.createDiv({ attr: { id: "ridge-chat-body", class: "ridge-chat-body" } });

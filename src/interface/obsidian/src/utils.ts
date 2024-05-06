@@ -1,4 +1,4 @@
-import { FileSystemAdapter, Notice, Vault, Modal, TFile, request } from 'obsidian';
+import { FileSystemAdapter, Notice, Vault, Modal, TFile, request, setIcon } from 'obsidian';
 import { RidgeSetting, UserInfo } from 'src/settings'
 
 export function getVaultAbsolutePath(vault: Vault): string {
@@ -213,4 +213,94 @@ export function getBackendStatusMessage(
         return `✅ Signed in to Ridge`;
     else
         return `✅ Signed in to Ridge as ${userEmail}`;
+}
+
+export async function populateHeaderPane(headerEl: Element, setting: RidgeSetting): Promise<void> {
+    let userInfo: UserInfo | null = null;
+    try {
+        const { userInfo: extractedUserInfo } = await canConnectToBackend(setting.ridgeUrl, setting.ridgeApiKey, false);
+        userInfo = extractedUserInfo;
+    } catch (error) {
+        console.error("❗️Could not connect to Ridge");
+    }
+
+    // Add Ridge title to header element
+    const titleEl = headerEl.createDiv();
+    titleEl.className = 'ridge-logo';
+    titleEl.textContent = "RIDGE"
+
+    // Populate the header element with the navigation pane
+    // Create the nav element
+    const nav = headerEl.createEl('nav');
+    nav.className = 'ridge-nav';
+
+    // Create the chat link
+    const chatLink = nav.createEl('a');
+    chatLink.id = 'chat-nav';
+    chatLink.className = 'ridge-nav chat-nav';
+
+    // Create the chat icon
+    const chatIcon = chatLink.createEl('span');
+    chatIcon.className = 'ridge-nav-icon ridge-nav-icon-chat';
+    setIcon(chatIcon, 'ridge-chat');
+
+    // Create the chat text
+    const chatText = chatLink.createEl('span');
+    chatText.className = 'ridge-nav-item-text';
+    chatText.textContent = 'Chat';
+
+    // Append the chat icon and text to the chat link
+    chatLink.appendChild(chatIcon);
+    chatLink.appendChild(chatText);
+
+    // Create the search link
+    const searchLink = nav.createEl('a');
+    searchLink.id = 'search-nav';
+    searchLink.className = 'ridge-nav search-nav';
+
+    // Create the search icon
+    const searchIcon = searchLink.createEl('span');
+    searchIcon.className = 'ridge-nav-icon ridge-nav-icon-search';
+
+    // Create the search text
+    const searchText = searchLink.createEl('span');
+    searchText.className = 'ridge-nav-item-text';
+    searchText.textContent = 'Search';
+
+    // Append the search icon and text to the search link
+    searchLink.appendChild(searchIcon);
+    searchLink.appendChild(searchText);
+
+    // Create the search link
+    const similarLink = nav.createEl('a');
+    similarLink.id = 'similar-nav';
+    similarLink.className = 'ridge-nav similar-nav';
+
+    // Create the search icon
+    const similarIcon = searchLink.createEl('span');
+    similarIcon.id = 'similar-nav-icon';
+    similarIcon.className = 'ridge-nav-icon ridge-nav-icon-similar';
+    setIcon(similarIcon, 'webhook');
+
+    // Create the search text
+    const similarText = searchLink.createEl('span');
+    similarText.className = 'ridge-nav-item-text';
+    similarText.textContent = 'Similar';
+
+    // Append the search icon and text to the search link
+    similarLink.appendChild(similarIcon);
+    similarLink.appendChild(similarText);
+
+    // Append the nav items to the nav element
+    nav.appendChild(chatLink);
+    nav.appendChild(searchLink);
+    nav.appendChild(similarLink);
+
+    // Append the title, nav items to the header element
+    headerEl.appendChild(titleEl);
+    headerEl.appendChild(nav);
+}
+
+export enum RidgeView {
+    CHAT = "ridge-chat-view",
 }

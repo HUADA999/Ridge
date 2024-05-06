@@ -1,8 +1,8 @@
 import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
-import { RidgeChatView, RIDGE_CHAT_VIEW } from 'src/chat_view'
-import { updateContentIndex, canConnectToBackend } from './utils';
+import { RidgeChatView } from 'src/chat_view'
+import { updateContentIndex, canConnectToBackend, RidgeView } from './utils';
 
 
 export default class Ridge extends Plugin {
@@ -30,14 +30,14 @@ export default class Ridge extends Plugin {
         this.addCommand({
             id: 'chat',
             name: 'Chat',
-            callback: () => { this.activateView(RIDGE_CHAT_VIEW); }
+            callback: () => { this.activateView(RidgeView.CHAT); }
         });
 
-        this.registerView(RIDGE_CHAT_VIEW, (leaf) => new RidgeChatView(leaf, this.settings));
+        this.registerView(RidgeView.CHAT, (leaf) => new RidgeChatView(leaf, this.settings));
 
         // Create an icon in the left ribbon.
         this.addRibbonIcon('message-circle', 'Ridge', (_: MouseEvent) => {
-            this.activateView(RIDGE_CHAT_VIEW);
+            this.activateView(RidgeView.CHAT);
         });
 
         // Add a settings tab so the user can configure ridge
@@ -72,7 +72,7 @@ export default class Ridge extends Plugin {
         this.unload();
     }
 
-    async activateView(viewType: string) {
+    async activateView(viewType: RidgeView) {
         const { workspace } = this.app;
 
         let leaf: WorkspaceLeaf | null = null;
