@@ -419,7 +419,7 @@ Auto invokes setup steps on calling main entrypoint."
          (delete-files (ridge--get-delete-file-list ridge--indexed-files files-to-index))
          (inhibit-message t)
          (message-log-max nil)
-         (batch-size 50))
+         (batch-size 30))
 	(dolist (files (ridge--split-file-list files-to-index batch-size))
       (ridge--send-index-update-request (ridge--render-update-files-as-request-body files boundary) boundary content-type type-query force))
     (when delete-files
