@@ -8,9 +8,11 @@ function toggleMenu() {
 document.addEventListener('click', function(event) {
     let menu = document.getElementById("ridge-nav-menu");
     let menuContainer = document.getElementById("ridge-nav-menu-container");
-    let isClickOnMenu = menuContainer.contains(event.target) || menuContainer === event.target;
-    if (isClickOnMenu === false && menu.classList.contains("show")) {
-        menu.classList.remove("show");
+    if (menuContainer) {
+        let isClickOnMenu = menuContainer.contains(event.target) || menuContainer === event.target;
+        if (isClickOnMenu === false && menu.classList.contains("show")) {
+            menu.classList.remove("show");
+        }
     }
 });
 

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 0
 slug: /
+keywords: ["ridge", "ridge ai", "ridge docs", "ridge documentation", "ridge features", "ridge overview", "ridge quickstart", "ridge chat", "ridge search", "ridge cloud", "ridge self-host", "ridge setup", "open source ai", "local llm", "ai copilot", "second brain ai", "ai search engine"]
 ---
 
 # Overview
@@ -28,7 +29,7 @@ Welcome to the Ridge Docs! This is the best place to get setup and explore Ridge
 - Ridge is an open source, personal AI
 - You can [chat](/features/chat) with it about anything. It'll use files you shared with it to respond, when relevant
 - Quickly [find](/features/search) relevant notes and documents using natural language
-- It understands pdf, plaintext, markdown, org-mode files, [notion pages](/online-data-sources/notion_integration) and [github repositories](/online-data-sources/github_integration)
+- It understands pdf, plaintext, markdown, org-mode files, [notion pages](/data-sources/notion_integration) and [github repositories](/data-sources/github_integration)
 - Access it from your [Emacs](/clients/emacs), [Obsidian](/clients/obsidian), [Web browser](/clients/web) or the [Ridge Desktop app](/clients/desktop)
 - Use [cloud](https://app.ridge.dev/login) to access your Ridge anytime from anywhere, [self-host](/get-started/setup) on consumer hardware for privacy
 
