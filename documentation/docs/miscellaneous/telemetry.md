@@ -16,7 +16,11 @@ We don't send any personal information or any information from/about your conten
 
 If you're self-hosting Ridge, you can opt out of telemetry at any time. To do so,
 1. Open `~/.ridge/ridge.yml`
-2. Set `should-log-telemetry` to `false`
+2. Add the following configuration:
+```
+app:
+  should-log-telemetry: false
+```
 3. Save the file and restart Ridge
 
 If you have any questions or concerns, please reach out to us on [Discord](https://discord.gg/BDgyabRM6e).
