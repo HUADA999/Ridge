@@ -29,6 +29,6 @@ Ridge is available as a [Desktop app](/clients/desktop), [Emacs package](/client
 ![](/img/ridge_clients.svg ':size=400px')
 
 ### Supported Data Sources
-Ridge can understand your org-mode, markdown, PDF, plaintext files, [Github projects](/online-data-sources/github_integration) and [Notion pages](/online-data-sources/notion_integration).
+Ridge can understand your org-mode, markdown, PDF, plaintext files, [Github projects](/data-sources/github_integration) and [Notion pages](/data-sources/notion_integration).
 
 ![](/img/ridge_datasources.svg ':size=200px')
