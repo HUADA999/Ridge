@@ -420,7 +420,7 @@ Auto invokes setup steps on calling main entrypoint."
          (inhibit-message t)
          (message-log-max nil)
          (batch-size 30))
-	(dolist (files (ridge--split-file-list files-to-index batch-size))
+	(dolist (files (-partition-all batch-size files-to-index))
       (ridge--send-index-update-request (ridge--render-update-files-as-request-body files boundary) boundary content-type type-query force))
     (when delete-files
         (ridge--send-index-update-request (ridge--render-delete-files-as-request-body delete-files boundary) boundary content-type type-query force))
@@ -434,22 +434,6 @@ delete them. return delete-file-list."
       (when (not (member indexed-file upload-files))
         (push indexed-file delete-files)))
     delete-files))
-
-(defun ridge--split-file-list (file-list size)
-  "Split `FILE-LIST' into subgroups of `SIZE' files each."
-  (let ((subgroups '())
-        (current-group '()))
-    (dolist (file file-list)
-      (if (= (length current-group) size)
-          ;; If the current group has size files, start a new group
-          (progn
-            (push current-group subgroups)
-            (setq current-group '()))
-        (push file current-group)))
-    ;; Add the last group if it's not empty
-    (when current-group
-      (push (nreverse current-group) subgroups))
-    (nreverse subgroups)))  ; Reverse to maintain the original order of file-list
 
 (defun ridge--send-index-update-request (body boundary &optional content-type type-query force)
   "Send `BODY' request to ridge server. 'TYPE-QUERY' is appended to the URL.
@@ -502,7 +486,6 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
   (with-temp-buffer
     (set-buffer-multibyte nil)
     (insert "\n")
-    (debug delete-files)
     (dolist (file-to-index delete-files)
       (let ((content-type (ridge--filename-to-mime-type file-to-index))
             (file-name (encode-coding-string  file-to-index 'utf-8)))
