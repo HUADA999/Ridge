@@ -15,6 +15,7 @@ from ridge.database.models import (
     RidgeUser,
     NotionConfig,
     OpenAIProcessorConversationConfig,
+    ProcessLock,
     ReflectiveQuestion,
     SearchModelConfig,
     SpeechToTextModelOptions,
@@ -44,10 +45,10 @@ class RidgeUserAdmin(UserAdmin):
 admin.site.register(RidgeUser, RidgeUserAdmin)
 
 admin.site.register(ChatModelOptions)
+admin.site.register(ProcessLock)
 admin.site.register(SpeechToTextModelOptions)
 admin.site.register(OpenAIProcessorConversationConfig)
 admin.site.register(SearchModelConfig)
-admin.site.register(Subscription)
 admin.site.register(ReflectiveQuestion)
 admin.site.register(UserSearchModelConfig)
 admin.site.register(TextToImageModelConfig)
@@ -81,6 +82,18 @@ class EntryAdmin(admin.ModelAdmin):
     search_fields = ("id", "user__email", "user__username", "file_path")
     list_filter = ("file_type",)
     ordering = ("-created_at",)
+
+
+@admin.register(Subscription)
+class RidgeUserSubscription(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "user",
+        "type",
+    )
+
+    search_fields = ("id", "user__email", "user__username", "type")
+    list_filter = ("type",)
 
 
 @admin.register(Conversation)
