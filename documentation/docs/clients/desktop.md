@@ -8,7 +8,7 @@ sidebar_position: 1
 
 Use the Desktop app to chat and search with Ridge.
 You can also sync any relevant files with Ridge using the app.
-Ridge will use these files to provide contextual reponses when you search or chat.
+Ridge will use these files to provide contextual responses when you search or chat.
 
 ## Features
 - **Chat**
