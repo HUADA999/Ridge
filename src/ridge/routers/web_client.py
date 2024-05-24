@@ -11,7 +11,6 @@ from starlette.authentication import has_required_scope, requires
 from ridge.database import adapters
 from ridge.database.adapters import (
     AgentAdapters,
-    AutomationAdapters,
     ConversationAdapters,
     EntryAdapters,
     PublicConversationAdapters,
