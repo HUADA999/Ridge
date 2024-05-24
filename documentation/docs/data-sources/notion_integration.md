@@ -4,7 +4,7 @@ The Notion integration allows you to search/chat with your Notion workspaces. [N
 
 Go to https://app.ridge.dev/config to connect your Notion workspace(s) to Ridge.
 
-![notion_integration](/img/notion_integration.gif)
+![notion_integration](https://assets.ridge.dev/notion_integration.gif)
 
 
 ## Self-Hosted Setup
