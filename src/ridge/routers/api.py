@@ -27,6 +27,9 @@ from ridge.database.adapters import (
     get_user_search_model_or_default,
 )
 from ridge.database.models import ChatModelOptions, RidgeUser, SpeechToTextModelOptions
+from ridge.processor.conversation.anthropic.anthropic_chat import (
+    extract_questions_anthropic,
+)
 from ridge.processor.conversation.offline.chat_model import extract_questions_offline
 from ridge.processor.conversation.offline.whisper import transcribe_audio_offline
 from ridge.processor.conversation.openai.gpt import extract_questions
@@ -37,7 +40,6 @@ from ridge.routers.helpers import (
     ConversationCommandRateLimiter,
     acreate_title_from_query,
     schedule_automation,
-    scheduled_chat,
     update_telemetry_state,
 )
 from ridge.search_filter.date_filter import DateFilter
@@ -340,6 +342,18 @@ async def extract_references_and_questions(
                 api_key=api_key,
                 conversation_log=meta_log,
                 location_data=location_data,
+                max_tokens=conversation_config.max_prompt_size,
+            )
+        elif conversation_config.model_type == ChatModelOptions.ModelType.ANTHROPIC:
+            api_key = conversation_config.openai_config.api_key
+            chat_model = conversation_config.chat_model
+            inferred_queries = extract_questions_anthropic(
+                defiltered_query,
+                model=chat_model,
+                api_key=api_key,
+                conversation_log=meta_log,
+                location_data=location_data,
+                max_tokens=conversation_config.max_prompt_size,
             )
 
     # Collate search results as context for GPT
