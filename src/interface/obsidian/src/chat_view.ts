@@ -280,7 +280,7 @@ export class RidgeChatView extends RidgePaneView {
         return referenceButton;
     }
 
-    formatHTMLMessage(message: string, raw=false, willReplace=true) {
+    formatHTMLMessage(message: string, raw = false, willReplace = true) {
         let rendered_msg = message;
 
         // Replace LaTeX delimiters with placeholders
@@ -373,7 +373,7 @@ export class RidgeChatView extends RidgePaneView {
         return imageMarkdown;
     }
 
-    renderMessage(chatBodyEl: Element, message: string, sender: string, dt?: Date, raw: boolean=false, willReplace: boolean=true): Element {
+    renderMessage(chatBodyEl: Element, message: string, sender: string, dt?: Date, raw: boolean = false, willReplace: boolean = true): Element {
         let message_time = this.formatDate(dt ?? new Date());
         let emojified_sender = sender == "ridge" ? "🏮 Ridge" : "🤔 You";
 
@@ -570,7 +570,7 @@ export class RidgeChatView extends RidgePaneView {
                                 let newTitle = editConversationTitleInputEl.value;
                                 if (newTitle != null) {
                                     let editURL = `/api/chat/title?client=web&conversation_id=${incomingConversationId}&title=${newTitle}`;
-                                    fetch(`${this.setting.ridgeUrl}${editURL}` , { method: "PATCH", headers })
+                                    fetch(`${this.setting.ridgeUrl}${editURL}`, { method: "PATCH", headers })
                                         .then(response => response.ok ? response.json() : Promise.reject(response))
                                         .then(data => {
                                             conversationSessionEl.textContent = newTitle;
@@ -578,8 +578,9 @@ export class RidgeChatView extends RidgePaneView {
                                         .catch(err => {
                                             return;
                                         });
-                                editConversationTitleInputBoxEl.remove();
-                            }});
+                                    editConversationTitleInputBoxEl.remove();
+                                }
+                            });
                             editConversationTitleInputBoxEl.appendChild(editConversationTitleSaveButtonEl);
                             conversationMenuEl.appendChild(editConversationTitleInputBoxEl);
                         });
@@ -596,7 +597,7 @@ export class RidgeChatView extends RidgePaneView {
                             let confirmation = confirm('Are you sure you want to delete this chat session?');
                             if (!confirmation) return;
                             let deleteURL = `/api/chat/history?client=obsidian&conversation_id=${incomingConversationId}`;
-                            fetch(`${this.setting.ridgeUrl}${deleteURL}` , { method: "DELETE", headers })
+                            fetch(`${this.setting.ridgeUrl}${deleteURL}`, { method: "DELETE", headers })
                                 .then(response => response.ok ? response.json() : Promise.reject(response))
                                 .then(data => {
                                     chatBodyEl.innerHTML = "";
@@ -997,7 +998,7 @@ export class RidgeChatView extends RidgePaneView {
         return loadingEllipsis;
     }
 
-    handleStreamResponse(newResponseElement: HTMLElement | null, rawResponse: string, loadingEllipsis: HTMLElement | null, replace=true) {
+    handleStreamResponse(newResponseElement: HTMLElement | null, rawResponse: string, loadingEllipsis: HTMLElement | null, replace = true) {
         if (!newResponseElement) return;
         if (newResponseElement.getElementsByClassName("lds-ellipsis").length > 0 && loadingEllipsis) {
             newResponseElement.removeChild(loadingEllipsis);
