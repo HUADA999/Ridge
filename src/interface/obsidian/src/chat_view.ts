@@ -91,7 +91,7 @@ export class RidgeChatView extends RidgePaneView {
                 class: "ridge-input-row-button clickable-icon",
             },
         })
-        chatSessions.addEventListener('click', async (_) => { await this.showChatSessions(chatBodyEl) });
+        chatSessions.addEventListener('click', async (_) => { await this.toggleChatSessions(chatBodyEl) });
         setIcon(chatSessions, "history");
 
         let chatInput = inputRow.createEl("textarea", {
@@ -468,7 +468,11 @@ export class RidgeChatView extends RidgePaneView {
         this.renderMessage(chatBodyEl, "Hey 👋🏾, what's up?", "ridge");
     }
 
-    async showChatSessions(chatBodyEl: HTMLElement): Promise<boolean> {
+    async toggleChatSessions(chatBodyEl: HTMLElement): Promise<boolean> {
+        if (this.contentEl.getElementsByClassName("side-panel")?.length > 0) {
+            chatBodyEl.innerHTML = "";
+            return this.getChatHistory(chatBodyEl);
+        }
         chatBodyEl.innerHTML = "";
         const sidePanelEl = this.contentEl.createDiv("side-panel");
         const newConversationEl = sidePanelEl.createDiv("new-conversation");

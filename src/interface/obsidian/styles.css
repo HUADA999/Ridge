@@ -24,6 +24,7 @@ If your plugin does not need CSS, delete this file.
 
 .ridge-chat {
     display: grid;
+    grid-template-rows: auto 1fr auto;
     background: var(--background-primary);
     color: var(--text-normal);
     text-align: center;
