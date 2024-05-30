@@ -10,13 +10,6 @@ export interface ChatJsonResult {
     inferredQueries?: string[];
 }
 
-interface WebSocketState {
-    newResponseTextEl: HTMLElement | null,
-    newResponseEl: HTMLElement | null,
-    loadingEllipsis: HTMLElement | null,
-    references: object,
-    rawResponse: string,
-}
 
 interface Location {
     region: string;
@@ -29,21 +22,12 @@ export class RidgeChatView extends RidgePaneView {
     result: string;
     setting: RidgeSetting;
     waitingForLocation: boolean;
-    websocket: WebSocket;
-    websocketState: WebSocketState;
     location: Location;
 
     constructor(leaf: WorkspaceLeaf, setting: RidgeSetting) {
         super(leaf, setting);
 
         this.waitingForLocation = true;
-        this.websocketState = {
-            newResponseTextEl: null,
-            newResponseEl: null,
-            loadingEllipsis: null,
-            references: {},
-            rawResponse: "",
-        };
 
         fetch("https://ipapi.co/json")
             .then(response => response.json())
@@ -60,7 +44,6 @@ export class RidgeChatView extends RidgePaneView {
             })
             .finally(() => {
                 this.waitingForLocation = false;
-                this.setupWebSocket();
             });
 
     }
@@ -78,10 +61,6 @@ export class RidgeChatView extends RidgePaneView {
     }
 
     async chat() {
-        if (this.websocket?.readyState === WebSocket.OPEN){
-            this.sendMessageViaWebSocket();
-            return;
-        }
 
         // Get text in chat input element
         let input_el = <HTMLTextAreaElement>this.contentEl.getElementsByClassName("ridge-chat-input")[0];
@@ -650,7 +629,6 @@ export class RidgeChatView extends RidgePaneView {
         let chatUrl = `${this.setting.ridgeUrl}/api/chat/history?client=obsidian`;
         if (chatBodyEl.dataset.conversationId) {
             chatUrl += `&conversation_id=${chatBodyEl.dataset.conversationId}`;
-            this.setupWebSocket();
         }
 
         try {
@@ -671,7 +649,6 @@ export class RidgeChatView extends RidgePaneView {
             } else if (responseJson.response) {
                 // Render conversation history, if any
                 chatBodyEl.dataset.conversationId = responseJson.response.conversation_id;
-                this.setupWebSocket();
                 chatBodyEl.dataset.conversationTitle = responseJson.response.slug || `New conversation 🌱`;
 
 
@@ -1139,168 +1116,5 @@ export class RidgeChatView extends RidgePaneView {
         referencesDiv.appendChild(referenceSection);
 
         return referencesDiv;
-    }
-
-    setupWebSocket() {
-        let chatBody = this.contentEl.getElementsByClassName("ridge-chat-body")[0] as HTMLElement;
-        let wsProtocol = this.setting.ridgeUrl.startsWith('https:') ? 'wss:' : 'ws:';
-        let baseUrl = this.setting.ridgeUrl.replace(/^https?:\/\//, '');
-        let webSocketUrl = `${wsProtocol}//${baseUrl}/api/chat/ws`;
-
-        if (this.waitingForLocation) {
-            console.debug("Waiting for location data to be fetched. Will setup WebSocket once location data is available.");
-            return;
-        }
-        if (!chatBody) return;
-
-        this.websocketState = {
-            newResponseTextEl: null,
-            newResponseEl: null,
-            loadingEllipsis: null,
-            references: {},
-            rawResponse: "",
-        }
-
-        if (chatBody.dataset.conversationId) {
-            webSocketUrl += `?conversation_id=${chatBody.dataset.conversationId}`;
-            webSocketUrl += !!this.location ? `&region=${this.location.region}&city=${this.location.city}&country=${this.location.countryName}&timezone=${this.location.timezone}` : '';
-
-            this.websocket = new WebSocket(webSocketUrl);
-            this.websocket.onmessage = (event) => {
-                // Get the last element in the chat-body
-                let chunk = event.data;
-                if (chunk == "start_llm_response") {
-                    console.log("Started streaming", new Date());
-                } else if(chunk == "end_llm_response") {
-                    console.log("Stopped streaming", new Date());
-                    // Append any references after all the data has been streamed
-                    this.finalizeChatBodyResponse(this.websocketState.references, this.websocketState.newResponseTextEl);
-
-                    // Reset variables
-                    this.websocketState = {
-                        newResponseTextEl: null,
-                        newResponseEl: null,
-                        loadingEllipsis: null,
-                        references: {},
-                        rawResponse: "",
-                    }
-                } else {
-                    try {
-                        if (chunk.includes("application/json")) {
-                            chunk = JSON.parse(chunk);
-                        }
-                    } catch (error) {
-                        // If the chunk is not a JSON object, continue.
-                    }
-
-                    const contentType = chunk["content-type"]
-                    if (contentType === "application/json") {
-                        // Handle JSON response
-                        try {
-                            if (chunk.image || chunk.detail) {
-                                const { rawResponse, references } = this.handleImageResponse(chunk, this.websocketState.rawResponse);
-                                this.websocketState.rawResponse = rawResponse;
-                                this.websocketState.references = references;
-                            } else if (chunk.type == "status") {
-                                this.handleStreamResponse(this.websocketState.newResponseTextEl, chunk.message, null, false);
-                            } else if (chunk.type == "rate_limit") {
-                                this.handleStreamResponse(this.websocketState.newResponseTextEl, chunk.message, this.websocketState.loadingEllipsis, true);
-                            } else {
-                                this.websocketState.rawResponse = chunk.response;
-                            }
-                        } catch (error) {
-                            // If the chunk is not a JSON object, just display it as is
-                            this.websocketState.rawResponse += chunk;
-                        } finally {
-                            if (chunk.type != "status" && chunk.type != "rate_limit") {
-                                this.addMessageToChatBody(this.websocketState.rawResponse, this.websocketState.newResponseTextEl, this.websocketState.references);
-                            }
-                        }
-                    } else {
-                        // Handle streamed response of type text/event-stream or text/plain
-                        if (chunk && chunk.includes("### compiled references:")) {
-                            const { rawResponse, references } = this.handleCompiledReferences(this.websocketState.newResponseTextEl, chunk, this.websocketState.references, this.websocketState.rawResponse);
-                            this.websocketState.rawResponse = rawResponse;
-                            this.websocketState.references = references;
-                        } else {
-                            // If the chunk is not a JSON object, just display it as is
-                            this.websocketState.rawResponse += chunk;
-                            if (this.websocketState.newResponseTextEl) {
-                                this.handleStreamResponse(this.websocketState.newResponseTextEl, this.websocketState.rawResponse, this.websocketState.loadingEllipsis);
-                            }
-                        }
-
-                        // Scroll to bottom of chat window as chat response is streamed
-                        chatBody.scrollTop = chatBody.scrollHeight;
-                    };
-                }
-            }
-        };
-        if (!this.websocket) return;
-        this.websocket.onclose = (event: Event) => {
-            console.log("WebSocket is closed now.");
-            let statusDotIcon = document.getElementById("connection-status-icon");
-            let statusDotText = document.getElementById("connection-status-text");
-            if (!statusDotIcon || !statusDotText) return;
-            statusDotIcon.style.backgroundColor = "red";
-            statusDotText.style.marginTop = "5px";
-            statusDotText.innerHTML = '<button onclick="setupWebSocket()">Reconnect to Server</button>';
-        }
-        this.websocket.onerror = (event: Event) => {
-            console.log("WebSocket error observed:", event);
-        }
-        this.websocket.onopen = (event: Event) => {
-            console.log("WebSocket is open now.")
-            let statusDotIcon = document.getElementById("connection-status-icon");
-            let statusDotText = document.getElementById("connection-status-text");
-            if (!statusDotIcon || !statusDotText) return;
-            statusDotIcon.style.backgroundColor = "green";
-            statusDotText.style.marginTop = "10px";
-            statusDotText.textContent = "Connected to Server";
-        }
-    }
-
-    sendMessageViaWebSocket() {
-        let chatBody = this.contentEl.getElementsByClassName("ridge-chat-body")[0] as HTMLElement;
-        let chatInput = this.contentEl.getElementsByClassName("ridge-chat-input")[0] as HTMLTextAreaElement;
-        let query = chatInput?.value.trim();
-        if (!chatInput || !chatBody || !query) return;
-        console.log(`Query: ${query}`);
-
-        // Add message by user to chat body
-        this.renderMessage(chatBody, query, "you");
-        chatInput.value = "";
-        this.autoResize();
-        chatInput.setAttribute("disabled", "disabled");
-
-        let newResponseEl = this.contentEl.createDiv();
-        newResponseEl.classList.add("ridge-chat-message", "ridge");
-        newResponseEl.setAttribute("data-meta", "🏮 Ridge at " + this.formatDate(new Date()));
-        chatBody.appendChild(newResponseEl);
-
-        let newResponseTextEl = this.contentEl.createDiv();
-        newResponseTextEl.classList.add("ridge-chat-message-text", "ridge");
-        newResponseEl.appendChild(newResponseTextEl);
-
-        // Temporary status message to indicate that Ridge is thinking
-        let loadingEllipsis = this.createLoadingEllipse();
-        newResponseTextEl.appendChild(loadingEllipsis);
-        chatBody.scrollTop = chatBody.scrollHeight;
-
-        // let chatTooltip = document.getElementById("chat-tooltip");
-        // if (chatTooltip) chatTooltip.style.display = "none";
-
-        chatInput.classList.remove("option-enabled");
-
-        // Call specified Ridge API
-        this.websocket.send(query);
-
-        this.websocketState = {
-            newResponseTextEl,
-            newResponseEl,
-            loadingEllipsis,
-            references: [],
-            rawResponse: "",
-        }
     }
 }
