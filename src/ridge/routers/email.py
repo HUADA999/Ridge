@@ -42,7 +42,7 @@ async def send_welcome_email(name, email):
 
     r = resend.Emails.send(
         {
-            "from": "team@ridge.dev",
+            "sender": "team@ridge.dev",
             "to": email,
             "subject": f"{name}, four ways to use Ridge" if name else "Four ways to use Ridge",
             "html": html_content,
@@ -68,7 +68,7 @@ async def send_query_feedback(uquery, kquery, sentiment, user_email):
     # send feedback from two fixed accounts
     r = resend.Emails.send(
         {
-            "from": "saba@ridge.dev",
+            "sender": "saba@ridge.dev",
             "to": "team@ridge.dev",
             "subject": f"User Feedback",
             "html": html_content,
@@ -91,7 +91,7 @@ def send_task_email(name, email, query, result, subject):
 
     r = resend.Emails.send(
         {
-            "from": "Ridge <ridge@ridge.dev>",
+            "sender": "Ridge <ridge@ridge.dev>",
             "to": email,
             "subject": f"✨ {subject}",
             "html": html_content,
