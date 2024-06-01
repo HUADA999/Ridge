@@ -25,7 +25,7 @@ You can upload documents to Ridge from the web interface, one at a time. This is
 1. You can drag and drop the document into the chat window.
 2. Or click the paperclip icon in the chat window and select the document from your file system.
 
-![demo of dragging and dropping a file](https://ridge-web-bucket.s3.amazonaws.com/drag_drop_file.gif)
+![demo of dragging and dropping a file](https://assets.ridge.dev/drag_drop_file.gif)
 
 ### Install on Phone
 You can optionally install Ridge as a [Progressive Web App (PWA)](https://web.dev/learn/pwa/installation). This makes it quick and easy to access Ridge on your phone.
