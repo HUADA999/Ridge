@@ -96,7 +96,7 @@ from ridge.utils.initialization import initialization
 
 def shutdown_scheduler():
     logger.info("🌑 Shutting down Ridge")
-    state.scheduler.shutdown()
+    # state.scheduler.shutdown()
 
 
 def run(should_start_server=True):
