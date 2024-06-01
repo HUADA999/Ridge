@@ -411,7 +411,7 @@ export class RidgeChatView extends RidgePaneView {
             attr: {
                 class: `ridge-chat-message-text ridge`
             },
-        })
+        }).createDiv();
 
         // Scroll to bottom after inserting chat messages
         this.scrollChatToBottom();
