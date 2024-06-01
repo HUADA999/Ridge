@@ -1,8 +1,8 @@
-import { Plugin } from 'obsidian';
+import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
-import { RidgeChatModal } from 'src/chat_modal'
-import { updateContentIndex, canConnectToBackend } from './utils';
+import { RidgeChatView } from 'src/chat_view'
+import { updateContentIndex, canConnectToBackend, RidgeView } from './utils';
 
 
 export default class Ridge extends Plugin {
@@ -30,12 +30,14 @@ export default class Ridge extends Plugin {
         this.addCommand({
             id: 'chat',
             name: 'Chat',
-            callback: () => { new RidgeChatModal(this.app, this.settings).open(); }
+            callback: () => { this.activateView(RidgeView.CHAT); }
         });
+
+        this.registerView(RidgeView.CHAT, (leaf) => new RidgeChatView(leaf, this.settings));
 
         // Create an icon in the left ribbon.
         this.addRibbonIcon('message-circle', 'Ridge', (_: MouseEvent) => {
-            new RidgeChatModal(this.app, this.settings).open()
+            this.activateView(RidgeView.CHAT);
         });
 
         // Add a settings tab so the user can configure ridge
@@ -69,4 +71,24 @@ export default class Ridge extends Plugin {
 
         this.unload();
     }
+
+    async activateView(viewType: RidgeView) {
+        const { workspace } = this.app;
+
+        let leaf: WorkspaceLeaf | null = null;
+        const leaves = workspace.getLeavesOfType(viewType);
+
+        if (leaves.length > 0) {
+          // A leaf with our view already exists, use that
+          leaf = leaves[0];
+        } else {
+          // Our view could not be found in the workspace, create a new leaf
+          // in the right sidebar for it
+          leaf = workspace.getRightLeaf(false);
+          await leaf.setViewState({ type: viewType, active: true });
+        }
+
+        // "Reveal" the leaf in case it is in a collapsed sidebar
+        workspace.revealLeaf(leaf);
+      }
 }

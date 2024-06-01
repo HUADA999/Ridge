@@ -1,5 +1,5 @@
-import { FileSystemAdapter, Notice, Vault, Modal, TFile, request } from 'obsidian';
-import { RidgeSetting } from 'src/settings'
+import { FileSystemAdapter, Notice, Vault, Modal, TFile, request, setIcon, Editor } from 'obsidian';
+import { RidgeSetting, UserInfo } from 'src/settings'
 
 export function getVaultAbsolutePath(vault: Vault): string {
     let adaptor = vault.adapter;
@@ -173,31 +173,30 @@ export async function canConnectToBackend(
     ridgeUrl: string,
     ridgeApiKey: string,
     showNotice: boolean = false
-): Promise<{ connectedToBackend: boolean; statusMessage: string, userEmail: string }> {
+): Promise<{ connectedToBackend: boolean; statusMessage: string, userInfo: UserInfo | null }> {
     let connectedToBackend = false;
-    let userEmail: string = '';
+    let userInfo: UserInfo | null = null;
 
     if (!!ridgeUrl) {
         let headers  = !!ridgeApiKey ? { "Authorization": `Bearer ${ridgeApiKey}` } : undefined;
-        await request({ url: `${ridgeUrl}/api/health`, method: "GET", headers: headers })
-        .then(response => {
+        try {
+            let response = await request({ url: `${ridgeUrl}/api/v1/user`, method: "GET", headers: headers })
             connectedToBackend = true;
-            userEmail = JSON.parse(response)?.email;
-        })
-        .catch(error => {
+            userInfo = JSON.parse(response);
+        } catch (error) {
             connectedToBackend = false;
             console.log(`Ridge connection error:\n\n${error}`);
-        });
+        };
     }
 
-    let statusMessage: string = getBackendStatusMessage(connectedToBackend, userEmail, ridgeUrl, ridgeApiKey);
+    let statusMessage: string = getBackendStatusMessage(connectedToBackend, userInfo?.email, ridgeUrl, ridgeApiKey);
     if (showNotice) new Notice(statusMessage);
-    return { connectedToBackend, statusMessage, userEmail };
+    return { connectedToBackend, statusMessage, userInfo };
 }
 
 export function getBackendStatusMessage(
     connectedToServer: boolean,
-    userEmail: string,
+    userEmail: string | undefined,
     ridgeUrl: string,
     ridgeApiKey: string
 ): string {
@@ -214,4 +213,156 @@ export function getBackendStatusMessage(
         return `✅ Signed in to Ridge`;
     else
         return `✅ Signed in to Ridge as ${userEmail}`;
+}
+
+export async function populateHeaderPane(headerEl: Element, setting: RidgeSetting): Promise<void> {
+    let userInfo: UserInfo | null = null;
+    try {
+        const { userInfo: extractedUserInfo } = await canConnectToBackend(setting.ridgeUrl, setting.ridgeApiKey, false);
+        userInfo = extractedUserInfo;
+    } catch (error) {
+        console.error("❗️Could not connect to Ridge");
+    }
+
+    // Add Ridge title to header element
+    const titleEl = headerEl.createDiv();
+    titleEl.className = 'ridge-logo';
+    titleEl.textContent = "RIDGE"
+
+    // Populate the header element with the navigation pane
+    // Create the nav element
+    const nav = headerEl.createEl('nav');
+    nav.className = 'ridge-nav';
+
+    // Create the chat link
+    const chatLink = nav.createEl('a');
+    chatLink.id = 'chat-nav';
+    chatLink.className = 'ridge-nav chat-nav';
+
+    // Create the chat icon
+    const chatIcon = chatLink.createEl('span');
+    chatIcon.className = 'ridge-nav-icon ridge-nav-icon-chat';
+    setIcon(chatIcon, 'ridge-chat');
+
+    // Create the chat text
+    const chatText = chatLink.createEl('span');
+    chatText.className = 'ridge-nav-item-text';
+    chatText.textContent = 'Chat';
+
+    // Append the chat icon and text to the chat link
+    chatLink.appendChild(chatIcon);
+    chatLink.appendChild(chatText);
+
+    // Create the search link
+    const searchLink = nav.createEl('a');
+    searchLink.id = 'search-nav';
+    searchLink.className = 'ridge-nav search-nav';
+
+    // Create the search icon
+    const searchIcon = searchLink.createEl('span');
+    searchIcon.className = 'ridge-nav-icon ridge-nav-icon-search';
+
+    // Create the search text
+    const searchText = searchLink.createEl('span');
+    searchText.className = 'ridge-nav-item-text';
+    searchText.textContent = 'Search';
+
+    // Append the search icon and text to the search link
+    searchLink.appendChild(searchIcon);
+    searchLink.appendChild(searchText);
+
+    // Create the search link
+    const similarLink = nav.createEl('a');
+    similarLink.id = 'similar-nav';
+    similarLink.className = 'ridge-nav similar-nav';
+
+    // Create the search icon
+    const similarIcon = searchLink.createEl('span');
+    similarIcon.id = 'similar-nav-icon';
+    similarIcon.className = 'ridge-nav-icon ridge-nav-icon-similar';
+    setIcon(similarIcon, 'webhook');
+
+    // Create the search text
+    const similarText = searchLink.createEl('span');
+    similarText.className = 'ridge-nav-item-text';
+    similarText.textContent = 'Similar';
+
+    // Append the search icon and text to the search link
+    similarLink.appendChild(similarIcon);
+    similarLink.appendChild(similarText);
+
+    // Append the nav items to the nav element
+    nav.appendChild(chatLink);
+    nav.appendChild(searchLink);
+    nav.appendChild(similarLink);
+
+    // Append the title, nav items to the header element
+    headerEl.appendChild(titleEl);
+    headerEl.appendChild(nav);
+}
+
+export enum RidgeView {
+    CHAT = "ridge-chat-view",
+}
+
+function copyParentText(event: MouseEvent, message: string, originalButton: string) {
+    const button = event.currentTarget as HTMLElement;
+    if (!button || !button?.parentNode?.textContent) return;
+    if (!!button.firstChild) button.removeChild(button.firstChild as HTMLImageElement);
+    const textContent = message ?? button.parentNode.textContent.trim();
+    navigator.clipboard.writeText(textContent).then(() => {
+        setIcon((button as HTMLElement), 'copy-check');
+        setTimeout(() => {
+            setIcon((button as HTMLElement), originalButton);
+        }, 1000);
+    }).catch((error) => {
+        console.error("Error copying text to clipboard:", error);
+        const originalButtonText = button.innerHTML;
+        button.innerHTML = "⛔️";
+        setTimeout(() => {
+            button.innerHTML = originalButtonText;
+            setIcon((button as HTMLElement), originalButton);
+        }, 2000);
+    });
+
+    return textContent;
+}
+
+export function createCopyParentText(message: string, originalButton: string = 'copy-plus') {
+    return function(event: MouseEvent) {
+        return copyParentText(event, message, originalButton);
+    }
+}
+
+export function pasteTextAtCursor(text: string | undefined) {
+    // Get the current active file's editor
+    const editor: Editor = this.app.workspace.getActiveFileView()?.editor
+    if (!editor || !text) return;
+    const cursor = editor.getCursor();
+    // If there is a selection, replace it with the text
+    if (editor?.getSelection()) {
+        editor.replaceSelection(text);
+    // If there is no selection, insert the text at the cursor position
+    } else if (cursor) {
+        editor.replaceRange(text, cursor);
+    }
+}
+
+export function getLinkToEntry(sourceFiles: TFile[], chosenFile: string, chosenEntry: string): string | undefined {
+    // Find the vault file matching file of chosen file, entry
+    let fileMatch = sourceFiles
+        // Sort by descending length of path
+        // This finds longest path match when multiple files have same name
+        .sort((a, b) => b.path.length - a.path.length)
+        // The first match is the best file match across OS
+        // e.g Ridge server on Linux, Obsidian vault on Android
+        .find(file => chosenFile.replace(/\\/g, "/").endsWith(file.path))
+
+    // Return link to vault file at heading of chosen search result
+    if (fileMatch) {
+        let resultHeading = fileMatch.extension !== 'pdf' ? chosenEntry.split('\n', 1)[0] : '';
+        let linkToEntry = resultHeading.startsWith('#') ? `${fileMatch.path}${resultHeading}` : fileMatch.path;
+        console.log(`Link: ${linkToEntry}, File: ${fileMatch.path}, Heading: ${resultHeading}`);
+        return linkToEntry;
+    }
 }
