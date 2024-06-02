@@ -13,4 +13,4 @@ There are several ways you can get started with sharing your data with the Ridge
 - Setup the sync options for either [Obsidian](/clients/obsidian) or [Emacs](/clients/emacs) to automatically sync your documents with Ridge. This is best if you are already using these tools and want to leverage Ridge's AI capabilities.
 - Configure your [Notion](/data-sources/notion_integration) or [Github](/data-sources/github_integration) to sync with Ridge. By providing your credentials, you can keep the data synced in the background.
 
-![demo of dragging and dropping a file](https://ridge-web-bucket.s3.amazonaws.com/drag_drop_file.gif)
+![demo of dragging and dropping a file](https://assets.ridge.dev/drag_drop_file.gif)
