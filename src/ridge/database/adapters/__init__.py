@@ -493,7 +493,7 @@ class ClientApplicationAdapters:
 
 class AgentAdapters:
     DEFAULT_AGENT_NAME = "Ridge"
-    DEFAULT_AGENT_AVATAR = "https://ridge-web-bucket.s3.amazonaws.com/lamp-128.png"
+    DEFAULT_AGENT_AVATAR = "https://assets.ridge.dev/lamp-128.png"
     DEFAULT_AGENT_SLUG = "ridge"
 
     @staticmethod
