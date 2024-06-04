@@ -1,4 +1,5 @@
 import { MarkdownRenderer, WorkspaceLeaf, request, requestUrl, setIcon } from 'obsidian';
+import * as DOMPurify from 'dompurify';
 import { RidgeSetting } from 'src/settings';
 import { RidgePaneView } from 'src/pane_view';
 import { RidgeView, createCopyParentText, getLinkToEntry, pasteTextAtCursor } from 'src/utils';
@@ -79,6 +80,20 @@ export class RidgeChatView extends RidgePaneView {
         contentEl.addClass("ridge-chat");
 
         super.onOpen();
+
+        // Construct Content Security Policy
+        let defaultDomains = `'self' ${this.setting.ridgeUrl} https://app.ridge.dev https://assets.ridge.dev`;
+        const defaultSrc = `default-src ${defaultDomains};`;
+        const scriptSrc = `script-src ${defaultDomains} 'unsafe-inline';`;
+        const connectSrc = `connect-src ${this.setting.ridgeUrl} https://ipapi.co/json;`;
+        const styleSrc = `style-src ${defaultDomains} 'unsafe-inline';`;
+        const imgSrc = `img-src ${defaultDomains} data: https://*.ridge.dev https://*.googleusercontent.com;`;
+        const childSrc = `child-src 'none';`;
+        const objectSrc = `object-src 'none';`;
+        const csp = `${defaultSrc} ${scriptSrc} ${connectSrc} ${styleSrc} ${imgSrc} ${childSrc} ${objectSrc}`;
+
+        // Add CSP meta tag to the Ridge Chat modal
+        document.head.createEl("meta", { attr: { "http-equiv": "Content-Security-Policy", "content": `${csp}` } });
 
         // Create area for chat logs
         let chatBodyEl = contentEl.createDiv({ attr: { id: "ridge-chat-body", class: "ridge-chat-body" } });
@@ -289,6 +304,9 @@ export class RidgeChatView extends RidgePaneView {
         // Remove any text between <s>[INST] and </s> tags. These are spurious instructions for the AI chat model.
         rendered_msg = rendered_msg.replace(/<s>\[INST\].+(<\/s>)?/g, '');
 
+        // Sanitize the markdown to render
+        message = DOMPurify.sanitize(message);
+
         // Render markdow to HTML DOM element
         let chat_message_body_text_el = this.contentEl.createDiv();
         chat_message_body_text_el.className = "chat-message-text-response";
@@ -375,6 +393,10 @@ export class RidgeChatView extends RidgePaneView {
         let chat_message_body_el = chatMessageEl.createDiv();
         chat_message_body_el.addClasses(["ridge-chat-message-text", sender]);
         let chat_message_body_text_el = chat_message_body_el.createDiv();
+
+        // Sanitize the markdown to render
+        message = DOMPurify.sanitize(message);
+
         if (raw) {
             chat_message_body_text_el.innerHTML = message;
         } else {
@@ -422,6 +444,8 @@ export class RidgeChatView extends RidgePaneView {
     async renderIncrementalMessage(htmlElement: HTMLDivElement, additionalMessage: string) {
         this.result += additionalMessage;
         htmlElement.innerHTML = "";
+        // Sanitize the markdown to render
+        this.result = DOMPurify.sanitize(this.result);
         // @ts-ignore
         await MarkdownRenderer.renderMarkdown(this.result, htmlElement, '', null);
         // Render action buttons for the message
