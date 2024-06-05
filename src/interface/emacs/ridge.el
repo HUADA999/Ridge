@@ -108,6 +108,11 @@
   :group 'ridge
   :type 'number)
 
+(defcustom ridge-index-files-batch 30
+  "Number of files to send for indexing in each request."
+  :group 'ridge
+  :type 'number)
+
 (defcustom ridge-default-content-type "org"
   "The default content type to perform search on."
   :group 'ridge
@@ -416,29 +421,20 @@ Auto invokes setup steps on calling main entrypoint."
          (files-to-index (or file-paths
                              (append (mapcan (lambda (dir) (directory-files-recursively dir "\\.\\(org\\|md\\|markdown\\|pdf\\|txt\\|rst\\|xml\\|htm\\|html\\)$")) content-directories) content-files)))
          (type-query (if (or (equal content-type "all") (not content-type)) "" (format "t=%s" content-type)))
-         (delete-files (ridge--get-delete-file-list ridge--indexed-files files-to-index))
+         (delete-files (-difference ridge--indexed-files files-to-index))
          (inhibit-message t)
          (message-log-max nil)
-         (batch-size 30))
-	(dolist (files (-partition-all batch-size files-to-index))
+         (batch-size ridge-index-files-batch))
+    (dolist (files (-partition-all batch-size files-to-index))
       (ridge--send-index-update-request (ridge--render-update-files-as-request-body files boundary) boundary content-type type-query force))
     (when delete-files
         (ridge--send-index-update-request (ridge--render-delete-files-as-request-body delete-files boundary) boundary content-type type-query force))
     (setq ridge--indexed-files files-to-index)))
 
-(defun ridge--get-delete-file-list (indexed-files upload-files)
-  "Get delete file list. when `INDEXED-FILES' no longer in `UPLOAD-FILES'.
-delete them. return delete-file-list."
-  (let (delete-files '())
-    (dolist (indexed-file indexed-files)
-      (when (not (member indexed-file upload-files))
-        (push indexed-file delete-files)))
-    delete-files))
-
 (defun ridge--send-index-update-request (body boundary &optional content-type type-query force)
-  "Send `BODY' request to ridge server. 'TYPE-QUERY' is appended to the URL.
-Use `BOUNDARY' to add headder conte
-nt-type."
+  "Send multi-part form `BODY' of `CONTENT-TYPE' in request to ridge server.
+Append 'TYPE-QUERY' as query parameter in request url.
+Specify `BOUNDARY' used to separate files in request header."
   (let ((url-request-method "POST")
         (url-request-data body)
           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
@@ -1087,8 +1083,8 @@ Paragraph only starts at first text after blank line."
 (defun ridge ()
   "Search and chat with your knowledge base using your personal AI copilot.
 
-Collaborate with Ridge to search, understand, create, review and update your knowledge base.
-Ridge can research across your org-mode, markdown notes, plaintext documents and the internet."
+Collaborate with Ridge to search, create, review and update your knowledge base.
+Research across the internet & your documents from the comfort of Emacs."
   (interactive)
   (when ridge-auto-setup
     (ridge-setup t))
