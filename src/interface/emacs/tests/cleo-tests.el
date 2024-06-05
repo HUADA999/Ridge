@@ -219,7 +219,7 @@ Rule everything\n")
         (progn
           (should
            (equal
-            (ridge--render-files-as-request-body (list upgrade-file act-file) '() "ridge")
+            (ridge--render-update-files-as-request-body (list upgrade-file act-file) "ridge")
             (format
             "\n--ridge\r\n\
 Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
@@ -244,19 +244,16 @@ Rule everything\n\n\r\n\
         (progn
           (should
            (equal
-            (ridge--render-files-as-request-body (list upgrade-file act-file) (list upgrade-file act-file "/tmp/deleted-file.org") "ridge")
+            (ridge--render-delete-files-as-request-body (list upgrade-file act-file "/tmp/deleted-file.org") "ridge")
             (format
             "\n--ridge\r\n\
 Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
 Content-Type: text/org\r\n\r\n\
-# Become God\n\
-## Upgrade\n\n\
-Penance to Immortality\n\n\r
+\r
 --ridge\r\n\
 Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
 Content-Type: text/org\r\n\r\n\
-## Act\n\n\
-Rule everything\n\n\r
+\r
 --ridge\r\n\
 Content-Disposition: form-data; name=\"files\"; filename=\"%s\"\r\n\
 Content-Type: text/org\r\n\r\n\
