@@ -732,7 +732,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
       (thread-last
         json-response
         ;; generate chat messages from Ridge Chat API response
-        (mapcar #'ridge--render-chat-response)
+        (mapcar #'ridge--format-chat-response)
         ;; insert chat messages into Ridge Chat Buffer
         (mapc #'insert))
       (progn
@@ -786,33 +786,29 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; render json response into formatted chat messages
   (with-current-buffer (get-buffer buffer-name)
     (let ((inhibit-read-only t)
-          (new-content-start-pos (point-max))
-          (query-time (format-time-string "%F %T"))
-          (json-response (ridge--query-chat-api query)))
-      (goto-char new-content-start-pos)
+          (query-time (format-time-string "%F %T")))
+      (goto-char (point-max))
       (insert
-       (ridge--render-chat-message query "you" query-time)
-       (ridge--render-chat-response json-response))
-      (ridge--add-hover-text-to-footnote-refs new-content-start-pos))
-    (progn
-      (org-set-startup-visibility)
-      (visual-line-mode)
-      (re-search-backward "^\*+ 🏮" nil t))))
+       (ridge--render-chat-message query "you" query-time))
+      (ridge--query-chat-api query
+                            #'ridge--format-chat-response
+                            #'ridge--render-chat-response buffer-name))))
 
-(defun ridge--query-chat-api (query)
-  "Send QUERY to Ridge Chat API."
+(defun ridge--query-chat-api (query callback &rest cbargs)
+  "Send QUERY to Ridge Chat API and call CALLBACK with the response.
+CBARGS are optional additional arguments to pass to CALLBACK."
   (let* ((url-request-method "GET")
          (encoded-query (url-hexify-string query))
          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
          (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url encoded-query ridge-results-count)))
-    (with-temp-buffer
-      (condition-case ex
-          (progn
-            (url-insert-file-contents query-url)
-            (json-parse-buffer :object-type 'alist))
-        ('file-error (cond ((string-match "Internal server error" (nth 2 ex))
-                      (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
-                     (t (message "Chat exception: [%s]" ex))))))))
+    (url-retrieve query-url
+                  (lambda (status)
+                    (if (plist-get status :error)
+                        (message "Chat exception: [%s]" (plist-get status :error))
+                      (goto-char (point-min))
+                      (re-search-forward "^$")
+                      (delete-region (point) (point-min))
+                      (apply callback (json-parse-buffer :object-type 'alist) cbargs))))))
 
 
 (defun ridge--get-chat-history-api ()
@@ -864,7 +860,20 @@ RECEIVE-DATE is the message receive date."
      (replace-regexp-in-string "\n\n" "\n")
      (format "\n[fn:%x] %s" ridge--reference-count)))))
 
-(defun ridge--render-chat-response (json-response)
+(defun ridge--render-chat-response (response buffer-name)
+  (with-current-buffer (get-buffer buffer-name)
+    (let ((start-pos (point))
+          (inhibit-read-only t))
+      (goto-char (point-max))
+      (insert
+       response
+       (or (ridge--add-hover-text-to-footnote-refs start-pos) ""))
+      (progn
+        (org-set-startup-visibility)
+        (visual-line-mode)
+        (re-search-backward "^\*+ 🏮" nil t)))))
+
+(defun ridge--format-chat-response (json-response &optional callback &rest cbargs)
   "Render chat message using JSON-RESPONSE from Ridge Chat API."
   (let* ((message (cdr (or (assoc 'response json-response) (assoc 'message json-response))))
          (sender (cdr (assoc 'by json-response)))
@@ -872,19 +881,23 @@ RECEIVE-DATE is the message receive date."
          (references (or (cdr (assoc 'context json-response)) '()))
          (footnotes (mapcar #'ridge--generate-reference references))
          (footnote-links (mapcar #'car footnotes))
-         (footnote-defs (mapcar #'cdr footnotes)))
-    (thread-first
-      ;; concatenate ridge message and references from API
-      (concat
-       message
-       ;; append reference links to ridge message
-       (string-join footnote-links "")
-       ;; append reference sub-section to ridge message and fold it
-       (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" "")
-       ;; append reference definitions to references subsection
-       (string-join footnote-defs " "))
-      ;; Render chat message using data obtained from API
-      (ridge--render-chat-message sender receive-date))))
+         (footnote-defs (mapcar #'cdr footnotes))
+         (formatted-response
+          (thread-first
+            ;; concatenate ridge message and references from API
+            (concat
+             message
+             ;; append reference links to ridge message
+             (string-join footnote-links "")
+             ;; append reference sub-section to ridge message and fold it
+             (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" "")
+             ;; append reference definitions to references subsection
+             (string-join footnote-defs " "))
+            ;; Render chat message using data obtained from API
+            (ridge--render-chat-message sender receive-date))))
+    (if callback
+        (apply callback formatted-response cbargs)
+        formatted-response)))
 
 
 ;; ------------------
