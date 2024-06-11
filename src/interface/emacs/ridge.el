@@ -698,7 +698,7 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   "Chat with Ridge."
   (interactive)
   (when (not (get-buffer ridge--chat-buffer-name))
-      (ridge--load-chat-history ridge--chat-buffer-name))
+      (ridge--load-chat-session ridge--chat-buffer-name))
   (ridge--open-side-pane ridge--chat-buffer-name)
   (let ((query (read-string "Query: ")))
     (when (not (string-empty-p query))
@@ -722,10 +722,11 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
                        (- (truncate (* 0.33 (frame-width))) (window-width))
                        t)))))
 
-(defun ridge--load-chat-history (buffer-name)
+(defun ridge--load-chat-session (buffer-name &optional session-id)
   "Load Ridge Chat conversation history into BUFFER-NAME."
   (setq ridge--reference-count 0)
-  (let ((json-response (cdr (elt (cdr (assoc 'response (ridge--get-chat-history-api))) 0))))
+  (let ((inhibit-read-only t)
+        (json-response (cdr (elt (cdr (assoc 'response (ridge--get-chat-session session-id))) 0))))
     (with-current-buffer (get-buffer-create buffer-name)
       (erase-buffer)
       (insert "* Ridge Chat\n")
@@ -794,6 +795,19 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
                             #'ridge--format-chat-response
                             #'ridge--render-chat-response buffer-name))))
 
+(defun ridge--get-chat-sessions ()
+  "Get all chat sessions from Ridge server."
+  (let* ((url-request-method "GET")
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
+         (query-url (format "%s/api/chat/sessions?client=emacs" ridge-server-url)))
+    (with-temp-buffer
+      (condition-case ex
+          (progn
+            (url-insert-file-contents query-url)
+            (json-parse-buffer :object-type 'alist))
+        ('file-error (message "Chat exception: [%s]" ex))))))
+
+
 (defun ridge--query-chat-api (query callback &rest cbargs)
   "Send QUERY to Ridge Chat API and call CALLBACK with the response.
 CBARGS are optional additional arguments to pass to CALLBACK."
@@ -811,11 +825,12 @@ CBARGS are optional additional arguments to pass to CALLBACK."
                       (apply callback (json-parse-buffer :object-type 'alist) cbargs))))))
 
 
-(defun ridge--get-chat-history-api ()
-  "Send QUERY to Ridge Chat History API."
+(defun ridge--get-chat-session (&optional session-id)
+  "Get chat messages from default or SESSION-ID chat session."
   (let* ((url-request-method "GET")
          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (query-url (format "%s/api/chat/history?client=emacs" ridge-server-url)))
+         (session-id-query-param (if session-id (format "&conversation_id=%s" session-id) ""))
+         (query-url (format "%s/api/chat/history?client=emacs%s" ridge-server-url session-id-query-param)))
     (with-temp-buffer
       (condition-case ex
           (progn
@@ -825,6 +840,17 @@ CBARGS are optional additional arguments to pass to CALLBACK."
                       (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
                      (t (message "Chat exception: [%s]" ex))))))))
 
+(defun ridge--open-conversation-session ()
+  "Menu to select Ridge conversation session to open."
+  (let* ((sessions (ridge--get-chat-sessions))
+         (session-alist (-map (lambda (session)
+                                (cons (cdr (assoc 'slug session))
+                                      (cdr (assoc 'conversation_id session))))
+                              sessions))
+         (selected-session-slug (completing-read "Open Conversation: " session-alist nil t))
+         (selected-session-id (cdr (assoc selected-session-slug session-alist))))
+    (ridge--load-chat-session ridge--chat-buffer-name selected-session-id)
+    (ridge--open-side-pane ridge--chat-buffer-name)))
 
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
@@ -1090,7 +1116,7 @@ Paragraph only starts at first text after blank line."
 ;; ---------
 
 (defun ridge--setup-and-show-menu ()
-  "Create Transient menu for ridge and show it."
+  "Create main Transient menu for Ridge and show it."
   ;; Create the Ridge Transient menu
   (transient-define-argument ridge--content-type-switch ()
     :class 'transient-switches
@@ -1137,15 +1163,26 @@ Paragraph only starts at first text after blank line."
     (interactive (list (transient-args transient-current-command)))
     (ridge--chat))
 
+  (transient-define-suffix ridge--open-conversation-session-command (&optional _)
+    "Command to select Ridge conversation sessions to open."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--open-conversation-session))
+
+  (transient-define-prefix ridge--chat-menu ()
+    "Open the Ridge chat menu."
+    ["Act"
+     ("c" "Chat" ridge--chat-command)
+     ("o" "Open Session" ridge--open-conversation-session-command)])
+
   (transient-define-prefix ridge--menu ()
     "Create Ridge Menu to Configure and Execute Commands."
     [["Configure Search"
-      ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
+      ("-n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
       ("t" "Content Type" ridge--content-type-switch)]
      ["Configure Update"
       ("-f" "Force Update" "--force-update")]]
     [["Act"
-      ("c" "Chat" ridge--chat-command)
+      ("c" "Chat" ridge--chat-menu)
       ("s" "Search" ridge--search-command)
       ("f" "Find Similar" ridge--find-similar-command)
       ("u" "Update" ridge--update-command)
