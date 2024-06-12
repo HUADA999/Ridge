@@ -857,6 +857,17 @@ CBARGS are optional additional arguments to pass to CALLBACK."
     (ridge--load-chat-session ridge--chat-buffer-name selected-session-id)
     (ridge--open-side-pane ridge--chat-buffer-name)))
 
+(defun ridge--create-chat-session ()
+  "Create new chat session."
+  (ridge--call-api "/api/chat/sessions" "POST"))
+
+(defun ridge--new-conversation-session ()
+  "Create new Ridge conversation session."
+  (let* ((session (ridge--create-chat-session))
+         (new-session-id (cdr (assoc 'conversation_id session))))
+    (ridge--load-chat-session ridge--chat-buffer-name new-session-id)
+    (ridge--open-side-pane ridge--chat-buffer-name)))
+
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
 MESSAGE is the text of the chat message.
@@ -1172,11 +1183,18 @@ Paragraph only starts at first text after blank line."
     (interactive (list (transient-args transient-current-command)))
     (ridge--open-conversation-session))
 
+  (transient-define-suffix ridge--new-conversation-session-command (&optional _)
+    "Command to select Ridge conversation sessions to open."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--new-conversation-session))
+
   (transient-define-prefix ridge--chat-menu ()
     "Open the Ridge chat menu."
     ["Act"
      ("c" "Chat" ridge--chat-command)
-     ("o" "Open Session" ridge--open-conversation-session-command)])
+     ("o" "Open Conversation" ridge--open-conversation-session-command)
+     ("n" "New Conversation" ridge--new-conversation-session-command)
+     ])
 
   (transient-define-prefix ridge--menu ()
     "Create Ridge Menu to Configure and Execute Commands."
