@@ -629,38 +629,67 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
 ;; --------------
 ;; Query Ridge API
 ;; --------------
+(defun ridge--call-api (path &optional method params callback &rest cbargs)
+  "Sync call API at PATH with METHOD and query PARAMS as kv assoc list.
+Return json parsed response as alist."
+  (let* ((url-request-method (or method "GET"))
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
+         (param-string (if params (url-build-query-string params) ""))
+         (query-url (format "%s%s?%s&client=emacs" ridge-server-url path param-string))
+         (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs))) ; normalize cbargs to (a b) from ((a b)) if required
+    (with-temp-buffer
+      (condition-case ex
+          (progn
+            (url-insert-file-contents query-url)
+            (if (and callback cbargs)
+                (apply callback (json-parse-buffer :object-type 'alist) cbargs)
+              (if callback
+                  (funcall callback (json-parse-buffer :object-type 'alist))
+            (json-parse-buffer :object-type 'alist))))
+        ('file-error (message "Chat exception: [%s]" ex))))))
+
+(defun ridge--call-api-async (path &optional method params callback &rest cbargs)
+  "Async call to API at PATH with METHOD and query PARAMS as kv assoc list.
+Return json parsed response as alist."
+  (let* ((url-request-method (or method "GET"))
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
+         (param-string (if params (url-build-query-string params) ""))
+         (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs)) ; normalize cbargs to (a b) from ((a b)) if required
+         (query-url (format "%s%s?%s&client=emacs" ridge-server-url path param-string)))
+    (url-retrieve query-url
+                  (lambda (status)
+                    (if (plist-get status :error)
+                        (message "Chat exception: [%s]" (plist-get status :error))
+                      (goto-char (point-min))
+                      (re-search-forward "^$")
+                      (delete-region (point) (point-min))
+                      (if (and callback cbargs)
+                          (apply callback (json-parse-buffer :object-type 'alist) cbargs)
+                        (if callback
+                            (funcall callback (json-parse-buffer :object-type 'alist))
+                          (json-parse-buffer :object-type 'alist))))))))
+
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (let ((config-url (format "%s/api/config/types" ridge-server-url))
-        (url-request-method "GET")
-        (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
-    (with-temp-buffer
-      (url-insert-file-contents config-url)
-      (thread-last
-        (json-parse-buffer :object-type 'alist)
-        (mapcar #'intern)))))
+  (ridge--call-api "/api/config/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
 
-(defun ridge--construct-search-api-query (query content-type &optional rerank)
-  "Construct Search API Query.
-Use QUERY, CONTENT-TYPE and (optional) RERANK as query params"
-  (let ((rerank (or rerank "false"))
-        (encoded-query (url-hexify-string query)))
-    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s&client=emacs" ridge-server-url encoded-query content-type rerank ridge-results-count)))
+(defun ridge--query-search-api-and-render-results (query content-type buffer-name &optional rerank title)
+  "Query Ridge Search API with QUERY, CONTENT-TYPE and (optional) RERANK as query params
+Render results in BUFFER-NAME using search results, CONTENT-TYPE and (optional) TITLE."
+  (let ((title (or title query))
+        (rerank (or rerank "false"))
+        (params `((q ,query) (t ,content-type) (r ,rerank) (n ,ridge-results-count)))
+        (path "/api/search"))
+    (ridge--call-api path
+                    "GET"
+                    params
+                    'ridge--render-search-results
+                    content-type title buffer-name)))
 
-(defun ridge--query-search-api-and-render-results (query-url content-type query buffer-name)
-  "Query Ridge Search with QUERY-URL.
-Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
-  ;; get json response from api
-  (with-current-buffer buffer-name
-    (let ((inhibit-read-only t)
-          (url-request-method "GET")
-          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
-      (erase-buffer)
-      (url-insert-file-contents query-url)))
+(defun ridge--render-search-results (json-response content-type query buffer-name)
   ;; render json response into formatted entries
   (with-current-buffer buffer-name
-    (let ((inhibit-read-only t)
-          (json-response (json-parse-buffer :object-type 'alist)))
+    (let ((inhibit-read-only t))
       (erase-buffer)
       (insert
        (cond ((equal content-type "org") (ridge--extract-entries-as-org json-response query))
@@ -673,15 +702,15 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
                  (equal content-type "org"))
              (progn (visual-line-mode)
                     (org-mode)
-                   (setq-local
-                    org-startup-folded "showall"
-                    org-hide-leading-stars t
-                    org-startup-with-inline-images t)
-                   (org-set-startup-visibility)))
+                    (setq-local
+                     org-startup-folded "showall"
+                     org-hide-leading-stars t
+                     org-startup-with-inline-images t)
+                    (org-set-startup-visibility)))
             ((equal content-type "markdown") (progn (markdown-mode)
                                                     (visual-line-mode)))
             ((equal content-type "image") (progn (shr-render-region (point-min) (point-max))
-                                                (goto-char (point-min))))
+                                                 (goto-char (point-min))))
             (t (fundamental-mode))))
     ;; keep cursor at top of ridge buffer by default
     (goto-char (point-min))
@@ -795,50 +824,23 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
                             #'ridge--format-chat-response
                             #'ridge--render-chat-response buffer-name))))
 
-(defun ridge--get-chat-sessions ()
-  "Get all chat sessions from Ridge server."
-  (let* ((url-request-method "GET")
-         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (query-url (format "%s/api/chat/sessions?client=emacs" ridge-server-url)))
-    (with-temp-buffer
-      (condition-case ex
-          (progn
-            (url-insert-file-contents query-url)
-            (json-parse-buffer :object-type 'alist))
-        ('file-error (message "Chat exception: [%s]" ex))))))
-
-
 (defun ridge--query-chat-api (query callback &rest cbargs)
   "Send QUERY to Ridge Chat API and call CALLBACK with the response.
 CBARGS are optional additional arguments to pass to CALLBACK."
-  (let* ((url-request-method "GET")
-         (encoded-query (url-hexify-string query))
-         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url encoded-query ridge-results-count)))
-    (url-retrieve query-url
-                  (lambda (status)
-                    (if (plist-get status :error)
-                        (message "Chat exception: [%s]" (plist-get status :error))
-                      (goto-char (point-min))
-                      (re-search-forward "^$")
-                      (delete-region (point) (point-min))
-                      (apply callback (json-parse-buffer :object-type 'alist) cbargs))))))
+  (ridge--call-api-async "/api/chat"
+                        "GET"
+                        `(("q" ,query) ("n" ,ridge-results-count))
+                        callback cbargs))
 
+(defun ridge--get-chat-sessions ()
+  "Get all chat sessions from Ridge server."
+  (ridge--call-api "/api/chat/sessions" "GET"))
 
 (defun ridge--get-chat-session (&optional session-id)
   "Get chat messages from default or SESSION-ID chat session."
-  (let* ((url-request-method "GET")
-         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (session-id-query-param (if session-id (format "&conversation_id=%s" session-id) ""))
-         (query-url (format "%s/api/chat/history?client=emacs%s" ridge-server-url session-id-query-param)))
-    (with-temp-buffer
-      (condition-case ex
-          (progn
-            (url-insert-file-contents query-url)
-            (json-parse-buffer :object-type 'alist))
-        ('file-error (cond ((string-match "Internal server error" (nth 2 ex))
-                      (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
-                     (t (message "Chat exception: [%s]" ex))))))))
+  (ridge--call-api "/api/chat/history"
+                  "GET"
+                  (when session-id `(("conversation_id" ,session-id)))))
 
 (defun ridge--open-conversation-session ()
   "Menu to select Ridge conversation session to open."
@@ -977,8 +979,7 @@ RECEIVE-DATE is the message receive date."
   "Perform Incremental Search on Ridge. Allow optional RERANK of results."
   (let* ((rerank-str (cond (rerank "true") (t "false")))
          (ridge-buffer-name (get-buffer-create ridge--search-buffer-name))
-         (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-search-api-query query ridge--content-type rerank-str)))
+         (query (minibuffer-contents-no-properties)))
     ;; Query ridge API only when user in ridge minibuffer and non-empty query
     ;; Prevents querying if
     ;;   1. user hasn't started typing query
@@ -998,10 +999,10 @@ RECEIVE-DATE is the message receive date."
           (setq ridge--rerank t)
           (message "ridge.el: Rerank Results"))
         (ridge--query-search-api-and-render-results
-         query-url
-         ridge--content-type
          query
-         ridge-buffer-name))))))
+         ridge--content-type
+         ridge-buffer-name
+         rerank-str))))))
 
 (defun ridge--delete-open-network-connections-to-server ()
   "Delete all network connections to ridge server."
@@ -1095,7 +1096,6 @@ Paragraph only starts at first text after blank line."
                  ;; get paragraph, if in text mode
                  (t
                   (ridge--get-current-paragraph-text))))
-         (query-url (ridge--construct-search-api-query query content-type rerank))
          ;; extract heading to show in result buffer from query
          (query-title
           (format "Similar to: %s"
@@ -1103,10 +1103,11 @@ Paragraph only starts at first text after blank line."
          (buffer-name (get-buffer-create ridge--search-buffer-name)))
     (progn
       (ridge--query-search-api-and-render-results
-       query-url
+       query
        content-type
-       query-title
-       buffer-name)
+       buffer-name
+       rerank
+       query-title)
       (ridge--open-side-pane buffer-name)
       (goto-char (point-min)))))
 
