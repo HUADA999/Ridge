@@ -888,6 +888,17 @@ CBARGS are optional additional arguments to pass to CALLBACK."
     (ridge--load-chat-session ridge--chat-buffer-name new-session-id)
     (ridge--open-side-pane ridge--chat-buffer-name)))
 
+(defun ridge--delete-chat-session (session-id)
+  "Delete new chat session."
+  (ridge--call-api "/api/chat/history" "DELETE" `(("conversation_id" ,session-id))))
+
+(defun ridge--delete-conversation-session ()
+  "Delete new Ridge conversation session."
+  (let* ((selected-session-id (ridge--select-conversation-session "Delete"))
+         (session (ridge--delete-chat-session selected-session-id)))
+    (ridge--load-chat-session ridge--chat-buffer-name)
+    (ridge--open-side-pane ridge--chat-buffer-name)))
+
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
 MESSAGE is the text of the chat message.
@@ -1208,12 +1219,19 @@ Paragraph only starts at first text after blank line."
     (interactive (list (transient-args transient-current-command)))
     (ridge--new-conversation-session))
 
+  (transient-define-suffix ridge--delete-conversation-session-command (&optional _)
+    "Command to select Ridge conversation sessions to delete."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--delete-conversation-session))
+
   (transient-define-prefix ridge--chat-menu ()
     "Open the Ridge chat menu."
     ["Act"
      ("c" "Chat" ridge--chat-command)
      ("o" "Open Conversation" ridge--open-conversation-session-command)
      ("n" "New Conversation" ridge--new-conversation-session-command)
+     ("d" "Delete Conversation" ridge--delete-conversation-session-command)
+     ("q" "Quit" transient-quit-one)
      ])
 
   (transient-define-prefix ridge--menu ()
