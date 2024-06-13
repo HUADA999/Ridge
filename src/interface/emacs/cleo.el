@@ -858,17 +858,22 @@ CBARGS are optional additional arguments to pass to CALLBACK."
                   "GET"
                   (when session-id `(("conversation_id" ,session-id)))))
 
-(defun ridge--open-conversation-session ()
-  "Menu to select Ridge conversation session to open."
-  (let* ((sessions (ridge--get-chat-sessions))
+(defun ridge--select-conversation-session (&optional completion-action)
+  "Select Ridge conversation session to perform COMPLETION-ACTION on."
+  (let* ((completion-text (format "%s Conversation:" (or completion-action "Open")))
+         (sessions (ridge--get-chat-sessions))
          (session-alist (-map (lambda (session)
                                 (cons (if (not (equal :null (cdr (assoc 'slug session))))
                                           (cdr (assoc 'slug session))
                                         (format "New Conversation (%s)" (cdr (assoc 'conversation_id session))))
                                       (cdr (assoc 'conversation_id session))))
                               sessions))
-         (selected-session-slug (completing-read "Open Conversation: " session-alist nil t))
-         (selected-session-id (cdr (assoc selected-session-slug session-alist))))
+         (selected-session-slug (completing-read completion-text session-alist nil t)))
+    (cdr (assoc selected-session-slug session-alist))))
+
+(defun ridge--open-conversation-session ()
+  "Menu to select Ridge conversation session to open."
+  (let ((selected-session-id (ridge--select-conversation-session "Open")))
     (ridge--load-chat-session ridge--chat-buffer-name selected-session-id)
     (ridge--open-side-pane ridge--chat-buffer-name)))
 
