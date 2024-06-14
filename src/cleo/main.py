@@ -3,6 +3,7 @@
 """
 
 from contextlib import redirect_stdout
+import itertools
 import logging
 import io
 import os
@@ -66,19 +67,25 @@ else:
 django_app = get_asgi_application()
 
 # Add CORS middleware
-RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "app.ridge.dev")
+RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "app.ridge.dev").split(",")
+scheme = "https" if not is_env_var_true("RIDGE_NO_HTTPS") else "http"
+custom_origins = list(
+    itertools.chain.from_iterable(
+        [[f"{scheme}://{domain.strip()}", f"{scheme}://{domain.strip()}:*"] for domain in RIDGE_DOMAIN]
+    )
+)
+default_origins = [
+    "app://obsidian.md",  # To allow access from Obsidian desktop app
+    "capacitor://localhost",  # To allow access from Obsidian iOS app using Capacitor.JS
+    "http://localhost",  # To allow access from Obsidian Android app
+    "http://localhost:*",  # To allow access from localhost
+    "http://127.0.0.1:*",  # To allow access from localhost
+    "app://ridge.dev",  # To allow access from Ridge desktop app
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "app://obsidian.md",
-        "capacitor://localhost",  # To allow access from Obsidian iOS app using Capacitor.JS
-        "http://localhost",  # To allow access from Obsidian Android app
-        "http://localhost:*",
-        "http://127.0.0.1:*",
-        f"https://{RIDGE_DOMAIN}" if not is_env_var_true("RIDGE_NO_HTTPS") else f"http://{RIDGE_DOMAIN}",
-        f"https://{RIDGE_DOMAIN}:*" if not is_env_var_true("RIDGE_NO_HTTPS") else f"http://{RIDGE_DOMAIN}:*",
-        "app://ridge.dev",
-    ],
+    allow_origins=default_origins + custom_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
