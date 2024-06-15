@@ -113,7 +113,7 @@
   :group 'ridge
   :type 'number)
 
-(defcustom ridge-default-content-type "org"
+(defcustom ridge-default-content-type "all"
   "The default content type to perform search on."
   :group 'ridge
   :type '(choice (const "org")
@@ -163,6 +163,7 @@ NO-PAGING FILTER))
      "
      Set Content Type
 -------------------------\n"
+     ("C-c RET | improve sort \n")
      (when (member 'markdown enabled-content-types)
        "C-x m  | markdown\n")
      (when (member 'org enabled-content-types)
@@ -174,24 +175,12 @@ NO-PAGING FILTER))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
 (defvar ridge--reference-count 0 "Track number of references currently in chat bufffer.")
-(defun ridge--search-markdown () "Set content-type to `markdown'." (interactive) (setq ridge--content-type "markdown"))
-(defun ridge--search-org () "Set content-type to `org-mode'." (interactive) (setq ridge--content-type "org"))
-(defun ridge--search-images () "Set content-type to image." (interactive) (setq ridge--content-type "image"))
-(defun ridge--search-pdf () "Set content-type to pdf." (interactive) (setq ridge--content-type "pdf"))
-(defun ridge--improve-rank () "Use cross-encoder to rerank search results." (interactive) (ridge--incremental-search t))
+(defun ridge--improve-sort () "Use cross-encoder to improve sorting of search results." (interactive) (ridge--incremental-search t))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search. Build of EXISTING-KEYMAP when passed."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (kmap (or existing-keymap (make-sparse-keymap))))
-    (define-key kmap (kbd "C-c RET") #'ridge--improve-rank)
-    (when (member 'markdown enabled-content-types)
-      (define-key kmap (kbd "C-x m") #'ridge--search-markdown))
-    (when (member 'org enabled-content-types)
-      (define-key kmap (kbd "C-x o") #'ridge--search-org))
-    (when (member 'image enabled-content-types)
-      (define-key kmap (kbd "C-x i") #'ridge--search-images))
-    (when (member 'pdf enabled-content-types)
-      (define-key kmap (kbd "C-x p") #'ridge--search-pdf))
+    (define-key kmap (kbd "C-c RET") #'ridge--improve-sort)
     kmap))
 
 (defvar ridge--keymap nil "Track Ridge keymap in this variable.")
