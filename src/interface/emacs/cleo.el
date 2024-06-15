@@ -680,7 +680,7 @@ Render results in BUFFER-NAME using search results, CONTENT-TYPE and (optional) 
         (rerank (or rerank "false"))
         (params `((q ,query) (t ,content-type) (r ,rerank) (n ,ridge-results-count)))
         (path "/api/search"))
-    (ridge--call-api path
+    (ridge--call-api-async path
                     "GET"
                     params
                     'ridge--render-search-results
