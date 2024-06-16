@@ -113,7 +113,7 @@
   :group 'ridge
   :type 'number)
 
-(defcustom ridge-default-content-type "org"
+(defcustom ridge-default-content-type "all"
   "The default content type to perform search on."
   :group 'ridge
   :type '(choice (const "org")
@@ -163,6 +163,7 @@ NO-PAGING FILTER))
      "
      Set Content Type
 -------------------------\n"
+     ("C-c RET | improve sort \n")
      (when (member 'markdown enabled-content-types)
        "C-x m  | markdown\n")
      (when (member 'org enabled-content-types)
@@ -174,24 +175,12 @@ NO-PAGING FILTER))
 
 (defvar ridge--rerank nil "Track when re-rank of results triggered.")
 (defvar ridge--reference-count 0 "Track number of references currently in chat bufffer.")
-(defun ridge--search-markdown () "Set content-type to `markdown'." (interactive) (setq ridge--content-type "markdown"))
-(defun ridge--search-org () "Set content-type to `org-mode'." (interactive) (setq ridge--content-type "org"))
-(defun ridge--search-images () "Set content-type to image." (interactive) (setq ridge--content-type "image"))
-(defun ridge--search-pdf () "Set content-type to pdf." (interactive) (setq ridge--content-type "pdf"))
-(defun ridge--improve-rank () "Use cross-encoder to rerank search results." (interactive) (ridge--incremental-search t))
+(defun ridge--improve-sort () "Use cross-encoder to improve sorting of search results." (interactive) (ridge--incremental-search t))
 (defun ridge--make-search-keymap (&optional existing-keymap)
   "Setup keymap to configure Ridge search. Build of EXISTING-KEYMAP when passed."
   (let ((enabled-content-types (ridge--get-enabled-content-types))
         (kmap (or existing-keymap (make-sparse-keymap))))
-    (define-key kmap (kbd "C-c RET") #'ridge--improve-rank)
-    (when (member 'markdown enabled-content-types)
-      (define-key kmap (kbd "C-x m") #'ridge--search-markdown))
-    (when (member 'org enabled-content-types)
-      (define-key kmap (kbd "C-x o") #'ridge--search-org))
-    (when (member 'image enabled-content-types)
-      (define-key kmap (kbd "C-x i") #'ridge--search-images))
-    (when (member 'pdf enabled-content-types)
-      (define-key kmap (kbd "C-x p") #'ridge--search-pdf))
+    (define-key kmap (kbd "C-c RET") #'ridge--improve-sort)
     kmap))
 
 (defvar ridge--keymap nil "Track Ridge keymap in this variable.")
@@ -629,38 +618,67 @@ Use `BOUNDARY' to separate files. This is sent to Ridge server as a POST request
 ;; --------------
 ;; Query Ridge API
 ;; --------------
+(defun ridge--call-api (path &optional method params callback &rest cbargs)
+  "Sync call API at PATH with METHOD and query PARAMS as kv assoc list.
+Return json parsed response as alist."
+  (let* ((url-request-method (or method "GET"))
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
+         (param-string (if params (url-build-query-string params) ""))
+         (query-url (format "%s%s?%s&client=emacs" ridge-server-url path param-string))
+         (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs))) ; normalize cbargs to (a b) from ((a b)) if required
+    (with-temp-buffer
+      (condition-case ex
+          (progn
+            (url-insert-file-contents query-url)
+            (if (and callback cbargs)
+                (apply callback (json-parse-buffer :object-type 'alist) cbargs)
+              (if callback
+                  (funcall callback (json-parse-buffer :object-type 'alist))
+            (json-parse-buffer :object-type 'alist))))
+        ('file-error (message "Chat exception: [%s]" ex))))))
+
+(defun ridge--call-api-async (path &optional method params callback &rest cbargs)
+  "Async call to API at PATH with METHOD and query PARAMS as kv assoc list.
+Return json parsed response as alist."
+  (let* ((url-request-method (or method "GET"))
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
+         (param-string (if params (url-build-query-string params) ""))
+         (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs)) ; normalize cbargs to (a b) from ((a b)) if required
+         (query-url (format "%s%s?%s&client=emacs" ridge-server-url path param-string)))
+    (url-retrieve query-url
+                  (lambda (status)
+                    (if (plist-get status :error)
+                        (message "Chat exception: [%s]" (plist-get status :error))
+                      (goto-char (point-min))
+                      (re-search-forward "^$")
+                      (delete-region (point) (point-min))
+                      (if (and callback cbargs)
+                          (apply callback (json-parse-buffer :object-type 'alist) cbargs)
+                        (if callback
+                            (funcall callback (json-parse-buffer :object-type 'alist))
+                          (json-parse-buffer :object-type 'alist))))))))
+
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (let ((config-url (format "%s/api/config/types" ridge-server-url))
-        (url-request-method "GET")
-        (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
-    (with-temp-buffer
-      (url-insert-file-contents config-url)
-      (thread-last
-        (json-parse-buffer :object-type 'alist)
-        (mapcar #'intern)))))
+  (ridge--call-api "/api/config/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
 
-(defun ridge--construct-search-api-query (query content-type &optional rerank)
-  "Construct Search API Query.
-Use QUERY, CONTENT-TYPE and (optional) RERANK as query params"
-  (let ((rerank (or rerank "false"))
-        (encoded-query (url-hexify-string query)))
-    (format "%s/api/search?q=%s&t=%s&r=%s&n=%s&client=emacs" ridge-server-url encoded-query content-type rerank ridge-results-count)))
+(defun ridge--query-search-api-and-render-results (query content-type buffer-name &optional rerank title)
+  "Query Ridge Search API with QUERY, CONTENT-TYPE and (optional) RERANK as query params
+Render results in BUFFER-NAME using search results, CONTENT-TYPE and (optional) TITLE."
+  (let ((title (or title query))
+        (rerank (or rerank "false"))
+        (params `((q ,query) (t ,content-type) (r ,rerank) (n ,ridge-results-count)))
+        (path "/api/search"))
+    (ridge--call-api-async path
+                    "GET"
+                    params
+                    'ridge--render-search-results
+                    content-type title buffer-name)))
 
-(defun ridge--query-search-api-and-render-results (query-url content-type query buffer-name)
-  "Query Ridge Search with QUERY-URL.
-Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
-  ;; get json response from api
-  (with-current-buffer buffer-name
-    (let ((inhibit-read-only t)
-          (url-request-method "GET")
-          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
-      (erase-buffer)
-      (url-insert-file-contents query-url)))
+(defun ridge--render-search-results (json-response content-type query buffer-name)
   ;; render json response into formatted entries
   (with-current-buffer buffer-name
-    (let ((inhibit-read-only t)
-          (json-response (json-parse-buffer :object-type 'alist)))
+    (let ((inhibit-read-only t))
       (erase-buffer)
       (insert
        (cond ((equal content-type "org") (ridge--extract-entries-as-org json-response query))
@@ -673,16 +691,20 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
                  (equal content-type "org"))
              (progn (visual-line-mode)
                     (org-mode)
-                   (setq-local
-                    org-startup-folded "showall"
-                    org-hide-leading-stars t
-                    org-startup-with-inline-images t)
-                   (org-set-startup-visibility)))
+                    (setq-local
+                     org-startup-folded "showall"
+                     org-hide-leading-stars t
+                     org-startup-with-inline-images t)
+                    (org-set-startup-visibility)))
             ((equal content-type "markdown") (progn (markdown-mode)
                                                     (visual-line-mode)))
             ((equal content-type "image") (progn (shr-render-region (point-min) (point-max))
-                                                (goto-char (point-min))))
+                                                 (goto-char (point-min))))
             (t (fundamental-mode))))
+    ;; keep cursor at top of ridge buffer by default
+    (goto-char (point-min))
+    ;; enable minor modes for ridge chat
+    (visual-line-mode)
     (read-only-mode t)))
 
 
@@ -694,24 +716,52 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   "Chat with Ridge."
   (interactive)
   (when (not (get-buffer ridge--chat-buffer-name))
-      (ridge--load-chat-history ridge--chat-buffer-name))
-  (switch-to-buffer ridge--chat-buffer-name)
+      (ridge--load-chat-session ridge--chat-buffer-name))
+  (ridge--open-side-pane ridge--chat-buffer-name)
   (let ((query (read-string "Query: ")))
     (when (not (string-empty-p query))
       (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name))))
 
-(defun ridge--load-chat-history (buffer-name)
+(defun ridge--open-side-pane (buffer-name)
+  "Open Ridge BUFFER-NAME in right side pane."
+  (if (get-buffer-window-list buffer-name)
+      ;; if window is already open, switch to it
+      (progn
+        (select-window (get-buffer-window buffer-name))
+        (switch-to-buffer buffer-name))
+    ;; else if window is not open, open it as a right-side window pane
+    (let ((bottomright-window (some-window (lambda (window) (and (window-at-side-p window 'right) (window-at-side-p window 'bottom))))))
+      (progn
+        ;; Select the right-most window
+        (select-window bottomright-window)
+        ;; if bottom-right window is not a vertical pane, split it vertically, else use the existing bottom-right vertical window
+        (let ((ridge-window (if (window-at-side-p bottomright-window 'left)
+                               (split-window-right)
+                             bottomright-window)))
+          ;; Set the buffer in the ridge window
+          (set-window-buffer ridge-window buffer-name)
+          ;; Switch to the ridge window
+          (select-window ridge-window)
+          ;; Resize the window to 1/3 of the frame width
+          (window-resize ridge-window
+                         (- (truncate (* 0.33 (frame-width))) (window-width))
+                         t))))))
+
+(defun ridge--load-chat-session (buffer-name &optional session-id)
   "Load Ridge Chat conversation history into BUFFER-NAME."
-  (let ((json-response (cdr (assoc 'response (ridge--get-chat-history-api)))))
+  (setq ridge--reference-count 0)
+  (let ((inhibit-read-only t)
+        (json-response (cdr (assoc 'chat (cdr (assoc 'response (ridge--get-chat-session session-id)))))))
     (with-current-buffer (get-buffer-create buffer-name)
       (erase-buffer)
       (insert "* Ridge Chat\n")
-      (thread-last
-        json-response
-        ;; generate chat messages from Ridge Chat API response
-        (mapcar #'ridge--render-chat-response)
-        ;; insert chat messages into Ridge Chat Buffer
-        (mapc #'insert))
+      (when json-response
+        (thread-last
+          json-response
+          ;; generate chat messages from Ridge Chat API response
+          (mapcar #'ridge--format-chat-response)
+          ;; insert chat messages into Ridge Chat Buffer
+          (mapc #'insert)))
       (progn
         (org-mode)
         (ridge--add-hover-text-to-footnote-refs (point-min))
@@ -727,12 +777,20 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
 
         ;; create ridge chat shortcut keybindings
         (use-local-map (copy-keymap org-mode-map))
+        (local-set-key (kbd "q") #'ridge--close)
         (local-set-key (kbd "m") #'ridge--chat)
         (local-set-key (kbd "C-x m") #'ridge--chat)
 
         ;; enable minor modes for ridge chat
         (visual-line-mode)
         (read-only-mode t)))))
+
+(defun ridge--close ()
+  "Kill Ridge buffer and window"
+  (interactive)
+  (progn
+    (kill-buffer (current-buffer))
+    (delete-window)))
 
 (defun ridge--add-hover-text-to-footnote-refs (start-pos)
   "Show footnote defs on mouse hover on footnote refs from START-POS."
@@ -763,49 +821,72 @@ Render results in BUFFER-NAME using QUERY, CONTENT-TYPE."
   ;; render json response into formatted chat messages
   (with-current-buffer (get-buffer buffer-name)
     (let ((inhibit-read-only t)
-          (new-content-start-pos (point-max))
-          (query-time (format-time-string "%F %T"))
-          (json-response (ridge--query-chat-api query)))
-      (goto-char new-content-start-pos)
+          (query-time (format-time-string "%F %T")))
+      (goto-char (point-max))
       (insert
-       (ridge--render-chat-message query "you" query-time)
-       (ridge--render-chat-response json-response))
-      (ridge--add-hover-text-to-footnote-refs new-content-start-pos))
-    (progn
-      (org-set-startup-visibility)
-      (visual-line-mode)
-      (re-search-backward "^\*+ 🏮" nil t))))
+       (ridge--render-chat-message query "you" query-time))
+      (ridge--query-chat-api query
+                            #'ridge--format-chat-response
+                            #'ridge--render-chat-response buffer-name))))
 
-(defun ridge--query-chat-api (query)
-  "Send QUERY to Ridge Chat API."
-  (let* ((url-request-method "GET")
-         (encoded-query (url-hexify-string query))
-         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (query-url (format "%s/api/chat?q=%s&n=%s&client=emacs" ridge-server-url encoded-query ridge-results-count)))
-    (with-temp-buffer
-      (condition-case ex
-          (progn
-            (url-insert-file-contents query-url)
-            (json-parse-buffer :object-type 'alist))
-        ('file-error (cond ((string-match "Internal server error" (nth 2 ex))
-                      (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
-                     (t (message "Chat exception: [%s]" ex))))))))
+(defun ridge--query-chat-api (query callback &rest cbargs)
+  "Send QUERY to Ridge Chat API and call CALLBACK with the response.
+CBARGS are optional additional arguments to pass to CALLBACK."
+  (ridge--call-api-async "/api/chat"
+                        "GET"
+                        `(("q" ,query) ("n" ,ridge-results-count))
+                        callback cbargs))
 
+(defun ridge--get-chat-sessions ()
+  "Get all chat sessions from Ridge server."
+  (ridge--call-api "/api/chat/sessions" "GET"))
 
-(defun ridge--get-chat-history-api ()
-  "Send QUERY to Ridge Chat History API."
-  (let* ((url-request-method "GET")
-         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (query-url (format "%s/api/chat/history?client=emacs" ridge-server-url)))
-    (with-temp-buffer
-      (condition-case ex
-          (progn
-            (url-insert-file-contents query-url)
-            (json-parse-buffer :object-type 'alist))
-        ('file-error (cond ((string-match "Internal server error" (nth 2 ex))
-                      (message "Chat processor not configured. Configure OpenAI API key and restart it. Exception: [%s]" ex))
-                     (t (message "Chat exception: [%s]" ex))))))))
+(defun ridge--get-chat-session (&optional session-id)
+  "Get chat messages from default or SESSION-ID chat session."
+  (ridge--call-api "/api/chat/history"
+                  "GET"
+                  (when session-id `(("conversation_id" ,session-id)))))
 
+(defun ridge--select-conversation-session (&optional completion-action)
+  "Select Ridge conversation session to perform COMPLETION-ACTION on."
+  (let* ((completion-text (format "%s Conversation:" (or completion-action "Open")))
+         (sessions (ridge--get-chat-sessions))
+         (session-alist (-map (lambda (session)
+                                (cons (if (not (equal :null (cdr (assoc 'slug session))))
+                                          (cdr (assoc 'slug session))
+                                        (format "New Conversation (%s)" (cdr (assoc 'conversation_id session))))
+                                      (cdr (assoc 'conversation_id session))))
+                              sessions))
+         (selected-session-slug (completing-read completion-text session-alist nil t)))
+    (cdr (assoc selected-session-slug session-alist))))
+
+(defun ridge--open-conversation-session ()
+  "Menu to select Ridge conversation session to open."
+  (let ((selected-session-id (ridge--select-conversation-session "Open")))
+    (ridge--load-chat-session ridge--chat-buffer-name selected-session-id)
+    (ridge--open-side-pane ridge--chat-buffer-name)))
+
+(defun ridge--create-chat-session ()
+  "Create new chat session."
+  (ridge--call-api "/api/chat/sessions" "POST"))
+
+(defun ridge--new-conversation-session ()
+  "Create new Ridge conversation session."
+  (let* ((session (ridge--create-chat-session))
+         (new-session-id (cdr (assoc 'conversation_id session))))
+    (ridge--load-chat-session ridge--chat-buffer-name new-session-id)
+    (ridge--open-side-pane ridge--chat-buffer-name)))
+
+(defun ridge--delete-chat-session (session-id)
+  "Delete new chat session."
+  (ridge--call-api "/api/chat/history" "DELETE" `(("conversation_id" ,session-id))))
+
+(defun ridge--delete-conversation-session ()
+  "Delete new Ridge conversation session."
+  (let* ((selected-session-id (ridge--select-conversation-session "Delete"))
+         (session (ridge--delete-chat-session selected-session-id)))
+    (ridge--load-chat-session ridge--chat-buffer-name)
+    (ridge--open-side-pane ridge--chat-buffer-name)))
 
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
@@ -829,38 +910,99 @@ RECEIVE-DATE is the message receive date."
 (defun ridge--generate-reference (reference)
   "Create `org-mode' footnotes with REFERENCE."
   (setq ridge--reference-count (1+ ridge--reference-count))
-  (cons
-   (propertize (format "^{ [fn:%x]}" ridge--reference-count) 'help-echo reference)
-   (thread-last
-     reference
-     ;; remove filename top heading line from reference
-     ;; prevents actual reference heading in next line jumping out of references footnote section
-     (replace-regexp-in-string "^\* .*\n" "")
-     ;; remove multiple, consecutive empty lines from reference
-     (replace-regexp-in-string "\n\n" "\n")
-     (format "\n[fn:%x] %s" ridge--reference-count))))
+  (let ((compiled-reference (if (stringp reference) reference (cdr (assoc 'compiled reference)))))
+    (cons
+     (propertize (format "^{ [fn:%x]}" ridge--reference-count) 'help-echo compiled-reference)
+     (thread-last
+       compiled-reference
+       ;; remove filename top heading line from reference
+       ;; prevents actual reference heading in next line jumping out of references footnote section
+       (replace-regexp-in-string "^\* .*\n" "")
+       ;; remove multiple, consecutive empty lines from reference
+       (replace-regexp-in-string "\n\n" "\n")
+       (format "\n[fn:%x] %s" ridge--reference-count)))))
 
-(defun ridge--render-chat-response (json-response)
+(defun ridge--generate-online-reference (reference)
+  (setq ridge--reference-count (1+ ridge--reference-count))
+  (let ((link (cdr (assoc 'link reference)))
+        (title (cdr (assoc 'title reference)))
+        (description (cdr (assoc 'description reference))))
+    (cons
+     (propertize (format "^{ [fn:%x]}" ridge--reference-count) 'help-echo (format "%s\n%s" link description))
+     (thread-last
+       description
+       ;; remove multiple, consecutive empty lines from reference
+       (replace-regexp-in-string "\n\n" "\n")
+       (format "\n[fn:%x] [[%s][%s]]\n%s\n" ridge--reference-count link title)))))
+
+(defun ridge--extract-online-references (result-types searches)
+  "Extract link, title, and description of specified RESULT-TYPES from SEARCHES."
+  (let ((result '()))
+    (-map
+     (lambda (search)
+      (let ((search-q (car search))
+            (search-results (cdr search)))
+        (-map-when
+         ;; filter search results by specified result types
+         (lambda (search-result) (member (car search-result) result-types))
+         ;; extract link, title, and description from search results
+         (lambda (search-result)
+           (-map
+            (lambda (entry)
+              (let ((link (cdr (or (assoc 'link entry) (assoc 'descriptionLink entry))))
+                    (title (cdr (or (assoc 'title entry) '(title . ,link))))
+                    (description (cdr (or (assoc 'snippet entry) (assoc 'description entry)))))
+                (setq result (append result `(((title . ,title) (link . ,link) (description . ,description) (search . ,search-q)))))))
+            ;; wrap search results in a list if it is not already a list
+            (if (or (equal 'knowledgeGraph (car search-result)) (equal 'webpages (car search-result)))
+                (list (cdr search-result))
+              (cdr search-result))))
+         search-results)))
+     searches)
+    result))
+
+(defun ridge--render-chat-response (response buffer-name)
+  (with-current-buffer (get-buffer buffer-name)
+    (let ((start-pos (point))
+          (inhibit-read-only t))
+      (goto-char (point-max))
+      (insert
+       response
+       (or (ridge--add-hover-text-to-footnote-refs start-pos) ""))
+      (progn
+        (org-set-startup-visibility)
+        (visual-line-mode)
+        (re-search-backward "^\*+ 🏮" nil t)))))
+
+(defun ridge--format-chat-response (json-response &optional callback &rest cbargs)
   "Render chat message using JSON-RESPONSE from Ridge Chat API."
   (let* ((message (cdr (or (assoc 'response json-response) (assoc 'message json-response))))
          (sender (cdr (assoc 'by json-response)))
          (receive-date (cdr (assoc 'created json-response)))
-         (references (or (cdr (assoc 'context json-response)) '()))
-         (footnotes (mapcar #'ridge--generate-reference references))
-         (footnote-links (mapcar #'car footnotes))
-         (footnote-defs (mapcar #'cdr footnotes)))
-    (thread-first
-      ;; concatenate ridge message and references from API
-      (concat
-       message
-       ;; append reference links to ridge message
-       (string-join footnote-links "")
-       ;; append reference sub-section to ridge message and fold it
-       (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" "")
-       ;; append reference definitions to references subsection
-       (string-join footnote-defs " "))
-      ;; Render chat message using data obtained from API
-      (ridge--render-chat-message sender receive-date))))
+         (online-references  (or (cdr (assoc 'onlineContext json-response)) '()))
+         (online-footnotes (-map #'ridge--generate-online-reference
+                                 (ridge--extract-online-references '(organic knowledgeGraph peopleAlsoAsk webpages)
+                                                                  online-references)))
+         (doc-references (or (cdr (assoc 'context json-response)) '()))
+         (doc-footnotes (mapcar #'ridge--generate-reference doc-references))
+         (footnote-links (mapcar #'car (append doc-footnotes online-footnotes)))
+         (footnote-defs (mapcar #'cdr (append doc-footnotes online-footnotes)))
+         (formatted-response
+          (thread-first
+            ;; concatenate ridge message and references from API
+            (concat
+             message
+             ;; append reference links to ridge message
+             (string-join footnote-links "")
+             ;; append reference sub-section to ridge message and fold it
+             (if footnote-defs "\n**** References\n:PROPERTIES:\n:VISIBILITY: folded\n:END:" "")
+             ;; append reference definitions to references subsection
+             (string-join footnote-defs " "))
+            ;; Render chat message using data obtained from API
+            (ridge--render-chat-message sender receive-date))))
+    (if callback
+        (apply callback formatted-response cbargs)
+        formatted-response)))
 
 
 ;; ------------------
@@ -871,8 +1013,7 @@ RECEIVE-DATE is the message receive date."
   "Perform Incremental Search on Ridge. Allow optional RERANK of results."
   (let* ((rerank-str (cond (rerank "true") (t "false")))
          (ridge-buffer-name (get-buffer-create ridge--search-buffer-name))
-         (query (minibuffer-contents-no-properties))
-         (query-url (ridge--construct-search-api-query query ridge--content-type rerank-str)))
+         (query (minibuffer-contents-no-properties)))
     ;; Query ridge API only when user in ridge minibuffer and non-empty query
     ;; Prevents querying if
     ;;   1. user hasn't started typing query
@@ -892,10 +1033,10 @@ RECEIVE-DATE is the message receive date."
           (setq ridge--rerank t)
           (message "ridge.el: Rerank Results"))
         (ridge--query-search-api-and-render-results
-         query-url
-         ridge--content-type
          query
-         ridge-buffer-name))))))
+         ridge--content-type
+         ridge-buffer-name
+         rerank-str))))))
 
 (defun ridge--delete-open-network-connections-to-server ()
   "Delete all network connections to ridge server."
@@ -923,8 +1064,8 @@ RECEIVE-DATE is the message receive date."
   "Natural, Incremental Search for your personal notes and documents."
   (interactive)
   (let* ((ridge-buffer-name (get-buffer-create ridge--search-buffer-name)))
-    ;; switch to ridge results buffer
-    (switch-to-buffer ridge-buffer-name)
+    ;; switch to ridge search buffer
+    (ridge--open-side-pane ridge-buffer-name)
     ;; open and setup minibuffer for incremental search
     (minibuffer-with-setup-hook
         (lambda ()
@@ -989,7 +1130,6 @@ Paragraph only starts at first text after blank line."
                  ;; get paragraph, if in text mode
                  (t
                   (ridge--get-current-paragraph-text))))
-         (query-url (ridge--construct-search-api-query query content-type rerank))
          ;; extract heading to show in result buffer from query
          (query-title
           (format "Similar to: %s"
@@ -997,11 +1137,12 @@ Paragraph only starts at first text after blank line."
          (buffer-name (get-buffer-create ridge--search-buffer-name)))
     (progn
       (ridge--query-search-api-and-render-results
-       query-url
+       query
        content-type
-       query-title
-       buffer-name)
-      (switch-to-buffer buffer-name)
+       buffer-name
+       rerank
+       query-title)
+      (ridge--open-side-pane buffer-name)
       (goto-char (point-min)))))
 
 
@@ -1010,7 +1151,7 @@ Paragraph only starts at first text after blank line."
 ;; ---------
 
 (defun ridge--setup-and-show-menu ()
-  "Create Transient menu for ridge and show it."
+  "Create main Transient menu for Ridge and show it."
   ;; Create the Ridge Transient menu
   (transient-define-argument ridge--content-type-switch ()
     :class 'transient-switches
@@ -1057,15 +1198,40 @@ Paragraph only starts at first text after blank line."
     (interactive (list (transient-args transient-current-command)))
     (ridge--chat))
 
+  (transient-define-suffix ridge--open-conversation-session-command (&optional _)
+    "Command to select Ridge conversation sessions to open."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--open-conversation-session))
+
+  (transient-define-suffix ridge--new-conversation-session-command (&optional _)
+    "Command to select Ridge conversation sessions to open."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--new-conversation-session))
+
+  (transient-define-suffix ridge--delete-conversation-session-command (&optional _)
+    "Command to select Ridge conversation sessions to delete."
+    (interactive (list (transient-args transient-current-command)))
+    (ridge--delete-conversation-session))
+
+  (transient-define-prefix ridge--chat-menu ()
+    "Open the Ridge chat menu."
+    ["Act"
+     ("c" "Chat" ridge--chat-command)
+     ("o" "Open Conversation" ridge--open-conversation-session-command)
+     ("n" "New Conversation" ridge--new-conversation-session-command)
+     ("d" "Delete Conversation" ridge--delete-conversation-session-command)
+     ("q" "Quit" transient-quit-one)
+     ])
+
   (transient-define-prefix ridge--menu ()
     "Create Ridge Menu to Configure and Execute Commands."
     [["Configure Search"
-      ("n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
+      ("-n" "Results Count" "--results-count=" :init-value (lambda (obj) (oset obj value (format "%s" ridge-results-count))))
       ("t" "Content Type" ridge--content-type-switch)]
      ["Configure Update"
       ("-f" "Force Update" "--force-update")]]
     [["Act"
-      ("c" "Chat" ridge--chat-command)
+      ("c" "Chat" ridge--chat-menu)
       ("s" "Search" ridge--search-command)
       ("f" "Find Similar" ridge--find-similar-command)
       ("u" "Update" ridge--update-command)
