@@ -64,7 +64,7 @@
 ")))
     (should
      (equal
-      (ridge--extract-entries-as-markdown json-response-from-ridge-backend user-query)
+      (ridge--extract-entries-as-markdown json-response-from-ridge-backend user-query nil)
       "\
 # Become God\n\
 ## Upgrade\n\
@@ -100,7 +100,7 @@ Rule everything\n\n"))))
 ")))
     (should
      (equal
-      (ridge--extract-entries-as-org json-response-from-ridge-backend user-query)
+      (ridge--extract-entries-as-org json-response-from-ridge-backend user-query nil)
       "\
 * Become God\n\
 ** Upgrade\n\
