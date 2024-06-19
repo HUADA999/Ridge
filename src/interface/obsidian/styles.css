@@ -84,7 +84,6 @@ If your plugin does not need CSS, delete this file.
     margin-left: auto;
     white-space: pre-line;
     background-color: var(--code-background);
-    /* background-color: var(--background-modifier-active-hover); */
 }
 /* add left protrusion to ridge chat bubble */
 .ridge-chat-message-text.ridge:after {
@@ -158,8 +157,6 @@ div.expanded.reference-section {
     margin: 10px 0;
 }
 button.reference-button {
-    background: var(--ridge-winter-sun);
-    color: var(--ridge-storm-grey);
     border: 1px solid var(--ridge-storm-grey);
     border-radius: 5px;
     padding: 4px;
@@ -200,8 +197,6 @@ button.reference-button[aria-expanded="true"]::before {
     transform: rotate(90deg);
 }
 button.reference-expand-button {
-    background: var(--ridge-winter-sun);
-    color: var(--ridge-storm-grey);
     border: 1px solid var(--ridge-storm-grey);
     border-radius: 5px;
     padding: 8px;
