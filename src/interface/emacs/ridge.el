@@ -738,28 +738,30 @@ Render results in BUFFER-NAME using search results, CONTENT-TYPE and (optional) 
 
 (defun ridge--open-side-pane (buffer-name)
   "Open Ridge BUFFER-NAME in right side pane."
-  (if (get-buffer-window-list buffer-name)
-      ;; if window is already open, switch to it
-      (progn
-        (select-window (get-buffer-window buffer-name))
-        (switch-to-buffer buffer-name))
-    ;; else if window is not open, open it as a right-side window pane
-    (let ((bottomright-window (some-window (lambda (window) (and (window-at-side-p window 'right) (window-at-side-p window 'bottom))))))
-      (progn
-        ;; Select the right-most window
-        (select-window bottomright-window)
-        ;; if bottom-right window is not a vertical pane, split it vertically, else use the existing bottom-right vertical window
-        (let ((ridge-window (if (window-at-side-p bottomright-window 'left)
-                               (split-window-right)
-                             bottomright-window)))
-          ;; Set the buffer in the ridge window
-          (set-window-buffer ridge-window buffer-name)
-          ;; Switch to the ridge window
-          (select-window ridge-window)
-          ;; Resize the window to 1/3 of the frame width
-          (window-resize ridge-window
-                         (- (truncate (* 0.33 (frame-width))) (window-width))
-                         t))))))
+  (save-selected-window
+    (if (get-buffer-window-list buffer-name)
+        ;; if window is already open, switch to it
+        (progn
+          (select-window (get-buffer-window buffer-name))
+          (switch-to-buffer buffer-name))
+      ;; else if window is not open, open it as a right-side window pane
+      (let ((bottomright-window (some-window (lambda (window) (and (window-at-side-p window 'right) (window-at-side-p window 'bottom))))))
+        (progn
+          ;; Select the right-most window
+          (select-window bottomright-window)
+          ;; if bottom-right window is not a vertical pane, split it vertically, else use the existing bottom-right vertical window
+          (let ((ridge-window (if (window-at-side-p bottomright-window 'left)
+                                 (split-window-right)
+                               bottomright-window)))
+            ;; Set the buffer in the ridge window
+            (set-window-buffer ridge-window buffer-name)
+            ;; Switch to the ridge window
+            (select-window ridge-window)
+            ;; Resize the window to 1/3 of the frame width
+            (window-resize ridge-window
+                           (- (truncate (* 0.33 (frame-width))) (window-width))
+                           t)))))
+    (goto-char (point-min))))
 
 (defun ridge--load-chat-session (buffer-name &optional session-id)
   "Load Ridge Chat conversation history into BUFFER-NAME."
@@ -1162,8 +1164,7 @@ Paragraph only starts at first text after blank line."
        buffer-name
        rerank
        t)
-      (ridge--open-side-pane buffer-name)
-      (goto-char (point-min)))))
+      (ridge--open-side-pane buffer-name))))
 
 (defun ridge--auto-find-similar ()
   "Call find similar on current element, if point has moved to a new element."
@@ -1176,8 +1177,7 @@ Paragraph only starts at first text after blank line."
       (unless (eq current-heading-pos ridge--last-heading-pos)
         (progn
           (setq ridge--last-heading-pos current-heading-pos)
-          (save-excursion
-            (ridge--find-similar)))))))
+          (ridge--find-similar))))))
 
 (defun ridge--setup-auto-find-similar ()
   "Setup automatic call to find similar to current element."
