@@ -751,14 +751,14 @@ Filter out first similar result if IS-FIND-SIMILAR set."
 ;; Ridge Chat
 ;; ----------------
 
-(defun ridge--chat ()
-  "Chat with Ridge."
+(defun ridge--chat (&optional session-id)
+  "Chat with Ridge in session with SESSION-ID."
   (interactive)
-  (when (not (get-buffer ridge--chat-buffer-name))
-    (ridge--load-chat-session ridge--chat-buffer-name))
+  (when (or session-id (not (get-buffer ridge--chat-buffer-name)))
+    (ridge--load-chat-session ridge--chat-buffer-name session-id))
   (let ((query (read-string "Query: ")))
     (when (not (string-empty-p query))
-      (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name))))
+      (ridge--query-chat-api-and-render-messages query ridge--chat-buffer-name session-id))))
 
 (defun ridge--open-side-pane (buffer-name)
   "Open Ridge BUFFER-NAME in right side pane."
@@ -857,8 +857,8 @@ Filter out first similar result if IS-FIND-SIMILAR set."
           ;; show definition on hover on footnote reference
           (overlay-put overlay 'help-echo it)))))))
 
-(defun ridge--query-chat-api-and-render-messages (query buffer-name)
-  "Send QUERY to Ridge Chat. Render the chat messages from exchange in BUFFER-NAME."
+(defun ridge--query-chat-api-and-render-messages (query buffer-name &optional session-id)
+  "Send QUERY to Chat SESSION-ID. Render the chat messages in BUFFER-NAME."
   ;; render json response into formatted chat messages
   (with-current-buffer (get-buffer buffer-name)
     (let ((inhibit-read-only t)
@@ -867,15 +867,19 @@ Filter out first similar result if IS-FIND-SIMILAR set."
       (insert
        (ridge--render-chat-message query "you" query-time))
       (ridge--query-chat-api query
+                            session-id
                             #'ridge--format-chat-response
                             #'ridge--render-chat-response buffer-name))))
 
-(defun ridge--query-chat-api (query callback &rest cbargs)
-  "Send QUERY to Ridge Chat API and call CALLBACK with the response and CBARGS."
-  (ridge--call-api-async "/api/chat"
-                        "GET"
-                        `(("q" ,query) ("n" ,ridge-results-count))
-                        callback cbargs))
+(defun ridge--query-chat-api (query session-id callback &rest cbargs)
+  "Send QUERY for SESSION-ID to Ridge Chat API.
+Call CALLBACK func with response and CBARGS."
+  (let ((params `(("q" ,query) ("n" ,ridge-results-count))))
+    (when session-id (push `("conversation_id" ,session-id) params))
+    (ridge--call-api-async "/api/chat"
+                          "GET"
+                          params
+                          callback cbargs)))
 
 (defun ridge--get-chat-sessions ()
   "Get all chat sessions from Ridge server."
@@ -911,9 +915,11 @@ Filter out first similar result if IS-FIND-SIMILAR set."
 
 (defun ridge--new-conversation-session ()
   "Create new Ridge conversation session."
-  (let* ((session (ridge--create-chat-session))
-         (new-session-id (cdr (assoc 'conversation_id session))))
-    (ridge--load-chat-session ridge--chat-buffer-name new-session-id)))
+  (thread-last
+    (ridge--create-chat-session)
+    (assoc 'conversation_id)
+    (cdr)
+    (ridge--chat)))
 
 (defun ridge--delete-chat-session (session-id)
   "Delete chat session with SESSION-ID."
@@ -921,9 +927,9 @@ Filter out first similar result if IS-FIND-SIMILAR set."
 
 (defun ridge--delete-conversation-session ()
   "Delete new Ridge conversation session."
-  (let* ((selected-session-id (ridge--select-conversation-session "Delete"))
-         (session (ridge--delete-chat-session selected-session-id)))
-    (ridge--load-chat-session ridge--chat-buffer-name)))
+  (thread-last
+    (ridge--select-conversation-session "Delete")
+    (ridge--delete-chat-session)))
 
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
