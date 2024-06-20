@@ -962,9 +962,9 @@ RECEIVE-DATE is the message receive date."
 (defun ridge--generate-online-reference (reference)
   "Create `org-mode' footnotes for online REFERENCE."
   (setq ridge--reference-count (1+ ridge--reference-count))
-  (let ((link (cdr (assoc 'link reference)))
-        (title (cdr (assoc 'title reference)))
-        (description (cdr (assoc 'description reference))))
+  (let* ((link (cdr (assoc 'link reference)))
+        (title (or (cdr (assoc 'title reference)) link))
+        (description (or (cdr (assoc 'description reference)) title)))
     (cons
      (propertize (format "^{ [fn:%x]}" ridge--reference-count) 'help-echo (format "%s\n%s" link description))
      (thread-last
