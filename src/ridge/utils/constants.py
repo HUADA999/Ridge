@@ -2,6 +2,7 @@ from pathlib import Path
 
 app_root_directory = Path(__file__).parent.parent.parent
 web_directory = app_root_directory / "ridge/interface/web/"
+next_js_directory = app_root_directory / "ridge/interface/built/"
 empty_escape_sequences = "\n|\r|\t| "
 app_env_filepath = "~/.ridge/env"
 telemetry_server = "https://ridge.beta.haletic.com/v1/telemetry"
