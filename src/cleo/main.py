@@ -3,7 +3,6 @@
 """
 
 from contextlib import redirect_stdout
-import itertools
 import logging
 import io
 import os
@@ -67,13 +66,9 @@ else:
 django_app = get_asgi_application()
 
 # Add CORS middleware
-RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "app.ridge.dev").split(",")
+RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "app.ridge.dev")
 scheme = "https" if not is_env_var_true("RIDGE_NO_HTTPS") else "http"
-custom_origins = list(
-    itertools.chain.from_iterable(
-        [[f"{scheme}://{domain.strip()}", f"{scheme}://{domain.strip()}:*"] for domain in RIDGE_DOMAIN]
-    )
-)
+custom_origins = [f"{scheme}://{RIDGE_DOMAIN.strip()}", f"{scheme}://{RIDGE_DOMAIN.strip()}:*"]
 default_origins = [
     "app://obsidian.md",  # To allow access from Obsidian desktop app
     "capacitor://localhost",  # To allow access from Obsidian iOS app using Capacitor.JS
