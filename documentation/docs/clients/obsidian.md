@@ -31,7 +31,7 @@ See the official [Obsidian Plugin Docs](https://help.obsidian.md/Extending+Obsid
 ## Use
 ### Chat
 Click the *Ridge chat* icon 💬 on the [Ribbon](https://help.obsidian.md/User+interface/Workspace/Ribbon) or run *Ridge: Chat* from the [Command Palette](https://help.obsidian.md/Plugins/Command+palette) and ask questions in a natural, conversational style.<br />
-E.g *"When did I file my taxes last year?"*
+E.g. *"When did I file my taxes last year?"*
 
 See [Ridge Chat](/features/chat) for more details
 
