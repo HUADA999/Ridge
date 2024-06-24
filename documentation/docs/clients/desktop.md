@@ -7,8 +7,8 @@ sidebar_position: 1
 > Query your Second Brain from your machine
 
 Use the Desktop app to chat and search with Ridge.
-You can also sync any relevant files with Ridge using the app.
-Ridge will use these files to provide contextual responses when you search or chat.
+You can also share your files, folders with Ridge using the app.
+Ridge will keep these files in sync to provide contextual responses when you search or chat.
 
 ## Features
 - **Chat**
@@ -25,6 +25,7 @@ Ridge will use these files to provide contextual responses when you search or ch
 2. Generate an API key on the [Ridge Web App](https://app.ridge.dev/config#clients)
 3. Set your Ridge API Key on the *Settings* page of the Ridge Desktop app
 4. [Optional] Add any files, folders you'd like Ridge to be aware of on the *Settings* page and Click *Save*
+   These files and folders will be automatically kept in sync for you
 
 ## Interface
 | Chat | Search |

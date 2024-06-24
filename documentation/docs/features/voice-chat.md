@@ -8,7 +8,8 @@ Click on the little mic icon to send your voice message to Ridge. It will send b
 
 ## Voice Response
 
-When you get a response from Ridge, you can click on the speaker icon to hear the response. This feature is available only on the web view right now.
+If you send a voice message, Ridge will automatically respond back with a voice message.
+You can also click on the speaker icon next to any message to hear it out loud. The voice response feature is available only on the web view right now.
 
 ![Speaker Icon](/img/speaker_icon.png)
 
