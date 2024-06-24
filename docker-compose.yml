@@ -45,7 +45,8 @@ services:
       - RIDGE_DEBUG=False
       - RIDGE_ADMIN_EMAIL=username@example.com
       - RIDGE_ADMIN_PASSWORD=password
-      # Uncomment the following lines to make your instance publicly accessible. Replace the domain with your domain. Proceed with caution, especially if you are using anonymous mode.
+      # Uncomment the following lines to make your instance publicly accessible.
+      # Replace the domain with your domain. Proceed with caution, especially if you are using anonymous mode.
       # - RIDGE_NO_HTTPS=True
       # - RIDGE_DOMAIN=192.168.0.104
     command: --host="0.0.0.0" --port=42110 -vv --anonymous-mode
