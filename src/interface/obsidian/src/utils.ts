@@ -226,7 +226,7 @@ export async function populateHeaderPane(headerEl: Element, setting: RidgeSettin
     // Add Ridge title to header element
     const titleEl = headerEl.createDiv();
     titleEl.className = 'ridge-logo';
-    titleEl.textContent = "Ridge"
+    titleEl.textContent = "RIDGE"
 
     // Populate the header element with the navigation pane
     // Create the nav element
