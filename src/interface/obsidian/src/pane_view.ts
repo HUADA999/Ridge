@@ -47,7 +47,15 @@ export abstract class RidgePaneView extends ItemView {
             await leaf?.setViewState({ type: viewType, active: true });
         }
 
-        // "Reveal" the leaf in case it is in a collapsed sidebar
-        if (leaf) workspace.revealLeaf(leaf);
+        if (leaf) {
+            if (viewType === RidgeView.CHAT) {
+                // focus on the chat input when the chat view is opened
+                let chatInput = <HTMLTextAreaElement>this.contentEl.getElementsByClassName("ridge-chat-input")[0];
+                if (chatInput) chatInput.focus();
+            }
+
+            // "Reveal" the leaf in case it is in a collapsed sidebar
+            workspace.revealLeaf(leaf);
+        }
     }
 }
