@@ -88,7 +88,16 @@ export default class Ridge extends Plugin {
             await leaf?.setViewState({ type: viewType, active: true });
         }
 
-        // "Reveal" the leaf in case it is in a collapsed sidebar
-        if (leaf) workspace.revealLeaf(leaf);
+        if (leaf) {
+            if (viewType === RidgeView.CHAT) {
+                // focus on the chat input when the chat view is opened
+                let chatView = leaf.view as RidgeChatView;
+                let chatInput = <HTMLTextAreaElement>chatView.contentEl.getElementsByClassName("ridge-chat-input")[0];
+                if (chatInput) chatInput.focus();
+            }
+
+            // "Reveal" the leaf in case it is in a collapsed sidebar
+            workspace.revealLeaf(leaf);
+        }
     }
 }
