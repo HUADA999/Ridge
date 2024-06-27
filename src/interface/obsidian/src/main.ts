@@ -2,7 +2,8 @@ import { Plugin, WorkspaceLeaf } from 'obsidian';
 import { RidgeSetting, RidgeSettingTab, DEFAULT_SETTINGS } from 'src/settings'
 import { RidgeSearchModal } from 'src/search_modal'
 import { RidgeChatView } from 'src/chat_view'
-import { updateContentIndex, canConnectToBackend, RidgeView } from './utils';
+import { updateContentIndex, canConnectToBackend, RidgeView, jumpToPreviousView } from './utils';
+import { RidgePaneView } from './pane_view';
 
 
 export default class Ridge extends Plugin {
@@ -89,15 +90,20 @@ export default class Ridge extends Plugin {
         }
 
         if (leaf) {
-            if (viewType === RidgeView.CHAT) {
-                // focus on the chat input when the chat view is opened
-                let chatView = leaf.view as RidgeChatView;
-                let chatInput = <HTMLTextAreaElement>chatView.contentEl.getElementsByClassName("ridge-chat-input")[0];
-                if (chatInput) chatInput.focus();
-            }
+            const activeRidgeLeaf = workspace.getActiveViewOfType(RidgePaneView)?.leaf;
+            // Jump to the previous view if the current view is Ridge Side Pane
+            if (activeRidgeLeaf === leaf) jumpToPreviousView();
+            // Else Reveal the leaf in case it is in a collapsed sidebar
+            else {
+                workspace.revealLeaf(leaf);
 
-            // "Reveal" the leaf in case it is in a collapsed sidebar
-            workspace.revealLeaf(leaf);
+                if (viewType === RidgeView.CHAT) {
+                    // focus on the chat input when the chat view is opened
+                    let chatView = leaf.view as RidgeChatView;
+                    let chatInput = <HTMLTextAreaElement>chatView.contentEl.getElementsByClassName("ridge-chat-input")[0];
+                    if (chatInput) chatInput.focus();
+                }
+            }
         }
     }
 }
