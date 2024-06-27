@@ -31,7 +31,16 @@ const nextConfig = {
                 protocol: "https",
                 hostname: "assets.ridge.dev",
             },
-        ] : undefined,
+        ] : [
+            {
+                protocol: "https",
+                hostname: "*"
+            },
+            {
+                protocol: "http",
+                hostname: "*"
+            }
+        ]
     }
 };
 
