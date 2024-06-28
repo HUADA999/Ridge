@@ -8,6 +8,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from openai import OpenAI
 from whisper import Whisper
 
+from ridge.database.models import ProcessLock
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.utils import config as utils_config
 from ridge.utils.config import OfflineChatProcessorModel, SearchModels
@@ -31,6 +32,7 @@ query_cache: Dict[str, LRU] = defaultdict(LRU)
 chat_lock = threading.Lock()
 SearchType = utils_config.SearchType
 scheduler: BackgroundScheduler = None
+schedule_leader_process_lock: ProcessLock = None
 telemetry: List[Dict[str, str]] = []
 ridge_version: str = None
 device = get_device()
