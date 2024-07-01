@@ -1,4 +1,4 @@
-import { ItemView, MarkdownRenderer, WorkspaceLeaf, request, requestUrl, setIcon } from 'obsidian';
+import { ItemView, MarkdownRenderer, Scope, WorkspaceLeaf, request, requestUrl, setIcon } from 'obsidian';
 import * as DOMPurify from 'dompurify';
 import { RidgeSetting } from 'src/settings';
 import { RidgePaneView } from 'src/pane_view';
@@ -27,6 +27,10 @@ export class RidgeChatView extends RidgePaneView {
 
     constructor(leaf: WorkspaceLeaf, setting: RidgeSetting) {
         super(leaf, setting);
+
+        // Register Modal Keybindings to send voice message
+        this.scope = new Scope(this.app.scope);
+        this.scope.register(["Mod"], 's', async (event) => { await this.speechToText(event); });
 
         this.waitingForLocation = true;
 
@@ -958,7 +962,7 @@ export class RidgeChatView extends RidgePaneView {
 
     sendMessageTimeout: NodeJS.Timeout | undefined;
     mediaRecorder: MediaRecorder | undefined;
-    async speechToText(event: MouseEvent | TouchEvent) {
+    async speechToText(event: MouseEvent | TouchEvent | KeyboardEvent) {
         event.preventDefault();
         const transcribeButton = <HTMLButtonElement>this.contentEl.getElementsByClassName("ridge-transcribe")[0];
         const chatInput = <HTMLTextAreaElement>this.contentEl.getElementsByClassName("ridge-chat-input")[0];
