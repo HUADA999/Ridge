@@ -10,7 +10,6 @@ export interface UserInfo {
     email?: string;
 }
 
-
 export interface RidgeSetting {
     resultsCount: number;
     ridgeUrl: string;
