@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google";
-import "../globals.css";
+import "../../globals.css";
 
 const inter = Noto_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Ridge AI - Chat",
-  description: "Use this page to chat with Ridge AI.",
+  description: "Use this page to view a chat with Ridge AI.",
 };
 
 export default function RootLayout({
