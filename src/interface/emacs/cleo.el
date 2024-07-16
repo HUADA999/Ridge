@@ -283,9 +283,9 @@ Auto invokes setup steps on calling main entrypoint."
     (if (/= (apply #'call-process ridge-server-python-command
                    nil t nil
                    "-m" "pip" "install" "--upgrade"
-                   '("ridge-assistant"))
+                   '("ridge"))
             0)
-        (message "ridge.el: Failed to install Ridge server. Please install it manually using pip install `ridge-assistant'.\n%s" (buffer-string))
+        (message "ridge.el: Failed to install Ridge server. Please install it manually using pip install `ridge'.\n%s" (buffer-string))
       (message "ridge.el: Installed and upgraded Ridge server version: %s" (ridge--server-get-version)))))
 
 (defun ridge--server-start ()
