@@ -1,6 +1,8 @@
 # syntax=docker/dockerfile:1
 FROM ubuntu:jammy
-LABEL org.opencontainers.image.source https://github.com/ridge-ai/ridge
+LABEL "homepage" "https://ridge.dev"
+LABEL "repository" "https://github.com/ridge-ai/ridge"
+LABEL "org.opencontainers.image.source" "https://github.com/ridge-ai/ridge"
 
 # Install System Dependencies
 RUN apt update -y && apt -y install python3-pip swig curl
