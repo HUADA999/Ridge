@@ -10,19 +10,28 @@ from fastapi.responses import Response
 from starlette.authentication import has_required_scope, requires
 
 from ridge.database import adapters
-from ridge.database.adapters import ConversationAdapters, EntryAdapters
+from ridge.database.adapters import (
+    ConversationAdapters,
+    EntryAdapters,
+    get_user_github_config,
+    get_user_notion_config,
+)
 from ridge.database.models import Entry as DbEntry
 from ridge.database.models import (
     GithubConfig,
+    GithubRepoConfig,
     RidgeUser,
     LocalMarkdownConfig,
     LocalOrgConfig,
     LocalPdfConfig,
     LocalPlaintextConfig,
     NotionConfig,
-    Subscription,
 )
-from ridge.routers.helpers import CommonQueryParams, update_telemetry_state
+from ridge.routers.helpers import (
+    CommonQueryParams,
+    get_user_config,
+    update_telemetry_state,
+)
 from ridge.utils import constants, state
 from ridge.utils.rawconfig import (
     FullConfig,
@@ -96,6 +105,69 @@ def _initialize_config():
     if state.config is None:
         state.config = FullConfig()
         state.config.search_type = SearchConfig.model_validate(constants.default_config["search-type"])
+
+
+@api_config.get("", response_class=Response)
+@requires(["authenticated"])
+def get_config(request: Request, detailed: Optional[bool] = False) -> Response:
+    user = request.user.object
+    user_config = get_user_config(user, request, is_detailed=detailed)
+    del user_config["request"]
+
+    # Return config data as a JSON response
+    return Response(content=json.dumps(user_config), media_type="application/json", status_code=200)
+
+
+@api_config.get("/content/github", response_class=Response)
+@requires(["authenticated"])
+def get_content_github(request: Request) -> Response:
+    user = request.user.object
+    user_config = get_user_config(user, request)
+    del user_config["request"]
+
+    current_github_config = get_user_github_config(user)
+
+    if current_github_config:
+        raw_repos = current_github_config.githubrepoconfig.all()
+        repos = []
+        for repo in raw_repos:
+            repos.append(
+                GithubRepoConfig(
+                    name=repo.name,
+                    owner=repo.owner,
+                    branch=repo.branch,
+                )
+            )
+        current_config = GithubContentConfig(
+            pat_token=current_github_config.pat_token,
+            repos=repos,
+        )
+        current_config = json.loads(current_config.json())
+    else:
+        current_config = {}  # type: ignore
+
+    user_config["current_config"] = current_config
+
+    # Return config data as a JSON response
+    return Response(content=json.dumps(user_config), media_type="application/json", status_code=200)
+
+
+@api_config.get("/content/notion", response_class=Response)
+@requires(["authenticated"])
+def get_content_notion(request: Request) -> Response:
+    user = request.user.object
+    user_config = get_user_config(user, request)
+    del user_config["request"]
+
+    current_notion_config = get_user_notion_config(user)
+    token = current_notion_config.token if current_notion_config else ""
+    current_config = NotionContentConfig(token=token)
+    current_config = json.loads(current_config.model_dump_json())
+
+    user_config["current_config"] = current_config
+
+    # Return config data as a JSON response
+    return Response(content=json.dumps(user_config), media_type="application/json", status_code=200)
 
 
 @api_config.post("/content/github", status_code=200)
