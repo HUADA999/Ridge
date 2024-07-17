@@ -23,7 +23,7 @@ sidebar_position: 3
 
   1. Open [Ridge](https://obsidian.md/plugins?id=ridge) from the *Community plugins* tab in Obsidian settings panel
   2. Click *Install*, then *Enable* on the Ridge plugin page in Obsidian
-  3. Generate an API key on the [Ridge Web App](https://app.ridge.dev/configure#clients)
+  3. Generate an API key on the [Ridge Web App](https://app.ridge.dev/settings#clients)
   4. Set your Ridge API Key in the Ridge plugin settings in Obsidian
 
 See the official [Obsidian Plugin Docs](https://help.obsidian.md/Extending+Obsidian/Community+plugins) for more details on installing Obsidian plugins.

@@ -99,7 +99,7 @@
   :type 'boolean)
 
 (defcustom ridge-api-key nil
-  "API Key to your Ridge. Default at https://app.ridge.dev/configure#clients."
+  "API Key to your Ridge. Default at https://app.ridge.dev/settings#clients."
   :group 'ridge
   :type 'string)
 
