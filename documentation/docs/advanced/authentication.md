@@ -41,7 +41,7 @@ To set up your self-hosted Ridge with Google Auth, you need to create a project 
 To implement this, you'll need to:
 1. You must use the `python` package or build from source, because you'll need to install additional packages for the google auth libraries (`prod`). The syntax to install the right packages is
    ```
-   pip install ridge-assistant[prod]
+   pip install ridge[prod]
    ```
 2. [Create authorization credentials](https://developers.google.com/identity/sign-in/web/sign-in) for your application.
 3. Open your [Google cloud console](https://console.developers.google.com/apis/credentials) and create a configuration like below for the relevant `OAuth 2.0 Client IDs` project:
