@@ -23,7 +23,7 @@ Ridge will keep these files in sync to provide contextual responses when you sea
 ## Setup
 
 1. Install the [Ridge Desktop app](https://ridge.dev/downloads) for your OS
-2. Generate an API key on the [Ridge Web App](https://app.ridge.dev/config#clients)
+2. Generate an API key on the [Ridge Web App](https://app.ridge.dev/settings#clients)
 3. Set your Ridge API Key on the *Settings* page of the Ridge Desktop app
 4. [Optional] Add any files, folders you'd like Ridge to be aware of on the *Settings* page and Click *Save*
    These files and folders will be automatically kept in sync for you
