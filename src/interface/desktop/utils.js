@@ -85,7 +85,7 @@ async function populateHeaderPane() {
                     <div id="ridge-nav-menu" class="ridge-nav-dropdown-content">
                         <div class="ridge-nav-username"> ${username} </div>
                         <a id="github-nav" class="ridge-nav" href="https://github.com/ridge-ai/ridge">GitHub</a>
-                        <a id="settings-nav" class="ridge-nav" href="./configure.html">⚙️ Settings</a>
+                        <a id="settings-nav" class="ridge-nav" href="./settings.html">⚙️ Settings</a>
                     </div>
                 </div>
             ` : ''}
