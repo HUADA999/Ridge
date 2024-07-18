@@ -697,7 +697,7 @@ Optionally apply CALLBACK with JSON parsed response and CBARGS."
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (ridge--call-api "/api/configure/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
+  (ridge--call-api "/api/content/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
 
 (defun ridge--query-search-api-and-render-results (query content-type buffer-name &optional rerank is-find-similar)
   "Query Ridge Search API with QUERY, CONTENT-TYPE and RERANK as query params.
