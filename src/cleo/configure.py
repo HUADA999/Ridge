@@ -42,7 +42,7 @@ from ridge.database.adapters import (
 )
 from ridge.database.models import ClientApplication, RidgeUser, ProcessLock, Subscription
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
-from ridge.routers.indexer import configure_content, configure_search
+from ridge.routers.api_content import configure_content, configure_search
 from ridge.routers.twilio import is_twilio_enabled
 from ridge.utils import constants, state
 from ridge.utils.config import SearchType
@@ -309,7 +309,7 @@ def configure_routes(app):
     from ridge.routers.api_agents import api_agents
     from ridge.routers.api_chat import api_chat
     from ridge.routers.api_config import api_config
-    from ridge.routers.indexer import indexer
+    from ridge.routers.api_content import api_content
     from ridge.routers.notion import notion_router
     from ridge.routers.web_client import web_client
 
@@ -317,7 +317,7 @@ def configure_routes(app):
     app.include_router(api_chat, prefix="/api/chat")
     app.include_router(api_agents, prefix="/api/agents")
     app.include_router(api_config, prefix="/api/configure")
-    app.include_router(indexer, prefix="/api/v1/index")
+    app.include_router(api_content, prefix="/api/content")
     app.include_router(notion_router, prefix="/api/notion")
     app.include_router(web_client)
 

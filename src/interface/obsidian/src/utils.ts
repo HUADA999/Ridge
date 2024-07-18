@@ -89,10 +89,11 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
     for (let i = 0; i < fileData.length; i += 1000) {
         const filesGroup = fileData.slice(i, i + 1000);
         const formData = new FormData();
+        const method = regenerate ? "PUT" : "PATCH";
         filesGroup.forEach(fileItem => { formData.append('files', fileItem.blob, fileItem.path) });
         // Call Ridge backend to update index with all markdown, pdf files
-        const response = await fetch(`${setting.ridgeUrl}/api/v1/index/update?force=${regenerate}&client=obsidian`, {
-            method: 'POST',
+        const response = await fetch(`${setting.ridgeUrl}/api/content?client=obsidian`, {
+            method: method,
             headers: {
                 'Authorization': `Bearer ${setting.ridgeApiKey}`,
             },
