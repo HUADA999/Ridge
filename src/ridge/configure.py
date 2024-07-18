@@ -308,15 +308,15 @@ def configure_routes(app):
     from ridge.routers.api import api
     from ridge.routers.api_agents import api_agents
     from ridge.routers.api_chat import api_chat
-    from ridge.routers.api_config import api_config
     from ridge.routers.api_content import api_content
+    from ridge.routers.api_model import api_model
     from ridge.routers.notion import notion_router
     from ridge.routers.web_client import web_client
 
     app.include_router(api, prefix="/api")
     app.include_router(api_chat, prefix="/api/chat")
     app.include_router(api_agents, prefix="/api/agents")
-    app.include_router(api_config, prefix="/api/configure")
+    app.include_router(api_model, prefix="/api/model")
     app.include_router(api_content, prefix="/api/content")
     app.include_router(notion_router, prefix="/api/notion")
     app.include_router(web_client)
