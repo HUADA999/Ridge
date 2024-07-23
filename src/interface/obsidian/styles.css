@@ -85,6 +85,12 @@ If your plugin does not need CSS, delete this file.
     margin-left: auto;
     white-space: pre-line;
 }
+/* Override white-space for ul, ol, li under ridge-chat-message-text.ridge */
+.ridge-chat-message-text.ridge ul,
+.ridge-chat-message-text.ridge ol,
+.ridge-chat-message-text.ridge li {
+    white-space: normal;
+}
 /* add left protrusion to ridge chat bubble */
 .ridge-chat-message-text.ridge:after {
     content: '';
