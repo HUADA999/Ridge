@@ -7,7 +7,7 @@ from typing import Any, Iterator, List, Union
 from langchain.schema import ChatMessage
 from llama_cpp import Llama
 
-from ridge.database.models import Agent
+from ridge.database.models import Agent, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.offline.utils import download_model
 from ridge.processor.conversation.utils import (
@@ -30,6 +30,7 @@ def extract_questions_offline(
     use_history: bool = True,
     should_extract_questions: bool = True,
     location_data: LocationData = None,
+    user: RidgeUser = None,
     max_prompt_size: int = None,
 ) -> List[str]:
     """
@@ -45,6 +46,7 @@ def extract_questions_offline(
     offline_chat_model = loaded_model or download_model(model, max_tokens=max_prompt_size)
 
     location = f"{location_data.city}, {location_data.region}, {location_data.country}" if location_data else "Unknown"
+    username = prompts.user_name.format(name=user.get_full_name()) if user and user.get_full_name() else ""
 
     # Extract Past User Message and Inferred Questions from Conversation Log
     chat_history = ""
@@ -68,6 +70,7 @@ def extract_questions_offline(
         last_year=last_year,
         this_year=today.year,
         location=location,
+        username=username,
     )
 
     messages = generate_chatml_messages_with_context(
