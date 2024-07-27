@@ -25,7 +25,7 @@ from ridge.database.models import (
 from ridge.processor.content.org_mode.org_to_entries import OrgToEntries
 from ridge.processor.content.plaintext.plaintext_to_entries import PlaintextToEntries
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
-from ridge.routers.indexer import configure_content
+from ridge.routers.api_content import configure_content
 from ridge.search_type import text_search
 from ridge.utils import fs_syncer, state
 from ridge.utils.config import SearchModels
