@@ -14,7 +14,7 @@ In order to use Ridge on WhatsApp with your own data, you need to setup a Ridge 
 
 If you hit usage limits for the WhatsApp bot, upgrade to [a paid plan](https://ridge.dev/pricing) on Ridge Cloud.
 
-<img src="https://ridge-web-bucket.s3.amazonaws.com/ridgewhatsapp.png" alt="WhatsApp QR Code" width="300" height="300">
+<img src="https://ridge-web-bucket.s3.amazonaws.com/ridgewhatsapp.png" alt="WhatsApp QR Code" width="300" height="300" />
 
 ## Features
 
