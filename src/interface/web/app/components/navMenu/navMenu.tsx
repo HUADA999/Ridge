@@ -23,7 +23,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Moon, Sun, UserCircle, User, Robot, MagnifyingGlass, Question, GearFine, ArrowRight } from '@phosphor-icons/react';
-import { RidgeLogo } from '../logo/khogLogo';
+import { RidgeLogoType } from '../logo/khogLogo';
 
 
 interface NavMenuProps {
@@ -99,7 +99,7 @@ export default function NavMenu(props: NavMenuProps) {
                 {
                     !displayTitle && props.showLogo &&
                     <Link href='/'>
-                        <RidgeLogo />
+                        <RidgeLogoType />
                     </Link>
                 }
             </div>

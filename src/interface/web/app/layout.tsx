@@ -5,8 +5,11 @@ import "./globals.css";
 const inter = Noto_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Ridge AI - Chat",
-  description: "Use this page to chat with Ridge AI.",
+    title: "Ridge AI - Home",
+    description: "Your open, personal AI.",
+    icons: {
+        icon: '/static/favicon.ico',
+    },
 };
 
 export default function RootLayout({
