@@ -6,7 +6,7 @@ const inter = Noto_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
     title: "Ridge AI - Home",
-    description: "Your open, personal AI.",
+    description: "Your Second Brain.",
     icons: {
         icon: '/static/favicon.ico',
     },
