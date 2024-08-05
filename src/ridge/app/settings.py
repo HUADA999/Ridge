@@ -30,7 +30,7 @@ DEBUG = in_debug_mode()
 
 # All Subdomains of RIDGE_DOMAIN are trusted
 RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "ridge.dev")
-ALLOWED_HOSTS = [f".{RIDGE_DOMAIN}", "localhost", "127.0.0.1", "[::1]"]
+ALLOWED_HOSTS = [f".{RIDGE_DOMAIN}", "localhost", "127.0.0.1", "[::1]", f"{RIDGE_DOMAIN}"]
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://*.{RIDGE_DOMAIN}",
