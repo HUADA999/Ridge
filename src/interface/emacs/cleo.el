@@ -4,8 +4,8 @@
 
 ;; Author: Debanjum Singh Solanky <debanjum@ridge.dev>
 ;;         Saba Imran <saba@ridge.dev>
-;; Description: An AI copilot for your Second Brain
-;; Keywords: search, chat, org-mode, outlines, markdown, pdf, image
+;; Description: Your Second Brain
+;; Keywords: search, chat, ai, org-mode, outlines, markdown, pdf, image
 ;; Version: 1.17.0
 ;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1"))
 ;; URL: https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs
@@ -99,7 +99,7 @@
   :type 'boolean)
 
 (defcustom ridge-api-key nil
-  "API Key to your Ridge. Default at https://app.ridge.dev/config#clients."
+  "API Key to your Ridge. Default at https://app.ridge.dev/settings#clients."
   :group 'ridge
   :type 'string)
 
@@ -424,12 +424,12 @@ Auto invokes setup steps on calling main entrypoint."
   "Send multi-part form `BODY' of `CONTENT-TYPE' in request to ridge server.
 Append 'TYPE-QUERY' as query parameter in request url.
 Specify `BOUNDARY' used to separate files in request header."
-  (let ((url-request-method "POST")
+  (let ((url-request-method ((if force) "PUT" "PATCH"))
         (url-request-data body)
           (url-request-extra-headers `(("content-type" . ,(format "multipart/form-data; boundary=%s" boundary))
                                        ("Authorization" . ,(format "Bearer %s" ridge-api-key)))))
       (with-current-buffer
-          (url-retrieve (format "%s/api/v1/index/update?%s&force=%s&client=emacs" ridge-server-url type-query (or force "false"))
+          (url-retrieve (format "%s/api/content?%s&client=emacs" ridge-server-url type-query)
                         ;; render response from indexing API endpoint on server
                         (lambda (status)
                           (if (not (plist-get status :error))
@@ -697,7 +697,7 @@ Optionally apply CALLBACK with JSON parsed response and CBARGS."
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (ridge--call-api "/api/config/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
+  (ridge--call-api "/api/content/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
 
 (defun ridge--query-search-api-and-render-results (query content-type buffer-name &optional rerank is-find-similar)
   "Query Ridge Search API with QUERY, CONTENT-TYPE and RERANK as query params.

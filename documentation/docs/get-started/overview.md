@@ -1,7 +1,7 @@
 ---
 sidebar_position: 0
 slug: /
-keywords: ["ridge", "ridge ai", "ridge docs", "ridge documentation", "ridge features", "ridge overview", "ridge quickstart", "ridge chat", "ridge search", "ridge cloud", "ridge self-host", "ridge setup", "open source ai", "local llm", "ai copilot", "second brain ai", "ai search engine"]
+keywords: ["ridge", "ridge ai", "ridge docs", "ridge documentation", "ridge features", "ridge overview", "ridge quickstart", "ridge chat", "ridge search", "ridge cloud", "ridge self-host", "ridge setup", "open source ai", "local llm", "ai copilot", "second brain", "personal ai", "ai search engine"]
 ---
 
 # Overview
@@ -9,7 +9,7 @@ keywords: ["ridge", "ridge ai", "ridge docs", "ridge documentation", "ridge feat
 <p align="center"><img src="/img/ridge-logo-sideways-500.png" width="200" alt="Ridge Logo"></img></p>
 
 <div align="center">
-  <b>An AI copilot for your Second Brain</b>
+  <b>Your Second Brain</b>
 </div>
 
 <br />
