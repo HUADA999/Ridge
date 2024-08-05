@@ -34,6 +34,7 @@ import {
     ArrowRight,
     UsersFour,
 } from "@phosphor-icons/react";
+import { RidgeAgentLogo, RidgeAutomationLogo, RidgeSearchLogo } from "../logo/ridgeLogo";
 
 export default function NavMenu() {
     const userData = useAuthenticatedData();
@@ -123,7 +124,7 @@ export default function NavMenu() {
                         <DropdownMenuItem>
                             <Link href="/agents" className="no-underline w-full">
                                 <div className="flex flex-rows">
-                                    <UsersFour className="w-6 h-6" />
+                                    <RidgeAgentLogo className="w-6 h-6" />
                                     <p className="ml-3 font-semibold">Agents</p>
                                 </div>
                             </Link>
@@ -131,7 +132,7 @@ export default function NavMenu() {
                         <DropdownMenuItem>
                             <Link href="/automations" className="no-underline w-full">
                                 <div className="flex flex-rows">
-                                    <Robot className="w-6 h-6" />
+                                    <RidgeAutomationLogo className="w-6 h-6" />
                                     <p className="ml-3 font-semibold">Automations</p>
                                 </div>
                             </Link>
@@ -140,7 +141,7 @@ export default function NavMenu() {
                             <DropdownMenuItem>
                                 <Link href="/search" className="no-underline w-full">
                                     <div className="flex flex-rows">
-                                        <MagnifyingGlass className="w-6 h-6" />
+                                        <RidgeSearchLogo className="w-6 h-6" />
                                         <p className="ml-3 font-semibold">Search</p>
                                     </div>
                                 </Link>
@@ -230,7 +231,7 @@ export default function NavMenu() {
                             <MenubarItem>
                                 <Link href="/agents" className="no-underline w-full">
                                     <div className="flex flex-rows">
-                                        <UsersFour className="w-6 h-6" />
+                                        <RidgeAgentLogo className="w-6 h-6" />
                                         <p className="ml-3 font-semibold">Agents</p>
                                     </div>
                                 </Link>
@@ -238,7 +239,7 @@ export default function NavMenu() {
                             <MenubarItem>
                                 <Link href="/automations" className="no-underline w-full">
                                     <div className="flex flex-rows">
-                                        <Robot className="w-6 h-6" />
+                                        <RidgeAutomationLogo className="w-6 h-6" />
                                         <p className="ml-3 font-semibold">Automations</p>
                                     </div>
                                 </Link>
@@ -247,7 +248,7 @@ export default function NavMenu() {
                                 <MenubarItem>
                                     <Link href="/search" className="no-underline w-full">
                                         <div className="flex flex-rows">
-                                            <MagnifyingGlass className="w-6 h-6" />
+                                            <RidgeSearchLogo className="w-6 h-6" />
                                             <p className="ml-3 font-semibold">Search</p>
                                         </div>
                                     </Link>
