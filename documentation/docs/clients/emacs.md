@@ -30,7 +30,7 @@ sidebar_position: 2
 | ![ridge search on emacs](/img/ridge_search_on_emacs.png) | ![ridge chat on emacs](/img/ridge_chat_on_emacs.png) |
 
 ## Setup
-1. Generate an API key on the [Ridge Web App](https://app.ridge.dev/config#clients)
+1. Generate an API key on the [Ridge Web App](https://app.ridge.dev/settings#clients)
 2. Add below snippet to your Emacs config file, usually at `~/.emacs.d/init.el`
 
 
