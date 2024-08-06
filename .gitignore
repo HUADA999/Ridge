@@ -17,6 +17,7 @@ todesktop.json
 # Build artifacts
 /src/ridge/interface/web/images
 /src/ridge/interface/built/
+/src/ridge/interface/compiled/404.html
 /build/
 /dist/
 ridge_assistant.egg-info
