@@ -47,7 +47,7 @@ jobs:
 
       - name: 📂 Copy Generated Files
         run: |
-          mkdir -p src/ridge/interface/
+          mkdir -p src/ridge/interface/built
           cp -r /opt/hostedtoolcache/Python/3.11.9/x64/lib/python3.11/site-packages/ridge/interface/built/* src/ridge/interface/built/
 
       - name: ⚙️ Build Python Package
