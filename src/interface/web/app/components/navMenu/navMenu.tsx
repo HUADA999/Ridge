@@ -22,33 +22,17 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Moon,
-    Sun,
-    UserCircle,
-    User,
-    Robot,
-    MagnifyingGlass,
-    Question,
-    GearFine,
-    ArrowRight,
-    UsersFour,
-} from "@phosphor-icons/react";
+import { Moon, Sun, UserCircle, Question, GearFine, ArrowRight } from "@phosphor-icons/react";
 import { RidgeAgentLogo, RidgeAutomationLogo, RidgeSearchLogo } from "../logo/ridgeLogo";
+import { useIsMobileWidth } from "@/app/common/utils";
 
 export default function NavMenu() {
     const userData = useAuthenticatedData();
-    const [isMobileWidth, setIsMobileWidth] = useState(false);
     const [darkMode, setDarkMode] = useState(false);
     const [initialLoadDone, setInitialLoadDone] = useState(false);
+    const isMobileWidth = useIsMobileWidth();
 
     useEffect(() => {
-        setIsMobileWidth(window.innerWidth < 786);
-
-        window.addEventListener("resize", () => {
-            setIsMobileWidth(window.innerWidth < 786);
-        });
-
         if (localStorage.getItem("theme") === "dark") {
             document.documentElement.classList.add("dark");
             setDarkMode(true);
