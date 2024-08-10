@@ -8,7 +8,8 @@ export const metadata: Metadata = {
     title: "Ridge AI - Home",
     description: "Your Second Brain.",
     icons: {
-        icon: "/static/favicon.ico",
+        icon: "/static/assets/icons/ridge_lantern.ico",
+        apple: "/static/assets/icons/ridge_lantern_256x256.png",
     },
     manifest: "/static/ridge.webmanifest",
 };
