@@ -11,6 +11,20 @@ export const metadata: Metadata = {
         icon: "/static/assets/icons/ridge_lantern.ico",
         apple: "/static/assets/icons/ridge_lantern_256x256.png",
     },
+    openGraph: {
+        siteName: "Ridge AI",
+        title: "Ridge AI - Agents",
+        description: "Your Second Brain.",
+        url: "https://app.ridge.dev/agents",
+        type: "website",
+        images: [
+            {
+                url: "https://assets.ridge.dev/ridge_lantern_256x256.png",
+                width: 256,
+                height: 256,
+            },
+        ],
+    },
 };
 
 export default function RootLayout({
