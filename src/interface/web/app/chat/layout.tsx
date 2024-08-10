@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     description:
         "Ask anything. Ridge will use the internet and your docs to answer, paint and even automate stuff for you.",
     icons: {
-        icon: "/static/favicon.ico",
+        icon: "/static/assets/icons/ridge_lantern.ico",
+        apple: "/static/assets/icons/ridge_lantern_256x256.png",
     },
 };
 

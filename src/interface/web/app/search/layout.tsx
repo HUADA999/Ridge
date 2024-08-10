@@ -7,7 +7,8 @@ export const metadata: Metadata = {
     description:
         "Find anything in documents you've shared with Ridge using natural language queries.",
     icons: {
-        icon: "/static/favicon.ico",
+        icon: "/static/assets/icons/ridge_lantern.ico",
+        apple: "/static/assets/icons/ridge_lantern_256x256.png",
     },
 };
 

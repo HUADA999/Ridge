@@ -8,7 +8,8 @@ export const metadata: Metadata = {
     title: "Ridge AI - Agents",
     description: "Find a specialized agent that can help you address more specific needs.",
     icons: {
-        icon: "/static/favicon.ico",
+        icon: "/static/assets/icons/ridge_lantern.ico",
+        apple: "/static/assets/icons/ridge_lantern_256x256.png",
     },
 };
 
