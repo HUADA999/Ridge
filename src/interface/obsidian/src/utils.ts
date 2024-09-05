@@ -57,7 +57,7 @@ export const supportedImageFilesTypes = fileTypeToExtension.image;
 export const supportedBinaryFileTypes = fileTypeToExtension.pdf.concat(supportedImageFilesTypes);
 export const supportedFileTypes = fileTypeToExtension.markdown.concat(supportedBinaryFileTypes);
 
-export async function updateContentIndex(vault: Vault, setting: RidgeSetting, lastSync: Map<TFile, number>, regenerate: boolean = false): Promise<Map<TFile, number>> {
+export async function updateContentIndex(vault: Vault, setting: RidgeSetting, lastSync: Map<TFile, number>, regenerate: boolean = false, userTriggered: boolean = false): Promise<Map<TFile, number>> {
     // Get all markdown, pdf files in the vault
     console.log(`Ridge: Updating Ridge content index...`)
     const files = vault.getFiles()
@@ -179,6 +179,7 @@ export async function updateContentIndex(vault: Vault, setting: RidgeSetting, la
     if (error_message) {
         new Notice(error_message);
     } else {
+        if (userTriggered) new Notice('✅ Updated Ridge index.');
         console.log(`✅ Refreshed Ridge content index. Updated: ${countOfFilesToIndex} files, Deleted: ${countOfFilesToDelete} files.`);
     }
 
