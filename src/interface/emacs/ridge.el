@@ -878,7 +878,7 @@ Call CALLBACK func with response and CBARGS."
   (let ((params `(("q" ,query) ("n" ,ridge-results-count))))
     (when session-id (push `("conversation_id" ,session-id) params))
     (ridge--call-api-async "/api/chat"
-                          "GET"
+                          "POST"
                           params
                           callback cbargs)))
 
