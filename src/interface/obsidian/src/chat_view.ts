@@ -1074,9 +1074,9 @@ export class RidgeChatView extends RidgePaneView {
         };
 
         let response = await fetch(chatUrl, {
-            method: "GET",
+            method: "POST",
             headers: {
-                "Content-Type": "text/plain",
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${this.setting.ridgeApiKey}`,
             },
         })
