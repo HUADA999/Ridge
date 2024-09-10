@@ -1050,9 +1050,19 @@ export class RidgeChatView extends RidgePaneView {
         }
 
         // Get chat response from Ridge backend
-        let encodedQuery = encodeURIComponent(query);
-        let chatUrl = `${this.setting.ridgeUrl}/api/chat?q=${encodedQuery}&conversation_id=${conversationId}&n=${this.setting.resultsCount}&stream=true&client=obsidian`;
-        if (!!this.location) chatUrl += `&region=${this.location.region}&city=${this.location.city}&country=${this.location.countryName}&timezone=${this.location.timezone}`;
+        const chatUrl = `${this.setting.ridgeUrl}/api/chat?client=obsidian`;
+        const body = {
+            q: query,
+            n: this.setting.resultsCount,
+            stream: true,
+            ...(!!conversationId && { conversation_id: parseInt(conversationId) }),
+            ...(!!this.location && {
+                city: this.location.city,
+                region: this.location.region,
+                country: this.location.countryName,
+                timezone: this.location.timezone,
+            }),
+        };
 
         let newResponseEl = this.createRidgeResponseDiv();
         let newResponseTextEl = newResponseEl.createDiv();
@@ -1079,6 +1089,7 @@ export class RidgeChatView extends RidgePaneView {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${this.setting.ridgeApiKey}`,
             },
+            body: JSON.stringify(body),
         })
 
         try {
