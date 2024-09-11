@@ -6,7 +6,7 @@ from typing import Dict, Optional
 
 from langchain.schema import ChatMessage
 
-from ridge.database.models import Agent, RidgeUser
+from ridge.database.models import Agent, ChatModelOptions, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.anthropic.utils import (
     anthropic_chat_completion_with_backoff,
@@ -188,6 +188,7 @@ def converse_anthropic(
         model_name=model,
         max_prompt_size=max_prompt_size,
         tokenizer_name=tokenizer_name,
+        model_type=ChatModelOptions.ModelType.ANTHROPIC,
     )
 
     if len(messages) > 1:
