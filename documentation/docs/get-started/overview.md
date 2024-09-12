@@ -31,11 +31,10 @@ Welcome to the Ridge Docs! This is the best place to get setup and explore Ridge
 - Quickly [find](/features/search) relevant notes and documents using natural language
 - It understands pdf, plaintext, markdown, org-mode files, [notion pages](/data-sources/notion_integration) and [github repositories](/data-sources/github_integration)
 - Access it from your [Emacs](/clients/emacs), [Obsidian](/clients/obsidian), the [Ridge desktop app](/clients/desktop), or [any web browser](/clients/web)
-- Use [cloud](https://app.ridge.dev/login) to access your Ridge anytime from anywhere, [self-host](/get-started/setup) on consumer hardware for privacy
+- Use our [cloud](https://app.ridge.dev/login) instance to access your Ridge anytime from anywhere, [self-host](/get-started/setup) on consumer hardware for privacy
+
+![demo_chat](https://assets.ridge.dev/quadratic_equation_ridge_web.gif)
 
 ## Quickstart
 - [Try Ridge Cloud](https://app.ridge.dev) to get started quickly
 - [Read these instructions](/get-started/setup) to self-host a private instance of Ridge
-
-## At a Glance
-![demo_chat](https://assets.ridge.dev/using_ridge_for_studying.gif)
