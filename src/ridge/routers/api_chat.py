@@ -26,6 +26,7 @@ from ridge.database.adapters import (
 from ridge.database.models import RidgeUser
 from ridge.processor.conversation.prompts import help_message, no_entries_found
 from ridge.processor.conversation.utils import save_to_conversation_log
+from ridge.processor.image.generate import text_to_image
 from ridge.processor.speech.text_to_speech import generate_text_to_speech
 from ridge.processor.tools.online_search import read_webpages, search_online
 from ridge.routers.api import extract_references_and_questions
@@ -44,7 +45,6 @@ from ridge.routers.helpers import (
     is_query_empty,
     is_ready_to_chat,
     read_chat_stream,
-    text_to_image,
     update_telemetry_state,
     validate_conversation_config,
 )
