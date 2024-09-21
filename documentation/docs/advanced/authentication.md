@@ -7,7 +7,7 @@ This is only helpful for self-hosted users or teams. If you're using [Ridge Clou
 By default, most of the instructions for self-hosting Ridge assume a single user, and so the default configuration is to run in anonymous mode. However, if you want to enable authentication, you can do so either with with [Magic Links](#using-magic-links) or [Google OAuth](#using-google-oauth) as shown below. This can be helpful to make Ridge securely accessible to you and your team.
 
 :::tip[Note]
-Remove the `--anonymous-mode` flag in your start up command to enable authentication.
+Remove the `--anonymous-mode` flag from your ridge start up command or docker-compose file to enable authentication.
 :::
 
 ## Using Magic Links
