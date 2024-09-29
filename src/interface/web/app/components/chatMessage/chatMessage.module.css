@@ -53,6 +53,10 @@ div.ridgeChatMessage {
     padding-left: 16px;
 }
 
+div.emptyChatMessage {
+    display: none;
+}
+
 div.chatMessageContainer img {
     width: 50%;
 }
