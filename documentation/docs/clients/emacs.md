@@ -30,6 +30,12 @@ sidebar_position: 2
 | ![ridge search on emacs](/img/ridge_search_on_emacs.png) | ![ridge chat on emacs](/img/ridge_chat_on_emacs.png) |
 
 ## Setup
+:::info[Self Hosting]
+If you are self-hosting the Ridge server modify the install steps below:
+- Set `ridge-server-url` to your Ridge server URL. By default, use `http://127.0.0.1:42110`.
+- Do not set `ridge-api-key` if your Ridge server runs in anonymous mode. For example, `ridge --anonymous-mode`
+:::
+
 1. Generate an API key on the [Ridge Web App](https://app.ridge.dev/settings#clients)
 2. Add below snippet to your Emacs config file, usually at `~/.emacs.d/init.el`
 
@@ -43,6 +49,7 @@ M-x package-install ridge
 
 ; Set your Ridge API key
 (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY")
+(setq ridge-server-url "https://app.ridge.dev")
 ```
 
 #### **Minimal Install**
@@ -54,7 +61,8 @@ M-x package-install ridge
   :ensure t
   :pin melpa-stable
   :bind ("C-c s" . 'ridge)
-  :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"))
+  :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"
+                ridge-server-url "https://app.ridge.dev"))
 ```
 
 #### **Standard Install**
@@ -67,6 +75,7 @@ M-x package-install ridge
   :pin melpa-stable
   :bind ("C-c s" . 'ridge)
   :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"
+                ridge-server-url "https://app.ridge.dev"
                 ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
                 ridge-org-files '("~/docs/todo.org" "~/docs/work.org")))
 ```
@@ -81,6 +90,7 @@ M-x package-install ridge
   :straight (ridge :type git :host github :repo "ridge-ai/ridge" :files (:defaults "src/interface/emacs/ridge.el"))
   :bind ("C-c s" . 'ridge)
   :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"
+                ridge-server-url "https://app.ridge.dev"
                 ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
                 ridge-org-files '("~/docs/todo.org" "~/docs/work.org")))
 ```
