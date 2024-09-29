@@ -20,11 +20,18 @@ sidebar_position: 3
   - **Discover**: Find similar notes to the current one
 
 ## Setup
+:::info[Self Hosting]
+If you are self-hosting the Ridge server, update the Ridge Obsidian plugin settings step below:
+- Set the `Ridge URL` field to your Ridge server URL. By default, use `http://127.0.0.1:42110`.
+- Do not set the `Ridge API Key` field if your Ridge server runs in anonymous mode. For example, `ridge --anonymous-mode`
+:::
 
-  1. Open [Ridge](https://obsidian.md/plugins?id=ridge) from the *Community plugins* tab in Obsidian settings panel
-  2. Click *Install*, then *Enable* on the Ridge plugin page in Obsidian
-  3. Generate an API key on the [Ridge Web App](https://app.ridge.dev/settings#clients)
-  4. Set your Ridge API Key in the Ridge plugin settings in Obsidian
+1. Open [Ridge](https://obsidian.md/plugins?id=ridge) from the *Community plugins* tab in Obsidian settings panel
+2. Click *Install*, then *Enable* on the Ridge plugin page in Obsidian
+3. Generate an API key on the [Ridge Web App](https://app.ridge.dev/settings#clients)
+4. Set your Ridge API Key in the Ridge plugin settings on Obsidian
+5. (Optional) Click `Force Sync` in the Ridge plugin settings on Obsidian to immediately sync your Obsidian vault.
+    <br />By default, your Obsidian vault is automatically synced periodically.
 
 See the official [Obsidian Plugin Docs](https://help.obsidian.md/Extending+Obsidian/Community+plugins) for more details on installing Obsidian plugins.
 
