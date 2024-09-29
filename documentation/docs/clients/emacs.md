@@ -76,8 +76,8 @@ M-x package-install ridge
   :bind ("C-c s" . 'ridge)
   :config (setq ridge-api-key "YOUR_RIDGE_CLOUD_API_KEY"
                 ridge-server-url "https://app.ridge.dev"
-                ridge-org-directories '("~/docs/org-roam" "~/docs/notes")
-                ridge-org-files '("~/docs/todo.org" "~/docs/work.org")))
+                ridge-index-directories '("~/docs/org-roam" "~/docs/notes")
+                ridge-index-files '("~/docs/todo.org" "~/docs/work.org")))
 ```
 
 #### **Straight.el**
