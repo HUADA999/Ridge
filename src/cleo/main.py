@@ -1,4 +1,4 @@
-""" Main module for Ridge Assistant
+""" Main module for Ridge
    isort:skip_file
 """
 
