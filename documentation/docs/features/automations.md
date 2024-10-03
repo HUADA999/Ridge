@@ -1,9 +1,14 @@
 # Automations
 
-[Automations](https://app.ridge.dev/automations) are a powerful feature within Ridge to schedule repeated tasks for information retrieval directly from your account. You can run them at a specific time and interval. This is still an experimental feature, so please report any issues you encounter.
+[Automations](https://app.ridge.dev/automations) are a powerful feature within Ridge to schedule repeated jobs for Ridge to do on your behalf. Automations allow you run your query automatically at a scheduled time and frequency. Ridge will send its research to you as an email.
+You can ask Ridge to create custom newsletters, summarize news, notify you of world events etc.
 
-Ridge will use your local time zone to determine the scheduling localization. You can go back and configure the prompt any time you want from the automations page. You can also delete the automation if you no longer need it.
+Ridge uses your local time zone for scheduling. You can configure, share and delete your automations from the [automations page](https://app.ridge.dev/automations).
 
-:::danger[Note]
-Automations will not deliver emails to self-hosted users out of the box. You'll have to have Resend and [Authentication](/advanced/authentication) setup to send emails.
+:::info[Self Hosting]
+Self hosting users need to setup Resend and [Authentication](/advanced/authentication) setup to have Ridge send automation emails.
 :::
+
+| [Create Automation](https://app.ridge.dev/automations?subject=Weekly%20Newsletter&query=Compile%20a%20message%20including:%201.%20A%20recap%20of%20news%20from%20last%20week%202.%20An%20at-home%20workout%20I%20can%20do%20before%20work%203.%20A%20quote%20to%20inspire%20me%20for%20the%20week%20ahead&crontime=00%209%20*%20*%201) | Recieve Automation Email |
+|--------|-------|
+| <img src="/img/ridge_create_automation.png" alt="create automation" width="330" height="500" /> | <img src="/img/ridge_automation_email.png" alt="create automation" width="330" height="660" /> |
