@@ -8,7 +8,7 @@ import openai
 import requests
 
 from ridge.database.adapters import ConversationAdapters
-from ridge.database.models import RidgeUser, TextToImageModelConfig
+from ridge.database.models import Agent, RidgeUser, TextToImageModelConfig
 from ridge.routers.helpers import ChatEvent, generate_better_image_prompt
 from ridge.routers.storage import upload_image
 from ridge.utils import state
@@ -28,6 +28,7 @@ async def text_to_image(
     subscribed: bool = False,
     send_status_func: Optional[Callable] = None,
     uploaded_image_url: Optional[str] = None,
+    agent: Agent = None,
 ):
     status_code = 200
     image = None
@@ -67,6 +68,7 @@ async def text_to_image(
         model_type=text_to_image_config.model_type,
         subscribed=subscribed,
         uploaded_image_url=uploaded_image_url,
+        agent=agent,
     )
 
     if send_status_func:
