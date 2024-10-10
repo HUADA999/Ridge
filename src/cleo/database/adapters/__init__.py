@@ -1413,11 +1413,11 @@ class EntryAdapters:
 
     @staticmethod
     def search_with_embeddings(
-        user: RidgeUser,
+        raw_query: str,
         embeddings: Tensor,
+        user: RidgeUser,
         max_results: int = 10,
         file_type_filter: str = None,
-        raw_query: str = None,
         max_distance: float = math.inf,
         agent: Agent = None,
     ):
