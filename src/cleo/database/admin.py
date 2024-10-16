@@ -31,6 +31,7 @@ from ridge.database.models import (
     UserSearchModelConfig,
     UserVoiceModelConfig,
     VoiceModelOption,
+    WebScraper,
 )
 from ridge.utils.helpers import ImageIntentType
 
@@ -200,6 +201,19 @@ class ServerChatSettingsAdmin(admin.ModelAdmin):
         "chat_advanced",
         "web_scraper",
     )
+
+
+@admin.register(WebScraper)
+class WebScraperAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "type",
+        "api_key",
+        "api_url",
+        "created_at",
+    )
+    search_fields = ("name", "api_key", "api_url", "type")
+    ordering = ("-created_at",)
 
 
 @admin.register(Conversation)
