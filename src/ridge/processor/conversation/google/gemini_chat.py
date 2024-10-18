@@ -6,7 +6,7 @@ from typing import Dict, Optional
 
 from langchain.schema import ChatMessage
 
-from ridge.database.models import Agent, RidgeUser
+from ridge.database.models import Agent, ChatModelOptions, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.google.utils import (
     format_messages_for_gemini,
@@ -187,6 +187,7 @@ def converse_gemini(
         model_name=model,
         max_prompt_size=max_prompt_size,
         tokenizer_name=tokenizer_name,
+        model_type=ChatModelOptions.ModelType.GOOGLE,
     )
 
     messages, system_prompt = format_messages_for_gemini(messages, system_prompt)
