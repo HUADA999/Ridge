@@ -127,6 +127,11 @@
                  (const "image")
                  (const "pdf")))
 
+(defcustom ridge-default-agent "ridge"
+  "The default agent to chat with. See https://app.ridge.dev/agents for available options."
+  :group 'ridge
+  :type 'string)
+
 
 ;; --------------------------
 ;; Ridge Dynamic Configuration
@@ -143,6 +148,9 @@
 
 (defconst ridge--chat-buffer-name "*🏮 Ridge Chat*"
   "Name of chat buffer for Ridge.")
+
+(defvar ridge--selected-agent ridge-default-agent
+  "Currently selected Ridge agent.")
 
 (defvar ridge--content-type "org"
   "The type of content to perform search on.")
@@ -913,14 +921,16 @@ Call CALLBACK func with response and CBARGS."
   (let ((selected-session-id (ridge--select-conversation-session "Open")))
     (ridge--load-chat-session ridge--chat-buffer-name selected-session-id)))
 
-(defun ridge--create-chat-session ()
-  "Create new chat session."
-  (ridge--call-api "/api/chat/sessions" "POST"))
+(defun ridge--create-chat-session (&optional agent)
+  "Create new chat session with AGENT."
+  (ridge--call-api "/api/chat/sessions"
+                  "POST"
+                  (when agent `(("agent_slug" ,agent)))))
 
-(defun ridge--new-conversation-session ()
-  "Create new Ridge conversation session."
+(defun ridge--new-conversation-session (&optional agent)
+  "Create new Ridge conversation session with AGENT."
   (thread-last
-    (ridge--create-chat-session)
+    (ridge--create-chat-session agent)
     (assoc 'conversation_id)
     (cdr)
     (ridge--chat)))
@@ -934,6 +944,15 @@ Call CALLBACK func with response and CBARGS."
   (thread-last
     (ridge--select-conversation-session "Delete")
     (ridge--delete-chat-session)))
+
+(defun ridge--get-agents ()
+  "Get list of available Ridge agents."
+  (let* ((response (ridge--call-api "/api/agents" "GET"))
+         (agents (mapcar (lambda (agent)
+                           (cons (cdr (assoc 'name agent))
+                                 (cdr (assoc 'slug agent))))
+                         response)))
+    agents))
 
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
@@ -1246,6 +1265,20 @@ Paragraph only starts at first text after blank line."
     ;; dynamically set choices to content types enabled on ridge backend
     :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
 
+  (transient-define-argument ridge--agent-switch ()
+    :class 'transient-switches
+    :argument-format "--agent=%s"
+    :argument-regexp ".+"
+    :init-value (lambda (obj)
+                  (oset obj value (format "--agent=%s" ridge--selected-agent)))
+    :choices (or (ignore-errors (mapcar #'cdr (ridge--get-agents))) '("ridge"))
+    :reader (lambda (prompt initial-input history)
+              (let* ((agents (ridge--get-agents))
+                    (selected (completing-read prompt agents nil t initial-input history))
+                    (slug (cdr (assoc selected agents))))
+                (setq ridge--selected-agent slug)
+                slug)))
+
   (transient-define-suffix ridge--search-command (&optional args)
     (interactive (list (transient-args transient-current-command)))
     (progn
@@ -1287,10 +1320,11 @@ Paragraph only starts at first text after blank line."
     (interactive (list (transient-args transient-current-command)))
     (ridge--open-conversation-session))
 
-  (transient-define-suffix ridge--new-conversation-session-command (&optional _)
+  (transient-define-suffix ridge--new-conversation-session-command (&optional args)
     "Command to select Ridge conversation sessions to open."
     (interactive (list (transient-args transient-current-command)))
-    (ridge--new-conversation-session))
+    (let ((agent-slug (transient-arg-value "--agent=" args)))
+      (ridge--new-conversation-session agent-slug)))
 
   (transient-define-suffix ridge--delete-conversation-session-command (&optional _)
     "Command to select Ridge conversation sessions to delete."
@@ -1298,14 +1332,15 @@ Paragraph only starts at first text after blank line."
     (ridge--delete-conversation-session))
 
   (transient-define-prefix ridge--chat-menu ()
-    "Open the Ridge chat menu."
-    ["Act"
-     ("c" "Chat" ridge--chat-command)
-     ("o" "Open Conversation" ridge--open-conversation-session-command)
-     ("n" "New Conversation" ridge--new-conversation-session-command)
-     ("d" "Delete Conversation" ridge--delete-conversation-session-command)
-     ("q" "Quit" transient-quit-one)
-     ])
+    "Create the Ridge Chat Menu and Execute Commands."
+    [["Configure"
+      ("a" "Select Agent" ridge--agent-switch)]]
+    [["Act"
+      ("c" "Chat" ridge--chat-command)
+      ("o" "Open Conversation" ridge--open-conversation-session-command)
+      ("n" "New Conversation" ridge--new-conversation-session-command)
+      ("d" "Delete Conversation" ridge--delete-conversation-session-command)
+      ("q" "Quit" transient-quit-one)]])
 
   (transient-define-prefix ridge--menu ()
     "Create Ridge Menu to Configure and Execute Commands."
