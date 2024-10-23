@@ -132,8 +132,8 @@ function ChatBodyData(props: ChatBodyDataProps) {
     useEffect(() => {
         const agents = (agentsData || []).filter((agent) => agent !== null && agent !== undefined);
         setAgents(agents);
-        // set the selected agent to the most recently used agent, first agent is always ridge
-        setSelectedAgent(agents.length > 1 ? agents[1].slug : "ridge");
+        // set the first agent, which is always the default agent, as the default for chat
+        setSelectedAgent(agents.length > 1 ? agents[0].slug : "ridge");
 
         // generate colored icons for the available agents
         const agentIcons = agents.map((agent) => getIconFromIconName(agent.icon, agent.color)!);
