@@ -12,7 +12,7 @@ Without any desktop clients, you can start chatting with Ridge on WhatsApp. Bear
 
 In order to use Ridge on WhatsApp with your own data, you need to setup a Ridge Cloud account and connect your WhatsApp account to it. This is a one time setup and you can do it from the [Ridge Cloud config page](https://app.ridge.dev/settings).
 
-If you hit usage limits for the WhatsApp bot, upgrade to [a paid plan](https://ridge.dev/pricing) on Ridge Cloud.
+If you hit usage limits for the WhatsApp bot, upgrade to [a paid plan](https://ridge.dev/#pricing) on Ridge Cloud.
 
 <img src="https://ridge-web-bucket.s3.amazonaws.com/ridgewhatsapp.png" alt="WhatsApp QR Code" width="300" height="300" />
 
