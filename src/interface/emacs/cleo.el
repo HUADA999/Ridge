@@ -6,7 +6,7 @@
 ;;         Saba Imran <saba@ridge.dev>
 ;; Description: Your Second Brain
 ;; Keywords: search, chat, ai, org-mode, outlines, markdown, pdf, image
-;; Version: 1.25.0
+;; Version: 1.26.4
 ;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1"))
 ;; URL: https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs
 
@@ -127,6 +127,11 @@
                  (const "image")
                  (const "pdf")))
 
+(defcustom ridge-default-agent "ridge"
+  "The default agent to chat with. See https://app.ridge.dev/agents for available options."
+  :group 'ridge
+  :type 'string)
+
 
 ;; --------------------------
 ;; Ridge Dynamic Configuration
@@ -143,6 +148,9 @@
 
 (defconst ridge--chat-buffer-name "*🏮 Ridge Chat*"
   "Name of chat buffer for Ridge.")
+
+(defvar ridge--selected-agent ridge-default-agent
+  "Currently selected Ridge agent.")
 
 (defvar ridge--content-type "org"
   "The type of content to perform search on.")
@@ -656,13 +664,15 @@ Simplified fork of `org-cycle-content' from Emacs 29.1 to work with >=27.1."
 ;; --------------
 ;; Query Ridge API
 ;; --------------
-(defun ridge--call-api (path &optional method params callback &rest cbargs)
-  "Sync call API at PATH with METHOD and query PARAMS as kv assoc list.
+(defun ridge--call-api (path &optional method params body callback &rest cbargs)
+  "Sync call API at PATH with METHOD, query PARAMS and BODY as kv assoc list.
 Optionally apply CALLBACK with JSON parsed response and CBARGS."
   (let* ((url-request-method (or method "GET"))
          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key))))
-         (param-string (if params (url-build-query-string params) ""))
-         (query-url (format "%s%s?%s&client=emacs" ridge-server-url path param-string))
+         (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)) ("Content-Type" . "application/json")))
+         (url-request-data (if body (json-encode body) nil))
+         (param-string (url-build-query-string (append params '((client "emacs")))))
+         (query-url (format "%s%s?%s" ridge-server-url path param-string))
          (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs))) ; normalize cbargs to (a b) from ((a b)) if required
     (with-temp-buffer
       (condition-case ex
@@ -682,8 +692,8 @@ Optionally apply CALLBACK with JSON parsed response and CBARGS."
          (url-request-extra-headers `(("Authorization" . ,(format "Bearer %s" ridge-api-key)) ("Content-Type" . "application/json")))
          (url-request-data (if body (json-encode body) nil))
          (param-string (url-build-query-string (append params '((client "emacs")))))
-         (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs)) ; normalize cbargs to (a b) from ((a b)) if required
-         (query-url (format "%s%s?%s" ridge-server-url path param-string)))
+         (query-url (format "%s%s?%s" ridge-server-url path param-string))
+         (cbargs (if (and (listp cbargs) (listp (car cbargs))) (car cbargs) cbargs))) ; normalize cbargs to (a b) from ((a b)) if required
     (url-retrieve query-url
                   (lambda (status)
                     (if (plist-get status :error)
@@ -699,7 +709,7 @@ Optionally apply CALLBACK with JSON parsed response and CBARGS."
 
 (defun ridge--get-enabled-content-types ()
   "Get content types enabled for search from API."
-  (ridge--call-api "/api/content/types" "GET" nil `(lambda (item) (mapcar #'intern item))))
+  (ridge--call-api "/api/content/types" "GET" nil nil `(lambda (item) (mapcar #'intern item))))
 
 (defun ridge--query-search-api-and-render-results (query content-type buffer-name &optional rerank is-find-similar)
   "Query Ridge Search API with QUERY, CONTENT-TYPE and RERANK as query params.
@@ -913,14 +923,16 @@ Call CALLBACK func with response and CBARGS."
   (let ((selected-session-id (ridge--select-conversation-session "Open")))
     (ridge--load-chat-session ridge--chat-buffer-name selected-session-id)))
 
-(defun ridge--create-chat-session ()
-  "Create new chat session."
-  (ridge--call-api "/api/chat/sessions" "POST"))
+(defun ridge--create-chat-session (&optional agent)
+  "Create new chat session with AGENT."
+  (ridge--call-api "/api/chat/sessions"
+                  "POST"
+                  (when agent `(("agent_slug" ,agent)))))
 
-(defun ridge--new-conversation-session ()
-  "Create new Ridge conversation session."
+(defun ridge--new-conversation-session (&optional agent)
+  "Create new Ridge conversation session with AGENT."
   (thread-last
-    (ridge--create-chat-session)
+    (ridge--create-chat-session agent)
     (assoc 'conversation_id)
     (cdr)
     (ridge--chat)))
@@ -934,6 +946,15 @@ Call CALLBACK func with response and CBARGS."
   (thread-last
     (ridge--select-conversation-session "Delete")
     (ridge--delete-chat-session)))
+
+(defun ridge--get-agents ()
+  "Get list of available Ridge agents."
+  (let* ((response (ridge--call-api "/api/agents" "GET"))
+         (agents (mapcar (lambda (agent)
+                           (cons (cdr (assoc 'name agent))
+                                 (cdr (assoc 'slug agent))))
+                         response)))
+    agents))
 
 (defun ridge--render-chat-message (message sender &optional receive-date)
   "Render chat messages as `org-mode' list item.
@@ -1246,6 +1267,20 @@ Paragraph only starts at first text after blank line."
     ;; dynamically set choices to content types enabled on ridge backend
     :choices (or (ignore-errors (mapcar #'symbol-name (ridge--get-enabled-content-types))) '("all" "org" "markdown" "pdf" "image")))
 
+  (transient-define-argument ridge--agent-switch ()
+    :class 'transient-switches
+    :argument-format "--agent=%s"
+    :argument-regexp ".+"
+    :init-value (lambda (obj)
+                  (oset obj value (format "--agent=%s" ridge--selected-agent)))
+    :choices (or (ignore-errors (mapcar #'cdr (ridge--get-agents))) '("ridge"))
+    :reader (lambda (prompt initial-input history)
+              (let* ((agents (ridge--get-agents))
+                    (selected (completing-read prompt agents nil t initial-input history))
+                    (slug (cdr (assoc selected agents))))
+                (setq ridge--selected-agent slug)
+                slug)))
+
   (transient-define-suffix ridge--search-command (&optional args)
     (interactive (list (transient-args transient-current-command)))
     (progn
@@ -1287,10 +1322,11 @@ Paragraph only starts at first text after blank line."
     (interactive (list (transient-args transient-current-command)))
     (ridge--open-conversation-session))
 
-  (transient-define-suffix ridge--new-conversation-session-command (&optional _)
+  (transient-define-suffix ridge--new-conversation-session-command (&optional args)
     "Command to select Ridge conversation sessions to open."
     (interactive (list (transient-args transient-current-command)))
-    (ridge--new-conversation-session))
+    (let ((agent-slug (transient-arg-value "--agent=" args)))
+      (ridge--new-conversation-session agent-slug)))
 
   (transient-define-suffix ridge--delete-conversation-session-command (&optional _)
     "Command to select Ridge conversation sessions to delete."
@@ -1298,14 +1334,15 @@ Paragraph only starts at first text after blank line."
     (ridge--delete-conversation-session))
 
   (transient-define-prefix ridge--chat-menu ()
-    "Open the Ridge chat menu."
-    ["Act"
-     ("c" "Chat" ridge--chat-command)
-     ("o" "Open Conversation" ridge--open-conversation-session-command)
-     ("n" "New Conversation" ridge--new-conversation-session-command)
-     ("d" "Delete Conversation" ridge--delete-conversation-session-command)
-     ("q" "Quit" transient-quit-one)
-     ])
+    "Create the Ridge Chat Menu and Execute Commands."
+    [["Configure"
+      ("a" "Select Agent" ridge--agent-switch)]]
+    [["Act"
+      ("c" "Chat" ridge--chat-command)
+      ("o" "Open Conversation" ridge--open-conversation-session-command)
+      ("n" "New Conversation" ridge--new-conversation-session-command)
+      ("d" "Delete Conversation" ridge--delete-conversation-session-command)
+      ("q" "Quit" transient-quit-one)]])
 
   (transient-define-prefix ridge--menu ()
     "Create Ridge Menu to Configure and Execute Commands."
