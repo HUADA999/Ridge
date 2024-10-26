@@ -6,7 +6,7 @@
 ;;         Saba Imran <saba@ridge.dev>
 ;; Description: Your Second Brain
 ;; Keywords: search, chat, ai, org-mode, outlines, markdown, pdf, image
-;; Version: 1.26.4
+;; Version: 1.27.1
 ;; Package-Requires: ((emacs "27.1") (transient "0.3.0") (dash "2.19.1"))
 ;; URL: https://github.com/ridge-ai/ridge/tree/master/src/interface/emacs
 
