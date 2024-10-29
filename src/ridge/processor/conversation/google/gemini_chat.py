@@ -16,6 +16,7 @@ from ridge.processor.conversation.google.utils import (
 from ridge.processor.conversation.utils import (
     construct_structured_message,
     generate_chatml_messages_with_context,
+    remove_json_codeblock,
 )
 from ridge.utils.helpers import ConversationCommand, is_none_or_empty
 from ridge.utils.rawconfig import LocationData
@@ -92,10 +93,7 @@ def extract_questions_gemini(
 
     # Extract, Clean Message from Gemini's Response
     try:
-        response = response.strip()
-        match = re.search(r"\{.*?\}", response)
-        if match:
-            response = match.group()
+        response = remove_json_codeblock(response)
         response = json.loads(response)
         response = [q.strip() for q in response["queries"] if q.strip()]
         if not isinstance(response, list) or not response:
