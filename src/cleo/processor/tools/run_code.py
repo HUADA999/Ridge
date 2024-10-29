@@ -12,8 +12,8 @@ from ridge.database.models import Agent, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.utils import (
     ChatEvent,
+    clean_json,
     construct_chat_history,
-    remove_json_codeblock,
 )
 from ridge.routers.helpers import send_message_to_model_wrapper
 from ridge.utils.helpers import timer
@@ -111,8 +111,7 @@ async def generate_python_code(
     )
 
     # Validate that the response is a non-empty, JSON-serializable list
-    response = response.strip()
-    response = remove_json_codeblock(response)
+    response = clean_json(response)
     response = json.loads(response)
     codes = [code.strip() for code in response["codes"] if code.strip()]
 

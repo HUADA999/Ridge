@@ -11,9 +11,9 @@ from ridge.database.models import Agent, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.utils import (
     InformationCollectionIteration,
+    clean_json,
     construct_iteration_history,
     construct_tool_chat_history,
-    remove_json_codeblock,
 )
 from ridge.processor.tools.online_search import read_webpages, search_online
 from ridge.processor.tools.run_code import run_code
@@ -99,8 +99,7 @@ async def apick_next_tool(
         )
 
     try:
-        response = response.strip()
-        response = remove_json_codeblock(response)
+        response = clean_json(response)
         response = json.loads(response)
         selected_tool = response.get("tool", None)
         generated_query = response.get("query", None)
