@@ -1,12 +1,11 @@
 import json
 import logging
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional
 
 import yaml
 from fastapi import Request
 
-from ridge.database.adapters import ConversationAdapters, EntryAdapters
 from ridge.database.models import Agent, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.utils import (
