@@ -22,7 +22,7 @@ from langchain.schema import ChatMessage
 from llama_cpp.llama import Llama
 from transformers import AutoTokenizer
 
-from ridge.database.adapters import ConversationAdapters, ais_user_subscribed
+from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import ChatModelOptions, ClientApplication, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.offline.utils import download_model, infer_max_tokens
@@ -455,6 +455,11 @@ def reciprocal_conversation_to_chatml(message_pair):
 def clean_json(response: str):
     """Remove any markdown json codeblock and newline formatting if present. Useful for non schema enforceable models"""
     return response.strip().replace("\n", "").removeprefix("```json").removesuffix("```")
+
+
+def clean_code_python(code: str):
+    """Remove any markdown codeblock and newline formatting if present. Useful for non schema enforceable models"""
+    return code.strip().removeprefix("```python").removesuffix("```")
 
 
 def defilter_query(query: str):
