@@ -20,7 +20,7 @@ from langchain.schema import ChatMessage
 from llama_cpp.llama import Llama
 from transformers import AutoTokenizer
 
-from ridge.database.adapters import ConversationAdapters, ais_user_subscribed
+from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import ChatModelOptions, ClientApplication, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.offline.utils import download_model, infer_max_tokens
