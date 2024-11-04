@@ -13,7 +13,6 @@ from ridge.database.adapters import (
     EntryAdapters,
     FileObjectAdapters,
     get_default_search_model,
-    get_user_default_search_model,
 )
 from ridge.database.models import Entry as DbEntry
 from ridge.database.models import EntryDates, RidgeUser
@@ -149,7 +148,7 @@ class TextToEntries(ABC):
                 hashes_to_process |= hashes_for_file - existing_entry_hashes
 
         embeddings = []
-        model = get_user_default_search_model(user=user)
+        model = get_default_search_model()
         with timer("Generated embeddings for entries to add to database in", logger):
             entries_to_process = [hash_to_current_entries[hashed_val] for hashed_val in hashes_to_process]
             data_to_embed = [getattr(entry, key) for entry in entries_to_process]
