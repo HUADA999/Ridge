@@ -208,7 +208,7 @@ def setup(
     text_to_entries: Type[TextToEntries],
     files: dict[str, str],
     regenerate: bool,
-    user: RidgeUser = None,
+    user: RidgeUser,
     config=None,
 ) -> Tuple[int, int]:
     if config:
