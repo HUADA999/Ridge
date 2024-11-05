@@ -6,6 +6,7 @@ import os
 from typing import Any, Callable, List, Optional
 
 import aiohttp
+import requests
 
 from ridge.database.adapters import ais_user_subscribed
 from ridge.database.models import Agent, RidgeUser
@@ -37,6 +38,7 @@ async def run_code(
     agent: Agent = None,
     sandbox_url: str = SANDBOX_URL,
     tracer: dict = {},
+    attached_files: str = None,
 ):
     # Generate Code
     if send_status_func:
@@ -53,6 +55,7 @@ async def run_code(
                 query_images,
                 agent,
                 tracer,
+                attached_files,
             )
     except Exception as e:
         raise ValueError(f"Failed to generate code for {query} with error: {e}")
@@ -82,6 +85,7 @@ async def generate_python_code(
     query_images: List[str] = None,
     agent: Agent = None,
     tracer: dict = {},
+    attached_files: str = None,
 ) -> List[str]:
     location = f"{location_data}" if location_data else "Unknown"
     username = prompts.user_name.format(name=user.get_full_name()) if user.get_full_name() else ""
@@ -109,6 +113,7 @@ async def generate_python_code(
         response_type="json_object",
         user=user,
         tracer=tracer,
+        attached_files=attached_files,
     )
 
     # Validate that the response is a non-empty, JSON-serializable list
