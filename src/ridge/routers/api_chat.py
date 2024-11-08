@@ -28,7 +28,11 @@ from ridge.processor.conversation.prompts import help_message, no_entries_found
 from ridge.processor.conversation.utils import defilter_query, save_to_conversation_log
 from ridge.processor.image.generate import text_to_image
 from ridge.processor.speech.text_to_speech import generate_text_to_speech
-from ridge.processor.tools.online_search import read_webpages, search_online
+from ridge.processor.tools.online_search import (
+    deduplicate_organic_results,
+    read_webpages,
+    search_online,
+)
 from ridge.processor.tools.run_code import run_code
 from ridge.routers.api import extract_references_and_questions
 from ridge.routers.email import send_query_feedback
@@ -1026,12 +1030,13 @@ async def chat(
                 )
 
         ## Send Gathered References
+        unique_online_results = deduplicate_organic_results(online_results)
         async for result in send_event(
             ChatEvent.REFERENCES,
             {
                 "inferredQueries": inferred_queries,
                 "context": compiled_references,
-                "onlineContext": online_results,
+                "onlineContext": unique_online_results,
                 "codeContext": code_results,
             },
         ):
