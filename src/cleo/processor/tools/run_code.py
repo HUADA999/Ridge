@@ -10,8 +10,13 @@ import aiohttp
 from ridge.database.adapters import ais_user_subscribed
 from ridge.database.models import Agent, RidgeUser
 from ridge.processor.conversation import prompts
-from ridge.processor.conversation.utils import ChatEvent, clean_code_python, clean_json
-from ridge.routers.helpers import construct_chat_history, send_message_to_model_wrapper
+from ridge.processor.conversation.utils import (
+    ChatEvent,
+    clean_code_python,
+    clean_json,
+    construct_chat_history,
+)
+from ridge.routers.helpers import send_message_to_model_wrapper
 from ridge.utils.helpers import timer
 from ridge.utils.rawconfig import LocationData
 
