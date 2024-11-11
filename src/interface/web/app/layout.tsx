@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     manifest: "/static/ridge.webmanifest",
     openGraph: {
         siteName: "Ridge AI",
-        title: "Ridge AI - Home",
+        title: "Ridge AI",
         description: "Your Second Brain.",
         url: "https://app.ridge.dev",
         type: "website",
