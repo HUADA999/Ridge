@@ -61,6 +61,10 @@ services:
       # - RIDGE_NO_HTTPS=True
       # - RIDGE_DOMAIN=192.168.0.104
       # - RIDGE_DOMAIN=ridge.example.com
+      # Uncomment the line below to disable telemetry.
+      # Telemetry helps us prioritize feature development and understand how people are using Ridge
+      # Read more at https://docs.ridge.dev/miscellaneous/telemetry
+      # - RIDGE_TELEMETRY_DISABLE=True
     command: --host="0.0.0.0" --port=42110 -vv --anonymous-mode --non-interactive
 
 
