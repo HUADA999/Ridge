@@ -12,7 +12,7 @@ from ridge.database.models import ProcessLock
 from ridge.processor.embeddings import CrossEncoderModel, EmbeddingsModel
 from ridge.utils import config as utils_config
 from ridge.utils.config import OfflineChatProcessorModel, SearchModels
-from ridge.utils.helpers import LRU, get_device
+from ridge.utils.helpers import LRU, get_device, is_env_var_true
 from ridge.utils.rawconfig import FullConfig
 
 # Application Global State
@@ -34,6 +34,7 @@ SearchType = utils_config.SearchType
 scheduler: BackgroundScheduler = None
 schedule_leader_process_lock: ProcessLock = None
 telemetry: List[Dict[str, str]] = []
+telemetry_disabled: bool = is_env_var_true("RIDGE_TELEMETRY_DISABLE")
 ridge_version: str = None
 device = get_device()
 chat_on_gpu: bool = True
