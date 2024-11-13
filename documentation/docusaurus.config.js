@@ -79,7 +79,6 @@ const config = {
         {name: 'og:type', content: 'website'},
         {name: 'og:site_name', content: 'Ridge Documentation'},
         {name: 'og:description', content: 'Quickly get started with using or self-hosting Ridge'},
-        {name: 'og:image', content: 'https://assets.ridge.dev/link_preview_docs.png'},
         {name: 'og:url', content: 'https://docs.ridge.dev'},
         {name: 'keywords', content: 'ridge, ridge ai, chatgpt, open ai, open source, productivity'}
       ],
