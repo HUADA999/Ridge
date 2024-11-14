@@ -15,6 +15,7 @@ from ridge.processor.conversation.utils import (
     ThreadedGenerator,
     commit_conversation_trace,
     generate_chatml_messages_with_context,
+    messages_to_print,
 )
 from ridge.utils import state
 from ridge.utils.constants import empty_escape_sequences
@@ -222,8 +223,7 @@ def converse_offline(
         query_files=query_files,
     )
 
-    truncated_messages = "\n".join({f"{message.content[:70]}..." for message in messages})
-    logger.debug(f"Conversation Context for {model}: {truncated_messages}")
+    logger.debug(f"Conversation Context for {model}: {messages_to_print(messages)}")
 
     g = ThreadedGenerator(references, online_results, completion_func=completion_func)
     t = Thread(target=llm_thread, args=(g, messages, offline_chat_model, max_prompt_size, tracer))
