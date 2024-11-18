@@ -4,13 +4,13 @@ import pytest
 from faker import Faker
 from freezegun import freeze_time
 
-from ridge.database.models import Agent, Entry, RidgeUser
+from ridge.database.models import Agent, ChatModelOptions, Entry, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.utils import message_to_log
 from ridge.routers.helpers import aget_data_sources_and_output_format
-from tests.helpers import ConversationFactory
+from tests.helpers import ConversationFactory, get_chat_provider
 
-SKIP_TESTS = True
+SKIP_TESTS = get_chat_provider(default=None) != ChatModelOptions.ModelType.OFFLINE
 pytestmark = pytest.mark.skipif(
     SKIP_TESTS,
     reason="Disable in CI to avoid long test runs.",
