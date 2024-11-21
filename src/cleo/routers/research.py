@@ -16,7 +16,7 @@ from ridge.processor.conversation.utils import (
     construct_tool_chat_history,
 )
 from ridge.processor.tools.online_search import read_webpages, search_online
-from ridge.processor.tools.run_code import run_code, truncate_code_context
+from ridge.processor.tools.run_code import run_code
 from ridge.routers.api import extract_references_and_questions
 from ridge.routers.helpers import (
     ChatEvent,
@@ -28,6 +28,7 @@ from ridge.utils.helpers import (
     function_calling_description_for_llm,
     is_none_or_empty,
     timer,
+    truncate_code_context,
 )
 from ridge.utils.rawconfig import LocationData
 
