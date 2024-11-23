@@ -40,7 +40,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <meta
+            {/* <meta
                 httpEquiv="Content-Security-Policy"
                 content="default-src 'self' https://assets.ridge.dev;
                        media-src * blob:;
@@ -51,7 +51,7 @@ export default function RootLayout({
                        font-src 'self' https://assets.ridge.dev https://fonts.gstatic.com;
                        child-src 'none';
                        object-src 'none';"
-            ></meta>
+            ></meta> */}
             <body className={inter.className}>{children}</body>
         </html>
     );
