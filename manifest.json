@@ -1,7 +1,7 @@
 {
 	"id": "ridge",
 	"name": "Ridge",
-	"version": "1.30.2",
+	"version": "1.30.3",
 	"minAppVersion": "0.15.0",
 	"description": "Your Second Brain",
 	"author": "Ridge Inc.",
