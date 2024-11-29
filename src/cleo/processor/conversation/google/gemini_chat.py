@@ -24,7 +24,7 @@ from ridge.utils.helpers import (
     is_none_or_empty,
     truncate_code_context,
 )
-from ridge.utils.rawconfig import LocationData
+from ridge.utils.rawconfig import FileAttachment, LocationData
 from ridge.utils.yaml import yaml_dump
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ def converse_gemini(
     vision_available: bool = False,
     query_files: str = None,
     generated_images: Optional[list[str]] = None,
-    generated_files: List[str] = None,
+    generated_files: List[FileAttachment] = None,
     generated_excalidraw_diagram: Optional[str] = None,
     additional_context: List[str] = None,
     tracer={},
