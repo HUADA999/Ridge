@@ -49,9 +49,6 @@ async def text_to_image(
         if chat["by"] == "ridge" and chat["intent"].get("type") in ["remember", "reminder"]:
             chat_history += f"Q: {chat['intent']['query']}\n"
             chat_history += f"A: {chat['message']}\n"
-        elif chat["by"] == "ridge" and "text-to-image" in chat["intent"].get("type"):
-            chat_history += f"Q: Prompt: {chat['intent']['query']}\n"
-            chat_history += f"A: Improved Prompt: {chat['intent']['inferred-queries'][0]}\n"
         elif chat["by"] == "ridge" and chat.get("images"):
             chat_history += f"Q: {chat['intent']['query']}\n"
             chat_history += f"A: Improved Prompt: {chat['intent']['inferred-queries'][0]}\n"
