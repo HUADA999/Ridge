@@ -69,7 +69,7 @@ def extract_questions_offline(
 
     if use_history:
         for chat in conversation_log.get("chat", [])[-4:]:
-            if chat["by"] == "ridge" and "text-to-image" not in chat["intent"].get("type"):
+            if chat["by"] == "ridge":
                 chat_history += f"Q: {chat['intent']['query']}\n"
                 chat_history += f"Ridge: {chat['message']}\n\n"
 
