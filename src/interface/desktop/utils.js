@@ -31,7 +31,7 @@ function toggleNavMenu() {
 }
 
 // Close the dropdown menu if the user clicks outside of it
-document.addEventListener('click', function(event) {
+document.addEventListener('click', function (event) {
     let menu = document.getElementById("ridge-nav-menu");
     let menuContainer = document.getElementById("ridge-nav-menu-container");
     let isClickOnMenu = menuContainer?.contains(event.target) || menuContainer === event.target;
@@ -56,25 +56,19 @@ async function populateHeaderPane() {
     // Populate the header element with the navigation pane
     return `
         <a class="ridge-logo" href="/">
-            <img class="ridge-logo" src="./assets/icons/ridge-logo-sideways-500.png" alt="Ridge"></img>
+            <img class="ridge-logo" src="./assets/icons/ridge_logo.png" alt="Ridge"></img>
         </a>
         <nav class="ridge-nav">
-        ${
-            userInfo && userInfo.email
-              ? `<div class="ridge-status-box">
+        ${userInfo && userInfo.email
+            ? `<div class="ridge-status-box">
               <span class="ridge-status-connected"></span>
                <span class="ridge-status-text">Connected to server</span>
                </div>`
-              : `<div class="ridge-status-box">
+            : `<div class="ridge-status-box">
               <span class="ridge-status-not-connected"></span>
                <span class="ridge-status-text">Not connected to server</span>
                </div>`
-          }
-            <a id="chat-nav" class="ridge-nav" href="./chat.html">
-              <img class="nav-icon" src="./assets/icons/chat.svg" alt="Chat">
-              <span class="ridge-nav-item-text">Chat</span>
-            </a>
-            ${has_documents ? '<a id="search-nav" class="ridge-nav" href="./search.html"><img class="nav-icon" src="./assets/icons/search.svg" alt="Search"> <span class="ridge-nav-item-text">Search</span></a>' : ''}
+        }
             ${username ? `
                 <div id="ridge-nav-menu-container" class="ridge-nav dropdown">
                     ${user_photo && user_photo != "None" ? `
@@ -84,7 +78,10 @@ async function populateHeaderPane() {
                     `}
                     <div id="ridge-nav-menu" class="ridge-nav-dropdown-content">
                         <div class="ridge-nav-username"> ${username} </div>
-                        <a id="settings-nav" class="ridge-nav" href="./settings.html">⚙️ Settings</a>
+                        <a onclick="window.navigateAPI.navigateToWebHome()" class="ridge-nav-link">
+                        <img class="ridge-nav-icon" src="./assets/icons/open-link.svg" alt="Open Host Url"></img>
+                        Open App
+                        </a>
                     </div>
                 </div>
             ` : ''}
