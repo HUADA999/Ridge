@@ -541,12 +541,10 @@ export class RidgeChatView extends RidgePaneView {
             imageMarkdown += `${message}`;
         }
 
-        if (!images || images.length === 0) {
-            if (inferredQueries) {
-                imageMarkdown += "\n\n**Inferred Query**:";
-                for (let inferredQuery of inferredQueries) {
-                    imageMarkdown += `\n\n${inferredQuery}`;
-                }
+        if (images?.length === 0 && inferredQueries) {
+            imageMarkdown += "\n\n**Inferred Query**:";
+            for (let inferredQuery of inferredQueries) {
+                imageMarkdown += `\n\n${inferredQuery}`;
             }
         }
         return imageMarkdown;
