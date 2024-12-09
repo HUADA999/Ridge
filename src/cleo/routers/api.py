@@ -537,6 +537,7 @@ def user_info(request: Request) -> Response:
         "photo": user_picture,
         "is_active": is_active,
         "has_documents": has_documents,
+        "ridge_version": state.ridge_version,
     }
 
     # Return user information as a JSON response
