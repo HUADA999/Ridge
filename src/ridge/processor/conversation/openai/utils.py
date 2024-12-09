@@ -19,12 +19,7 @@ from ridge.processor.conversation.utils import (
     ThreadedGenerator,
     commit_conversation_trace,
 )
-from ridge.utils import state
-from ridge.utils.helpers import (
-    get_chat_usage_metrics,
-    in_debug_mode,
-    is_promptrace_enabled,
-)
+from ridge.utils.helpers import get_chat_usage_metrics, is_promptrace_enabled
 
 logger = logging.getLogger(__name__)
 
