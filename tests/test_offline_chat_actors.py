@@ -22,7 +22,6 @@ from ridge.processor.conversation.offline.chat_model import (
     filter_questions,
 )
 from ridge.processor.conversation.offline.utils import download_model
-from ridge.processor.conversation.utils import message_to_log
 from ridge.utils.constants import default_offline_chat_models
 
 
