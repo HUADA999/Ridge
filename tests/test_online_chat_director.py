@@ -6,7 +6,6 @@ from freezegun import freeze_time
 
 from ridge.database.models import Agent, Entry, RidgeUser
 from ridge.processor.conversation import prompts
-from ridge.processor.conversation.utils import message_to_log
 from tests.helpers import ConversationFactory, generate_chat_history, get_chat_api_key
 
 # Initialize variables for tests

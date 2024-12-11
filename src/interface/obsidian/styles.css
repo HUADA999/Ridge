@@ -50,12 +50,12 @@ If your plugin does not need CSS, delete this file.
     overflow-y: scroll; /* Make chat body scroll to see history */
 }
 /* add chat metatdata to bottom of bubble */
-.ridge-chat-message::after {
+.ridge-chat-message.ridge::after {
     content: attr(data-meta);
     display: block;
     font-size: var(--font-ui-smaller);
     color: var(--text-muted);
-    margin: -12px 7px 0 -5px;
+    margin: -12px 7px 0 0px;
 }
 /* move message by ridge to left */
 .ridge-chat-message.ridge {
@@ -82,7 +82,8 @@ If your plugin does not need CSS, delete this file.
 }
 /* color chat bubble by ridge blue */
 .ridge-chat-message-text.ridge {
-    border: 1px solid var(--ridge-sun);
+    border-left: 2px solid var(--ridge-sun);
+    border-radius: 0px;
     margin-left: auto;
     white-space: pre-line;
 }
@@ -104,8 +105,9 @@ If your plugin does not need CSS, delete this file.
 }
 /* color chat bubble by you dark grey */
 .ridge-chat-message-text.you {
-    border: 1px solid var(--color-accent);
+    color: var(--text-normal);
     margin-right: auto;
+    background-color: var(--background-modifier-cover);
 }
 /* add right protrusion to you chat bubble */
 .ridge-chat-message-text.you:after {
@@ -240,6 +242,10 @@ div.new-conversation {
     grid-auto-flow: column;
     grid-template-columns: 1fr auto;
     margin-bottom: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: var(--background-primary)
 }
 div.conversation-header-title {
     text-align: left;
@@ -314,6 +320,9 @@ div.selected-conversation {
     background: var(--background-primary);
     margin: 0 0 0 -8px;
     align-items: center;
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
 }
 #ridge-chat-input.option:hover {
     box-shadow: 0 0 11px var(--background-modifier-box-shadow);
