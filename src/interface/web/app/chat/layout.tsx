@@ -14,10 +14,16 @@ export const metadata: Metadata = {
     openGraph: {
         siteName: "Ridge AI",
         title: "Ridge AI - Chat",
-        description: "Your Second Brain.",
+        description:
+            "Ask anything. Ridge will use the internet and your docs to answer, paint and even automate stuff for you.",
         url: "https://app.ridge.dev/chat",
         type: "website",
         images: [
+            {
+                url: "https://assets.ridge.dev/ridge_hero.png",
+                width: 940,
+                height: 525,
+            },
             {
                 url: "https://assets.ridge.dev/ridge_lantern_256x256.png",
                 width: 256,

@@ -6,7 +6,7 @@ import { ContentSecurityPolicy } from "../common/layoutHelper";
 
 export const metadata: Metadata = {
     title: "Ridge AI - Automations",
-    description: "Use Autoomations with Ridge to simplify the process of running repetitive tasks.",
+    description: "Use Automations with Ridge to simplify the process of running repetitive tasks.",
     icons: {
         icon: "/static/assets/icons/ridge_lantern.ico",
         apple: "/static/assets/icons/ridge_lantern_256x256.png",
@@ -14,10 +14,16 @@ export const metadata: Metadata = {
     openGraph: {
         siteName: "Ridge AI",
         title: "Ridge AI - Automations",
-        description: "Your Second Brain.",
+        description:
+            "Use Automations with Ridge to simplify the process of running repetitive tasks.",
         url: "https://app.ridge.dev/automations",
         type: "website",
         images: [
+            {
+                url: "https://assets.ridge.dev/ridge_hero.png",
+                width: 940,
+                height: 525,
+            },
             {
                 url: "https://assets.ridge.dev/ridge_lantern_256x256.png",
                 width: 256,
