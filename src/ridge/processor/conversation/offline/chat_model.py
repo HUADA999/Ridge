@@ -9,7 +9,7 @@ import pyjson5
 from langchain.schema import ChatMessage
 from llama_cpp import Llama
 
-from ridge.database.models import Agent, ChatModelOptions, RidgeUser
+from ridge.database.models import Agent, ChatModel, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.offline.utils import download_model
 from ridge.processor.conversation.utils import (
@@ -96,7 +96,7 @@ def extract_questions_offline(
         model_name=model,
         loaded_model=offline_chat_model,
         max_prompt_size=max_prompt_size,
-        model_type=ChatModelOptions.ModelType.OFFLINE,
+        model_type=ChatModel.ModelType.OFFLINE,
         query_files=query_files,
     )
 
@@ -232,7 +232,7 @@ def converse_offline(
         loaded_model=offline_chat_model,
         max_prompt_size=max_prompt_size,
         tokenizer_name=tokenizer_name,
-        model_type=ChatModelOptions.ModelType.OFFLINE,
+        model_type=ChatModel.ModelType.OFFLINE,
         query_files=query_files,
         generated_files=generated_files,
         generated_asset_results=generated_asset_results,

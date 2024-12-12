@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 import pyjson5
 from langchain.schema import ChatMessage
 
-from ridge.database.models import Agent, ChatModelOptions, RidgeUser
+from ridge.database.models import Agent, ChatModel, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.openai.utils import (
     chat_completion_with_backoff,
@@ -83,7 +83,7 @@ def extract_questions(
     prompt = construct_structured_message(
         message=prompt,
         images=query_images,
-        model_type=ChatModelOptions.ModelType.OPENAI,
+        model_type=ChatModel.ModelType.OPENAI,
         vision_enabled=vision_enabled,
         attached_file_context=query_files,
     )
@@ -220,7 +220,7 @@ def converse_openai(
         tokenizer_name=tokenizer_name,
         query_images=query_images,
         vision_enabled=vision_available,
-        model_type=ChatModelOptions.ModelType.OPENAI,
+        model_type=ChatModel.ModelType.OPENAI,
         query_files=query_files,
         generated_files=generated_files,
         generated_asset_results=generated_asset_results,
