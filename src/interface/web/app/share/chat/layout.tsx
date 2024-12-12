@@ -4,8 +4,33 @@ import "../../globals.css";
 import { ContentSecurityPolicy } from "@/app/common/layoutHelper";
 
 export const metadata: Metadata = {
-    title: "Ridge AI - Chat",
-    description: "Use this page to view a chat with Ridge AI.",
+    title: "Ridge AI - Ask Anything",
+    description:
+        "Ask anything. Ridge will use the internet and your docs to answer, paint and even automate stuff for you.",
+    icons: {
+        icon: "/static/assets/icons/ridge_lantern.ico",
+        apple: "/static/assets/icons/ridge_lantern_256x256.png",
+    },
+    openGraph: {
+        siteName: "Ridge AI",
+        title: "Ridge AI - Ask Anything",
+        description:
+            "Ask anything. Ridge will use the internet and your docs to answer, paint and even automate stuff for you.",
+        url: "https://app.ridge.dev/chat",
+        type: "website",
+        images: [
+            {
+                url: "https://assets.ridge.dev/ridge_hero.png",
+                width: 940,
+                height: 525,
+            },
+            {
+                url: "https://assets.ridge.dev/ridge_lantern_256x256.png",
+                width: 256,
+                height: 256,
+            },
+        ],
+    },
 };
 
 export default function RootLayout({

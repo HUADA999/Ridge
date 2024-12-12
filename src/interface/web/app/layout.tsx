@@ -4,8 +4,9 @@ import "./globals.css";
 import { ContentSecurityPolicy } from "./common/layoutHelper";
 
 export const metadata: Metadata = {
-    title: "Ridge AI - Home",
-    description: "Your Second Brain.",
+    title: "Ridge AI - Ask Anything",
+    description:
+        "Ridge is a model-agnostic, open-source personal research assistant. It helps you understand, create, and generate faster.",
     icons: {
         icon: "/static/assets/icons/ridge_lantern.ico",
         apple: "/static/assets/icons/ridge_lantern_256x256.png",
@@ -14,10 +15,16 @@ export const metadata: Metadata = {
     openGraph: {
         siteName: "Ridge AI",
         title: "Ridge AI",
-        description: "Your Second Brain.",
+        description:
+            "Ridge is a model-agnostic, open-source personal research assistant. It helps you understand, create, and generate faster.",
         url: "https://app.ridge.dev",
         type: "website",
         images: [
+            {
+                url: "https://assets.ridge.dev/ridge_hero.png",
+                width: 940,
+                height: 525,
+            },
             {
                 url: "https://assets.ridge.dev/ridge_lantern_256x256.png",
                 width: 256,
