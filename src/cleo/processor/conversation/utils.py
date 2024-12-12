@@ -24,7 +24,7 @@ from llama_cpp.llama import Llama
 from transformers import AutoTokenizer
 
 from ridge.database.adapters import ConversationAdapters
-from ridge.database.models import ChatModelOptions, ClientApplication, RidgeUser
+from ridge.database.models import ChatModel, ClientApplication, RidgeUser
 from ridge.processor.conversation import prompts
 from ridge.processor.conversation.offline.utils import download_model, infer_max_tokens
 from ridge.search_filter.base_filter import BaseFilter
@@ -330,9 +330,9 @@ def construct_structured_message(
     Format messages into appropriate multimedia format for supported chat model types
     """
     if model_type in [
-        ChatModelOptions.ModelType.OPENAI,
-        ChatModelOptions.ModelType.GOOGLE,
-        ChatModelOptions.ModelType.ANTHROPIC,
+        ChatModel.ModelType.OPENAI,
+        ChatModel.ModelType.GOOGLE,
+        ChatModel.ModelType.ANTHROPIC,
     ]:
         if not attached_file_context and not (vision_enabled and images):
             return message
