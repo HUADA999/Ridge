@@ -269,8 +269,8 @@ async def astart_trial_subscription(user: RidgeUser) -> Subscription:
     return subscription
 
 
-async def aget_user_validated_by_email_verification_code(code: str) -> RidgeUser:
-    user = await RidgeUser.objects.filter(email_verification_code=code).afirst()
+async def aget_user_validated_by_email_verification_code(code: str, email: str) -> RidgeUser:
+    user = await RidgeUser.objects.filter(email_verification_code=code, email=email).afirst()
     if not user:
         return None
 
