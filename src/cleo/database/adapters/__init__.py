@@ -437,8 +437,12 @@ def is_user_subscribed(user: RidgeUser) -> bool:
     return subscribed
 
 
-async def get_user_by_email(email: str) -> RidgeUser:
+async def aget_user_by_email(email: str) -> RidgeUser:
     return await RidgeUser.objects.filter(email=email).afirst()
+
+
+def get_user_by_email(email: str) -> RidgeUser:
+    return RidgeUser.objects.filter(email=email).first()
 
 
 async def aget_user_by_uuid(uuid: str) -> RidgeUser:
