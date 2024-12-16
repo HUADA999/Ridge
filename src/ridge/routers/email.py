@@ -47,7 +47,7 @@ async def send_magic_link_email(email, unique_id, host):
         {
             "sender": os.environ.get("RESEND_EMAIL", "noreply@ridge.dev"),
             "to": email,
-            "subject": f"{unique_id} - Sign in to Ridge 🚀",
+            "subject": f"Your unique login to Ridge",
             "html": html_content,
         }
     )
