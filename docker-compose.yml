@@ -18,11 +18,19 @@ services:
     image: ghcr.io/ridge-ai/terrarium:latest
     ports:
       - "8080:8080"
+  search:
+    image: docker.io/searxng/searxng:latest
+    ports:
+      - "42113:8080"
+    volumes:
+      - ridge_search:/etc/searxng
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:42113/
   server:
     depends_on:
       database:
         condition: service_healthy
-    # Use the following line to use the latest version of ridge. Otherwise, it will build from source. Set this to ghcr.io/ridge-ai/ridge-cloud if you want to use the prod image.
+    # Use the following line to use the latest version of ridge. Otherwise, it will build from source. Set this to ghcr.io/ridge-ai/ridge-cloud:latest if you want to use the prod image.
     image: ghcr.io/ridge-ai/ridge:latest
     # Uncomment the following line to build from source. This will take a few minutes. Comment the next two lines out if you want to use the official image.
     # build:
@@ -51,6 +59,8 @@ services:
       - RIDGE_ADMIN_PASSWORD=password
       # Default URL of Terrarium, the Python sandbox used by Ridge to run code. Its container is specified above
       - RIDGE_TERRARIUM_URL=http://host.docker.internal:8080
+      # Default URL of SearxNG, the default web search engine used by Ridge. Its container is specified above
+      - RIDGE_SEARXNG_URL=http://host.docker.internal:42113
       # Uncomment line below to use with Ollama running on your local machine at localhost:11434.
       # Change URL to use with other OpenAI API compatible providers like VLLM, LMStudio etc.
       # - OPENAI_API_BASE=http://host.docker.internal:11434/v1/
@@ -85,7 +95,7 @@ services:
       # Telemetry helps us prioritize feature development and understand how people are using Ridge
       # Read more at https://docs.ridge.dev/miscellaneous/telemetry
       # - RIDGE_TELEMETRY_DISABLE=True
-    # Comment out this line when you're using the official ghcr.io/ridge-ai/ridge-cloud prod image.
+    # Comment out this line when you're using the official ghcr.io/ridge-ai/ridge-cloud:latest prod image.
     command: --host="0.0.0.0" --port=42110 -vv --anonymous-mode --non-interactive
 
 
@@ -93,3 +103,4 @@ volumes:
   ridge_config:
   ridge_db:
   ridge_models:
+  ridge_search:
