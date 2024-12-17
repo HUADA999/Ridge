@@ -28,6 +28,7 @@ from ridge.routers.helpers import (
     update_telemetry_state,
 )
 from ridge.utils import state
+from ridge.utils.helpers import in_debug_mode
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +215,10 @@ async def auth(request: Request):
 
     # 1. Construct the full redirect URI including domain
     base_url = str(request.base_url).rstrip("/")
+
+    if not in_debug_mode():
+        base_url = base_url.replace("http://", "https://")
+
     redirect_uri = f"{base_url}{request.app.url_path_for('auth')}"
 
     payload = {

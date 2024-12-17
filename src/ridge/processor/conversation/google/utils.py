@@ -27,7 +27,6 @@ from ridge.processor.conversation.utils import (
 from ridge.utils import state
 from ridge.utils.helpers import (
     get_chat_usage_metrics,
-    in_debug_mode,
     is_none_or_empty,
     is_promptrace_enabled,
 )
