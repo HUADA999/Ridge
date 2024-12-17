@@ -6,7 +6,7 @@ import { ContentSecurityPolicy } from "../common/layoutHelper";
 export const metadata: Metadata = {
     title: "Ridge AI - Agents",
     description:
-        "Find or create a specialized agent that can help you address more specific needs.",
+        "Find or create agents with custom knowledge, tools and personalities to help address your specific needs.",
     icons: {
         icon: "/static/assets/icons/ridge_lantern.ico",
         apple: "/static/assets/icons/ridge_lantern_256x256.png",
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
         siteName: "Ridge AI",
         title: "Ridge AI - Agents",
         description:
-            "Find or create a specialized agent that can help you address more specific needs.",
+            "Find or create agents with custom knowledge, tools and personalities to help address your specific needs.",
         url: "https://app.ridge.dev/agents",
         type: "website",
         images: [
