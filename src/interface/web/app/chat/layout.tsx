@@ -6,7 +6,7 @@ import { ContentSecurityPolicy } from "../common/layoutHelper";
 export const metadata: Metadata = {
     title: "Ridge AI - Chat",
     description:
-        "Ask anything. Ridge will use the internet and your docs to answer, paint and even automate stuff for you.",
+        "Ask anything. Research answers from across the internet and your documents, draft messages, summarize documents, generate paintings and chat with personal agents.",
     icons: {
         icon: "/static/assets/icons/ridge_lantern.ico",
         apple: "/static/assets/icons/ridge_lantern_256x256.png",
@@ -14,10 +14,16 @@ export const metadata: Metadata = {
     openGraph: {
         siteName: "Ridge AI",
         title: "Ridge AI - Chat",
-        description: "Your Second Brain.",
+        description:
+            "Ask anything. Research answers from across the internet and your documents, draft messages, summarize documents, generate paintings and chat with personal agents.",
         url: "https://app.ridge.dev/chat",
         type: "website",
         images: [
+            {
+                url: "https://assets.ridge.dev/ridge_hero.png",
+                width: 940,
+                height: 525,
+            },
             {
                 url: "https://assets.ridge.dev/ridge_lantern_256x256.png",
                 width: 256,
