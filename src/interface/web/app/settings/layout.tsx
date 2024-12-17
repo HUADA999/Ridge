@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     openGraph: {
         siteName: "Ridge AI",
         title: "Ridge AI - Settings",
-        description: "Setup, configure, and personalize Ridge. your AI-powered research assistant.",
+        description: "Setup, configure, and personalize Ridge, your AI research assistant.",
         url: "https://app.ridge.dev/settings",
         type: "website",
         images: [

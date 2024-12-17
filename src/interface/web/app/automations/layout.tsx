@@ -6,7 +6,8 @@ import { ContentSecurityPolicy } from "../common/layoutHelper";
 
 export const metadata: Metadata = {
     title: "Ridge AI - Automations",
-    description: "Use Automations with Ridge to simplify the process of running repetitive tasks.",
+    description:
+        "Use Ridge Automations to get tailored research and event based notifications directly in your inbox.",
     icons: {
         icon: "/static/assets/icons/ridge_lantern.ico",
         apple: "/static/assets/icons/ridge_lantern_256x256.png",
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
         siteName: "Ridge AI",
         title: "Ridge AI - Automations",
         description:
-            "Use Automations with Ridge to simplify the process of running repetitive tasks.",
+            "Use Ridge Automations to get tailored research and event based notifications directly in your inbox.",
         url: "https://app.ridge.dev/automations",
         type: "website",
         images: [
