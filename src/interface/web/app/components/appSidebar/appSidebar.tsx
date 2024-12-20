@@ -82,14 +82,14 @@ export function AppSidebar(props: AppSidebarProps) {
     }, []);
 
     return (
-        <Sidebar collapsible={"icon"}>
+        <Sidebar collapsible={"icon"} variant="sidebar">
             <SidebarHeader>
                 <SidebarMenu className="p-0 m-0">
                     <SidebarMenuItem className="p-0 m-0">
                         <SidebarMenuButton asChild>
                             <a className="flex items-center gap-2 no-underline" href="/">
                                 <RidgeLogo className="w-14 h-auto" />
-                                <span className="text-2xl">Ridge</span>
+                                <span className="text-lg">Ridge</span>
                             </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
