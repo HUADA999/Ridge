@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting, TFile } from 'obsidian';
+import { App, Notice, PluginSettingTab, Setting, TFile, SuggestModal } from 'obsidian';
 import Ridge from 'src/main';
 import { canConnectToBackend, getBackendStatusMessage, updateContentIndex } from './utils';
 
@@ -15,6 +15,7 @@ interface SyncFileTypes {
     images: boolean;
     pdf: boolean;
 }
+
 export interface RidgeSetting {
     resultsCount: number;
     ridgeUrl: string;
@@ -24,6 +25,7 @@ export interface RidgeSetting {
     lastSync: Map<TFile, number>;
     syncFileType: SyncFileTypes;
     userInfo: UserInfo | null;
+    syncFolders: string[];
 }
 
 export const DEFAULT_SETTINGS: RidgeSetting = {
@@ -39,6 +41,7 @@ export const DEFAULT_SETTINGS: RidgeSetting = {
         pdf: true,
     },
     userInfo: null,
+    syncFolders: [],
 }
 
 export class RidgeSettingTab extends PluginSettingTab {
@@ -60,7 +63,8 @@ export class RidgeSettingTab extends PluginSettingTab {
                 this.plugin.settings.userInfo?.email,
                 this.plugin.settings.ridgeUrl,
                 this.plugin.settings.ridgeApiKey
-            )}
+            )
+        }
         );
         let backendStatusMessage: string = '';
 
@@ -109,7 +113,7 @@ export class RidgeSettingTab extends PluginSettingTab {
                 }));
 
         // Add new "Sync" heading
-        containerEl.createEl('h3', {text: 'Sync'});
+        containerEl.createEl('h3', { text: 'Sync' });
 
         // Add setting to sync markdown notes
         new Setting(containerEl)
@@ -153,6 +157,29 @@ export class RidgeSettingTab extends PluginSettingTab {
                     this.plugin.settings.autoConfigure = value;
                     await this.plugin.saveSettings();
                 }));
+
+        // Add setting to manage sync folders
+        const syncFoldersContainer = containerEl.createDiv('sync-folders-container');
+        const foldersSetting = new Setting(syncFoldersContainer)
+            .setName('Sync Folders')
+            .setDesc('Specify folders to sync (leave empty to sync entire vault)')
+            .addButton(button => button
+                .setButtonText('Add Folder')
+                .onClick(() => {
+                    const modal = new FolderSuggestModal(this.app, (folder: string) => {
+                        if (!this.plugin.settings.syncFolders.includes(folder)) {
+                            this.plugin.settings.syncFolders.push(folder);
+                            this.plugin.saveSettings();
+                            this.updateFolderList(folderListEl);
+                        }
+                    });
+                    modal.open();
+                }));
+
+        // Create a list to display selected folders
+        const folderListEl = syncFoldersContainer.createDiv('folder-list');
+        this.updateFolderList(folderListEl);
+
         let indexVaultSetting = new Setting(containerEl);
         indexVaultSetting
             .setName('Force Sync')
@@ -199,5 +226,82 @@ export class RidgeSettingTab extends PluginSettingTab {
                     indexVaultSetting = indexVaultSetting.setDisabled(false);
                 })
             );
+    }
+
+    // Helper method to update the folder list display
+    private updateFolderList(containerEl: HTMLElement) {
+        containerEl.empty();
+        if (this.plugin.settings.syncFolders.length === 0) {
+            containerEl.createEl('div', {
+                text: 'Syncing entire vault',
+                cls: 'folder-list-empty'
+            });
+            return;
+        }
+
+        const list = containerEl.createEl('ul', { cls: 'folder-list' });
+        this.plugin.settings.syncFolders.forEach(folder => {
+            const item = list.createEl('li', { cls: 'folder-list-item' });
+            item.createSpan({ text: folder });
+
+            const removeButton = item.createEl('button', {
+                cls: 'folder-list-remove',
+                text: '×'
+            });
+            removeButton.addEventListener('click', async () => {
+                this.plugin.settings.syncFolders = this.plugin.settings.syncFolders.filter(f => f !== folder);
+                await this.plugin.saveSettings();
+                this.updateFolderList(containerEl);
+            });
+        });
+    }
+}
+
+// Modal with folder suggestions
+class FolderSuggestModal extends SuggestModal<string> {
+    constructor(app: App, private onChoose: (folder: string) => void) {
+        super(app);
+    }
+
+    getSuggestions(query: string): string[] {
+        const folders = this.getAllFolders();
+        if (!query) return folders;
+
+        return folders.filter(folder =>
+            folder.toLowerCase().includes(query.toLowerCase())
+        );
+    }
+
+    renderSuggestion(folder: string, el: HTMLElement) {
+        el.createSpan({
+            text: folder || '/',
+            cls: 'folder-suggest-item'
+        });
+    }
+
+    onChooseSuggestion(folder: string, _: MouseEvent | KeyboardEvent) {
+        this.onChoose(folder);
+    }
+
+    private getAllFolders(): string[] {
+        const folders = new Set<string>();
+        folders.add(''); // Root folder
+
+        // Récupérer tous les fichiers et extraire les chemins des dossiers
+        this.app.vault.getAllLoadedFiles().forEach(file => {
+            const folderPath = file.parent?.path;
+            if (folderPath) {
+                folders.add(folderPath);
+
+                // Ajouter aussi tous les dossiers parents
+                let parent = folderPath;
+                while (parent.includes('/')) {
+                    parent = parent.substring(0, parent.lastIndexOf('/'));
+                    folders.add(parent);
+                }
+            }
+        });
+
+        return Array.from(folders).sort();
     }
 }
