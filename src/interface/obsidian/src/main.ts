@@ -34,6 +34,21 @@ export default class Ridge extends Plugin {
             callback: () => { this.activateView(RidgeView.CHAT); }
         });
 
+        // Add sync command to manually sync new changes
+        this.addCommand({
+            id: 'sync',
+            name: 'Sync new changes',
+            callback: async () => {
+                this.settings.lastSync = await updateContentIndex(
+                    this.app.vault,
+                    this.settings,
+                    this.settings.lastSync,
+                    false, // regenerate = false pour ne synchroniser que les nouvelles modifications
+                    true  // userTriggered = true pour afficher une notification
+                );
+            }
+        });
+
         this.registerView(RidgeView.CHAT, (leaf) => new RidgeChatView(leaf, this.settings));
 
         // Create an icon in the left ribbon.
