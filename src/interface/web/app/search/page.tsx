@@ -237,7 +237,9 @@ export default function Search() {
                     <SidebarTrigger className="-ml-1" />
                     <Separator orientation="vertical" className="mr-2 h-4" />
                     {isMobileWidth ? (
-                        <RidgeLogoType className="h-auto w-16" />
+                        <a className="p-0 no-underline" href="/">
+                            <RidgeLogoType className="h-auto w-16" />
+                        </a>
                     ) : (
                         <h2 className="text-lg">Search</h2>
                     )}
