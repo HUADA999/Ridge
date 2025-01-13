@@ -655,7 +655,7 @@ export class RidgeChatView extends RidgePaneView {
         setIcon(pasteToFile, "clipboard-paste");
         pasteToFile.addEventListener('click', (event) => { pasteTextAtCursor(createCopyParentText(message, 'clipboard-paste')(event)); });
 
-    
+
         // Add delete button
         let deleteButton = null;
         if (!isSystemMessage) {
@@ -1543,7 +1543,7 @@ export class RidgeChatView extends RidgePaneView {
     async deleteMessage(messageEl: HTMLElement) {
         const chatBodyEl = this.contentEl.getElementsByClassName("ridge-chat-body")[0] as HTMLElement;
         const conversationId = chatBodyEl.dataset.conversationId;
-        
+
         // Get the turn_id from the message's data-meta attribute
         const turnId = messageEl.getAttribute("data-meta");
         if (!turnId || !conversationId) return;
@@ -1566,7 +1566,7 @@ export class RidgeChatView extends RidgePaneView {
                 const isRidgeMessage = messageEl.classList.contains("ridge");
                 const messages = Array.from(chatBodyEl.getElementsByClassName("ridge-chat-message"));
                 const messageIndex = messages.indexOf(messageEl);
-                
+
                 if (isRidgeMessage && messageIndex > 0) {
                     // If it is a Ridge message, remove the previous user message too
                     messages[messageIndex - 1].remove();
