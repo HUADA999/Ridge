@@ -8,6 +8,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarRail,
 } from "@/components/ui/sidebar";
 import {
     RidgeAgentLogo,
@@ -150,6 +151,7 @@ export function AppSidebar(props: AppSidebarProps) {
             <SidebarFooter>
                 <FooterMenu sideBarIsOpen={open} />
             </SidebarFooter>
+            <SidebarRail />
         </Sidebar>
     );
 }
