@@ -58,6 +58,6 @@ RUN cd src && python3 ridge/manage.py collectstatic --noinput
 # Run the Application
 # There are more arguments required for the application to run,
 # but those should be passed in through the docker-compose.yml file.
-ARG PORT
+ARG PORT=42110
 EXPOSE ${PORT}
 ENTRYPOINT ["python3", "src/ridge/main.py"]
