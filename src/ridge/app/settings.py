@@ -32,7 +32,8 @@ DEBUG = in_debug_mode()
 
 # All Subdomains of RIDGE_DOMAIN are trusted
 RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "ridge.dev")
-ALLOWED_HOSTS = [f".{RIDGE_DOMAIN}", "localhost", "127.0.0.1", "[::1]", f"{RIDGE_DOMAIN}"]
+RIDGE_ALLOWED_DOMAIN = os.getenv("RIDGE_ALLOWED_DOMAIN", RIDGE_DOMAIN)
+ALLOWED_HOSTS = [f".{RIDGE_ALLOWED_DOMAIN}", "localhost", "127.0.0.1", "[::1]", f"{RIDGE_ALLOWED_DOMAIN}"]
 
 CSRF_TRUSTED_ORIGINS = [
     f"https://*.{RIDGE_DOMAIN}",
@@ -45,7 +46,7 @@ CSRF_TRUSTED_ORIGINS = [
 DISABLE_HTTPS = is_env_var_true("RIDGE_NO_HTTPS")
 
 COOKIE_SAMESITE = "None"
-if DEBUG or os.getenv("RIDGE_DOMAIN") == None:
+if DEBUG and os.getenv("RIDGE_DOMAIN") == None:
     SESSION_COOKIE_DOMAIN = "localhost"
     CSRF_COOKIE_DOMAIN = "localhost"
 else:
