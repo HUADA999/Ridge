@@ -99,7 +99,7 @@ export default function FooterMenu({ sideBarIsOpen }: NavMenuProps) {
             link: "https://github.com/ridge-ai/ridge/releases",
         },
         {
-            title: "Organization",
+            title: "Teams",
             icon: <BuildingOffice className="w-6 h-6" />,
             link: "https://ridge.dev/teams",
         },
