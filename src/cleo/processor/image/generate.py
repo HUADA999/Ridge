@@ -12,7 +12,7 @@ from google.genai import types as gtypes
 from ridge.database.adapters import ConversationAdapters
 from ridge.database.models import Agent, RidgeUser, TextToImageModelConfig
 from ridge.routers.helpers import ChatEvent, generate_better_image_prompt
-from ridge.routers.storage import upload_image
+from ridge.routers.storage import upload_generated_image_to_bucket
 from ridge.utils import state
 from ridge.utils.helpers import convert_image_to_webp, timer
 from ridge.utils.rawconfig import LocationData
@@ -118,7 +118,7 @@ async def text_to_image(
 
     # Decide how to store the generated image
     with timer("Upload image to S3", logger):
-        image_url = upload_image(webp_image_bytes, user.uuid)
+        image_url = upload_generated_image_to_bucket(webp_image_bytes, user.uuid)
 
     if not image_url:
         image = f"data:image/webp;base64,{base64.b64encode(webp_image_bytes).decode('utf-8')}"
