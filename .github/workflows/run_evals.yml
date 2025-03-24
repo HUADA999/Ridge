@@ -117,10 +117,10 @@ jobs:
           RIDGE_LLM_SEED: "42"
           RIDGE_RESEARCH_ITERATIONS: ${{ github.event_name == 'workflow_dispatch' && inputs.max_research_iterations || 5 }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          SERPER_DEV_API_KEY: ${{ matrix.dataset != 'math500' && secrets.SERPER_DEV_API_KEY }}
-          OLOSTEP_API_KEY: ${{ matrix.dataset != 'math500' && secrets.OLOSTEP_API_KEY }}
+          SERPER_DEV_API_KEY: ${{ matrix.dataset != 'math500' && secrets.SERPER_DEV_API_KEY || '' }}
+          OLOSTEP_API_KEY: ${{ matrix.dataset != 'math500' && secrets.OLOSTEP_API_KEY || ''}}
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
-          E2B_API_KEY: ${{ inputs.sandbox == 'e2b' && secrets.E2B_API_KEY }}
+          E2B_API_KEY: ${{ inputs.sandbox == 'e2b' && secrets.E2B_API_KEY || '' }}
           E2B_TEMPLATE: ${{ vars.E2B_TEMPLATE }}
           RIDGE_ADMIN_EMAIL: ridge
           RIDGE_ADMIN_PASSWORD: ridge
