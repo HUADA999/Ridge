@@ -66,7 +66,7 @@ else:
 django_app = get_asgi_application()
 
 # Add CORS middleware
-RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN", "app.ridge.dev")
+RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN") or "app.ridge.dev"
 scheme = "https" if not is_env_var_true("RIDGE_NO_HTTPS") else "http"
 custom_origins = [f"{scheme}://{RIDGE_DOMAIN.strip()}", f"{scheme}://{RIDGE_DOMAIN.strip()}:*"]
 default_origins = [
