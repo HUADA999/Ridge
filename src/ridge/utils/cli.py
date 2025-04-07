@@ -16,7 +16,7 @@ from ridge.migrations.migrate_processor_config_openai import (
 )
 from ridge.migrations.migrate_server_pg import migrate_server_pg
 from ridge.migrations.migrate_version import migrate_config_to_version
-from ridge.utils.helpers import in_debug_mode, is_env_var_true, resolve_absolute_path
+from ridge.utils.helpers import is_env_var_true, resolve_absolute_path
 from ridge.utils.yaml import parse_config_from_file
 
 
@@ -81,7 +81,7 @@ def cli(args=None):
     else:
         args = run_migrations(args)
         args.config = parse_config_from_file(args.config_file)
-        if is_env_var_true("RIDGE_TELEMETRY_DISABLE") or in_debug_mode():
+        if is_env_var_true("RIDGE_TELEMETRY_DISABLE"):
             args.config.app.should_log_telemetry = False
 
     return args
