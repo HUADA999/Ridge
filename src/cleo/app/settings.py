@@ -22,34 +22,29 @@ from ridge.utils.helpers import is_env_var_true
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("RIDGE_DJANGO_SECRET_KEY", "!secret")
 
-# All Subdomains of RIDGE_DOMAIN are trusted
+# Set RIDGE_DOMAIN to custom domain for production deployments.
 RIDGE_DOMAIN = os.getenv("RIDGE_DOMAIN") or "ridge.dev"
+
+# Set RIDGE_ALLOWED_DOMAIN to the i.p or domain of the Ridge service on the internal network.
+# Useful to set when running the service behind a reverse proxy.
 RIDGE_ALLOWED_DOMAIN = os.getenv("RIDGE_ALLOWED_DOMAIN", RIDGE_DOMAIN)
 ALLOWED_HOSTS = [f".{RIDGE_ALLOWED_DOMAIN}", "localhost", "127.0.0.1", "[::1]", f"{RIDGE_ALLOWED_DOMAIN}"]
 
+# All Subdomains of RIDGE_DOMAIN are trusted for CSRF
 CSRF_TRUSTED_ORIGINS = [
     f"https://*.{RIDGE_DOMAIN}",
     f"https://{RIDGE_DOMAIN}",
     f"http://*.{RIDGE_DOMAIN}",
     f"http://{RIDGE_DOMAIN}",
-    f"https://app.{RIDGE_DOMAIN}",
 ]
 
 DISABLE_HTTPS = is_env_var_true("RIDGE_NO_HTTPS")
 
-# RIDGE_DOMAIN is tri-state.
-# - Unset it for local deployments.
-# - Set it to empty for official production deployment.
-# - Set it to custom domain for other production deployments.
 # WARNING: Change this check only if you know what you are doing.
-if os.getenv("RIDGE_DOMAIN") == None:
+if not os.getenv("RIDGE_DOMAIN"):
     SESSION_COOKIE_DOMAIN = "localhost"
     CSRF_COOKIE_DOMAIN = "localhost"
 else:
@@ -59,7 +54,6 @@ else:
     if not DISABLE_HTTPS:
         SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-COOKIE_SAMESITE = "None"
 if DISABLE_HTTPS:
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
