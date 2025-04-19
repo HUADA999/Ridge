@@ -1,5 +1,5 @@
 
-![Screenshot 2025-05-02 015935](.github/image.png)
+![Screenshot 2025-05-02 015935](.github/banner.png)
 
  Ridge is a self-hosted, open-source platform designed to integrate autonomous agents with advanced AI capabilities. It allows users to manage and automate a wide range of tasks, from code generation to data analysis, all while running entirely on local systems. With support for multiple AI models and a customizable environment, Ridge ensures privacy, flexibility, and full control, eliminating reliance on cloud services or external infrastructure.
 
