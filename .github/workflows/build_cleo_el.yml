@@ -5,35 +5,10 @@ name: build ridge.el
 on:
   push:
     branches:
-      - 'master'
-    paths:
-      - src/interface/emacs/*.el
-      - .github/workflows/build_ridge_el.yml
-  pull_request:
-    branches:
-      - 'master'
-    paths:
-      - src/interface/emacs/*.el
-      - .github/workflows/build_ridge_el.yml
+      - "main"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v1
-      with: { python-version: 3.11 }
-    - name: ⏬️ Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        sudo apt-get install emacs && emacs --version
-        git clone https://github.com/riscy/melpazoid.git ~/melpazoid
-        pip install ~/melpazoid
-    - name: 🌡️ Validate Ridge.el
-      env:
-        # Ridge recipe from https://github.com/melpa/melpa/pull/8321/files
-        RECIPE: (ridge :fetcher github :repo "ridge-ai/ridge" :files ("src/interface/emacs/*.el"))
-        EXIST_OK: true
-        LOCAL_REPO: ${{ github.workspace }}
-      run: echo $GITHUB_REF && make -C ~/melpazoid
+      - uses: actions/checkout@v2
