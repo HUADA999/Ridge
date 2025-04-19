@@ -49,7 +49,7 @@ jobs:
       - name: 📂 Copy Generated Files
         run: |
           mkdir -p src/ridge/interface/compiled
-          cp -r /opt/hostedtoolcache/Python/3.11.11/x64/lib/python3.11/site-packages/ridge/interface/compiled/* src/ridge/interface/compiled/
+          cp -r /opt/hostedtoolcache/Python/3.11.12/x64/lib/python3.11/site-packages/ridge/interface/compiled/* src/ridge/interface/compiled/
 
       - name: ⚙️ Build Python Package
         run: |
