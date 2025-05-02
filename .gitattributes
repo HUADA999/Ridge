@@ -1,2 +1,2 @@
-# Exclude tests data file from programming stats on Github
+# Exclude test data files from GitHub language statistics (not source code)
 tests/data/** linguist-vendored
